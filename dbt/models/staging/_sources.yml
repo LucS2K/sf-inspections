@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      Append-only landing zone written by ingest/fetch.py. Republished
+      versions of the same inspection coexist here on purpose; staging
+      dedups with ROW_NUMBER. All columns are VARCHAR until staging casts.
+    schema: raw
+    tables:
+      - name: inspections_2024
+        description: >
+          Health Inspection Scores 2024-present (Socrata tvy3-wexg). The
+          analytical core: the only source allowed to feed outcome metrics
+          (failure, reinspection, improvement, durability).
+      - name: inspections_2020_2023
+        description: >
+          Health Inspections 2020-2023 (Socrata 5tti-66ds). Context only:
+          facility tenure and history depth. No permit_number exists in
+          this era, linkage is by name and address and therefore inferred.
+          Never feeds outcome metrics (rating standard changed, COVID
+          confound).
+
+  - name: meta
+    schema: meta
+    tables:
+      - name: ingest_runs
+        description: One row per ingest run, success or failure.

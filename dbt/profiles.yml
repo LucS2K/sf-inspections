@@ -1,0 +1,9 @@
+# Project-local profile: run dbt from this directory and it is picked up
+# automatically, no ~/.dbt setup needed.
+sf_inspections:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../db/inspections.duckdb
+      threads: 4

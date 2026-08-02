@@ -1,0 +1,9 @@
+name: sf_inspections
+version: "1.0"
+profile: sf_inspections
+model-paths: ["models"]
+
+models:
+  sf_inspections:
+    staging:
+      +materialized: view

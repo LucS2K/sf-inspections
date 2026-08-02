@@ -1,0 +1,62 @@
+# SF Health Inspections: does enforcement work?
+
+When a San Francisco food facility fails a health inspection or is closed,
+does it improve, and does the improvement hold? This repo is the pipeline and
+the analysis that answer that question, built as a portfolio piece and a
+learning exercise.
+
+## Data
+
+| Source | Socrata ID | Role |
+|---|---|---|
+| Health Inspection Scores (2024-present) | `tvy3-wexg` | Analytical core. The only source that feeds outcome metrics. |
+| Health Inspections (2020-2023) | `5tti-66ds` | Context only: facility tenure and history depth. |
+
+The era split is deliberate. The older dataset uses a different rating
+standard (LIVES, discontinued 2021), covers the COVID window, and has no
+`permit_number`, so linking it to modern facilities is name-and-address
+inference. It therefore never feeds failure, improvement, or durability
+outcomes. Decided 2026-08-02.
+
+## Layout
+
+```
+ingest/fetch.py    Socrata -> DuckDB raw layer (incremental + full refresh)
+db/                inspections.duckdb (gitignored, rebuildable)
+dbt/               staging and analysis models (run dbt from this directory)
+schedule/          weekly Task Scheduler job (Mon 09:00)
+logs/              ingest.log (gitignored)
+data/tmp/          transient bulk-load files (gitignored)
+```
+
+## Pipeline contract
+
+- **Append-only raw.** Republished record versions are kept; staging dedups
+  with `ROW_NUMBER` over `data_as_of`.
+- **Idempotent loads.** Every row carries `_row_hash` (MD5 of the canonical
+  record JSON); loads anti-join on it, so re-running any window cannot
+  duplicate rows.
+- **Incremental** on `data_as_of >=` the landed watermark (`>=` so boundary
+  ties are refetched and hash-deduped rather than silently skipped).
+- **All raw columns are VARCHAR.** Casting is staging's job; a bad API value
+  cannot fail a load.
+- **Every run is logged** to `meta.ingest_runs` and `logs/ingest.log`,
+  including failures.
+
+## Setup
+
+```
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt
+python ingest/fetch.py              # incremental, tvy3-wexg
+python ingest/fetch.py --full-refresh
+python ingest/fetch.py --era old    # one-time 2020-2023 snapshot
+schedule/register_task.ps1          # register the weekly job
+```
+
+## Known data quirks
+
+See `CLAUDE.md`. Headlines: records are republished with later `data_as_of`
+(dedup before anything), `total_time` has negative values (untrusted),
+non-food permit types are mixed in (filter by `permit_type`), and
+`violation_codes` concatenates code lists with statutory boilerplate.
