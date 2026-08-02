@@ -174,20 +174,24 @@ function niceTicks(max, count = 4) {
   return out;
 }
 
-function monthKeys(vs) {
+/* string arithmetic only: Date-parsing ISO strings shifts months across
+   timezones (Jan 1 UTC renders as "Dec 23" in Pacific) */
+function monthKeys() {
   const from = cutoff() === "0000" ? DATA.summary.window_start : cutoff();
+  let [y, m] = from.slice(0, 7).split("-").map(Number);
+  const [ey, em] = DATA.summary.window_end.slice(0, 7).split("-").map(Number);
   const keys = [];
-  const d = new Date(from.slice(0, 7) + "-01");
-  const end = new Date(DATA.summary.window_end.slice(0, 7) + "-01");
-  while (d <= end) {
-    keys.push(d.toISOString().slice(0, 7));
-    d.setMonth(d.getMonth() + 1);
+  while (y < ey || (y === ey && m <= em)) {
+    keys.push(`${y}-${String(m).padStart(2, "0")}`);
+    m === 12 ? (y++, m = 1) : m++;
   }
   return keys;
 }
 
-function monthLabel(m) {
-  return new Date(m + "-01").toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function monthLabel(mk) {
+  const [y, m] = mk.split("-").map(Number);
+  return `${MONTHS[m - 1]} ${String(y).slice(2)}`;
 }
 
 /* generic monthly column chart; series = [{name, color, byMonth}] stacked */
@@ -236,6 +240,7 @@ function columnChart(el, months, series, tableEl) {
     const show = (evt) => showTip(evt, monthLabel(mo),
       series.map((sr) => [sr.color, fmt(sr.byMonth[mo] || 0), sr.name]).reverse());
     hit.addEventListener("pointermove", show);
+    hit.addEventListener("mousemove", show);
     hit.addEventListener("focus", (e) => {
       const r = hit.getBoundingClientRect();
       show({ clientX: r.x + r.width / 2, clientY: r.y + 20 });
@@ -329,17 +334,19 @@ function renderFunnel(eps) {
     const max = Math.max(g.length, 1);
     const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img" });
     stages.forEach(([name, val], i) => {
-      const bw = Math.max((val / max) * (W - 8), val > 0 ? 3 : 0);
+      /* reserve label room so a full-width bar never clips its value */
+      const bw = Math.max((val / max) * (W - 58), val > 0 ? 3 : 0);
       const yy = i * rowH + 16;
       const lbl = svgEl("text", { x: 0, y: yy - 4, class: "stage-label" });
       lbl.textContent = name; svg.append(lbl);
       const bar = svgEl("rect", { x: 0, y: yy, width: bw, height: 12, rx: 4, fill: ramp[i] });
       svg.append(bar);
-      const vl = svgEl("text", { x: Math.min(bw + 6, W - 40), y: yy + 10, class: "dlabel" });
+      const vl = svgEl("text", { x: bw + 6, y: yy + 10, class: "dlabel" });
       vl.textContent = fmt(val); svg.append(vl);
       const hit = svgEl("rect", { x: 0, y: yy - 12, width: W, height: rowH, fill: "transparent", tabindex: 0 });
       const show = (evt) => showTip(evt, title, [[ramp[i], fmt(val), name]]);
       hit.addEventListener("pointermove", show);
+    hit.addEventListener("mousemove", show);
       hit.addEventListener("pointerleave", hideTip);
       hit.addEventListener("blur", hideTip);
       svg.append(hit);
@@ -404,6 +411,7 @@ function renderHoods() {
       [CSS("--baseline"), fmt(r.rated), "rated inspections"],
     ]);
     hit.addEventListener("pointermove", show);
+    hit.addEventListener("mousemove", show);
     hit.addEventListener("pointerleave", hideTip);
     hit.addEventListener("blur", hideTip);
     svg.append(hit);
