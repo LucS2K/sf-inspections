@@ -103,7 +103,9 @@ def main() -> None:
            OR permit_number IN (
                 SELECT permit_number FROM base WHERE cohort = 'control'
                 ORDER BY hash(permit_number) LIMIT {CONTROL_SIZE})
-        ORDER BY cohort, permit_number
+        -- failure cohort genuinely first ('control' sorts before 'failure'
+        -- alphabetically, which silently inverted the priority)
+        ORDER BY CASE cohort WHEN 'failure' THEN 0 ELSE 1 END, permit_number
     """).fetchall()
 
     done = {r[0] for r in con.execute(
