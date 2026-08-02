@@ -1,3 +1,4 @@
-duckdb>=1.1
+# pinned: MotherDuck supports at most 1.5.4 right now
+duckdb==1.5.4
 requests>=2.32
 dbt-duckdb>=1.8
