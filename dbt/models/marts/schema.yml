@@ -11,3 +11,16 @@ models:
         tests: [not_null]
       - name: visit_number
         tests: [not_null]
+
+  - name: fct_enforcement_episodes
+    description: >
+      One row per failure event with its resolution (next rated visit) and
+      durability observation (the rated visit after that). NULL resolution
+      or durability fields are censoring, not success or absence.
+    columns:
+      - name: permit_number
+        tests: [not_null]
+      - name: failure_rating
+        tests:
+          - accepted_values:
+              values: ['Conditional Pass', 'Closure']

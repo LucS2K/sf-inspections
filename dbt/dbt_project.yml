@@ -7,3 +7,5 @@ models:
   sf_inspections:
     staging:
       +materialized: view
+    marts:
+      +materialized: table
