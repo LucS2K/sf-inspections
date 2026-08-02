@@ -18,10 +18,20 @@ standard (LIVES, discontinued 2021), covers the COVID window, and has no
 inference. It therefore never feeds failure, improvement, or durability
 outcomes. Decided 2026-08-02.
 
+Two cross-reference sources, both name+address matched (inferred linkage,
+flagged wherever used):
+
+| Source | Role |
+|---|---|
+| Registered Business Locations (`g8m3-pdis`) | Splits unresolved failures into attrition (business died) vs censoring. |
+| Yelp Fusion API | Present-day rating snapshot for failure cohort + control. Cross-sectional correlation only. Key in gitignored `.env`. |
+
 ## Layout
 
 ```
 ingest/fetch.py    Socrata -> DuckDB raw layer (incremental + full refresh)
+ingest/fetch_registry.py   business-registry candidates for unresolved failures
+ingest/fetch_yelp.py       Yelp ratings, failure cohort + control (resumable)
 db/                inspections.duckdb (gitignored, rebuildable)
 dbt/               staging and analysis models (run dbt from this directory)
 schedule/          weekly Task Scheduler job (Mon 09:00)

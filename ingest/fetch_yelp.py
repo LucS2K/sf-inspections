@@ -50,6 +50,11 @@ def get(url: str, headers: dict, params: dict | None = None) -> dict | None:
         raise RateLimited
     if resp.status_code == 404:
         return None
+    if resp.status_code in (400, 401, 403):
+        # 400 with a key-format complaint and 401/403 mean every call will
+        # fail: abort the run instead of landing 1,700 phantom no_matches
+        raise RuntimeError(f"Yelp auth/validation error {resp.status_code}: "
+                           f"{resp.text[:200]}")
     resp.raise_for_status()
     return resp.json()
 
@@ -102,7 +107,8 @@ def main() -> None:
     """).fetchall()
 
     done = {r[0] for r in con.execute(
-        "SELECT DISTINCT permit_number FROM raw.yelp_businesses").fetchall()}
+        "SELECT DISTINCT permit_number FROM raw.yelp_businesses "
+        "WHERE match_status = 'matched'").fetchall()}
     todo = [f for f in facilities if f[0] not in done]
     log(f"run {run_id} yelp lookup: {len(todo)} facilities "
         f"({len(done)} already fetched)")
@@ -112,14 +118,10 @@ def main() -> None:
     err = None
     try:
         for permit, dba, address, cohort in todo:
-            try:
-                match = get(MATCH_URL, headers, {
-                    "name": (dba or "")[:64], "address1": (address or "")[:64],
-                    "city": "San Francisco", "state": "CA", "country": "US",
-                    "limit": 1})
-            except requests.HTTPError:
-                # match endpoint 400s on some odd names; record and move on
-                match = None
+            match = get(MATCH_URL, headers, {
+                "name": (dba or "")[:64], "address1": (address or "")[:64],
+                "city": "San Francisco", "state": "CA", "country": "US",
+                "limit": 1})
             fetched += 1
             time.sleep(0.25)
             rec: dict = {}

@@ -21,6 +21,15 @@ sources:
           Never feeds outcome metrics (rating standard changed, COVID
           confound).
 
+      - name: registry_candidates
+        description: >
+          Registered Business Locations (g8m3-pdis) candidates for
+          unresolved-failure facilities, tagged with match method.
+      - name: yelp_businesses
+        description: >
+          Yelp Fusion lookups per facility (failure cohort + control),
+          one row per facility per fetch outcome.
+
   - name: meta
     schema: meta
     tables:
