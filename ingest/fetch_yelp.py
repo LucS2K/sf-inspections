@@ -68,11 +68,16 @@ def get(url: str, headers: dict, params: dict | None = None) -> dict | None:
         raise RateLimited
     if resp.status_code == 404:
         return None
-    if resp.status_code in (400, 401, 403):
-        # 400 with a key-format complaint and 401/403 mean every call will
-        # fail: abort the run instead of landing 1,700 phantom no_matches
-        raise RuntimeError(f"Yelp auth/validation error {resp.status_code}: "
+    if resp.status_code in (401, 403) or (
+            resp.status_code == 400 and "Authorization" in resp.text):
+        # auth failures mean every call will fail: abort the run instead
+        # of landing 1,700 phantom no_matches
+        raise RuntimeError(f"Yelp auth error {resp.status_code}: "
                            f"{resp.text[:200]}")
+    if resp.status_code == 400:
+        # this facility's name/address is unparseable to Yelp; that is a
+        # no_match for it, not a run failure
+        raise SkipFacility(resp.text[:120])
     resp.raise_for_status()
     return resp.json()
 
