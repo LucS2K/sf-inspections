@@ -44,6 +44,10 @@ class RateLimited(Exception):
     pass
 
 
+class SkipFacility(Exception):
+    """Per-facility validation failure (bad address); record no_match."""
+
+
 def get(url: str, headers: dict, params: dict | None = None) -> dict | None:
     # transient network errors get 3 retries with backoff; a mid-run blip
     # otherwise kills a 25-minute fetch at minute 24
@@ -134,10 +138,13 @@ def main() -> None:
     err = None
     try:
         for permit, dba, address, cohort in todo:
-            match = get(MATCH_URL, headers, {
-                "name": (dba or "")[:64], "address1": (address or "")[:64],
-                "city": "San Francisco", "state": "CA", "country": "US",
-                "match_threshold": "default", "limit": 1})
+            try:
+                match = get(MATCH_URL, headers, {
+                    "name": (dba or "")[:64], "address1": (address or "")[:64],
+                    "city": "San Francisco", "state": "CA", "country": "US",
+                    "match_threshold": "default", "limit": 1})
+            except SkipFacility:
+                match = None
             fetched += 1
             time.sleep(0.25)
             rec: dict = {}
