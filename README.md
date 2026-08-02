@@ -64,6 +64,26 @@ data/tmp/          transient bulk-load files (gitignored)
 - **Every run is logged** to `meta.ingest_runs` and `logs/ingest.log`,
   including failures.
 
+## Cloud architecture
+
+Production runs entirely in the cloud:
+
+- **State: MotherDuck** (`md:sf_inspections`). The append-only raw layer
+  must outlive any runner; a fresh full refetch would only capture the
+  current snapshot and lose accumulated republish history.
+- **Compute + schedule: GitHub Actions** (`.github/workflows/weekly-refresh.yml`,
+  Mondays 16:00 UTC + manual dispatch): ingest -> dbt build -> export -> deploy.
+- **Hosting: Vercel**, static deploy from the workflow.
+
+Every script switches between local file and MotherDuck through one
+function (`ingest/fetch.py::connect`): set `MOTHERDUCK_TOKEN` and you are
+in the cloud, unset and you are local. dbt: `DBT_TARGET=prod` or `dev`.
+
+Repo secrets required: `MOTHERDUCK_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`,
+`VERCEL_PROJECT_ID`. One-time: `scripts/migrate_to_motherduck.py` copies
+local raw+meta up; then disable the local Task Scheduler job
+(`schtasks /Delete /TN "sf-inspections weekly ingest"`).
+
 ## Setup
 
 ```

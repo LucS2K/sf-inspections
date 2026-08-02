@@ -46,6 +46,17 @@ LOG_PATH = PROJECT_ROOT / "logs" / "ingest.log"
 PAGE_SIZE = 5000
 TIMEOUT = 60
 
+
+def connect(read_only: bool = False) -> "duckdb.DuckDBPyConnection":
+    """Cloud runners set MOTHERDUCK_TOKEN and get the md: database;
+    local dev gets the file. Every script connects through here so the
+    switch lives in exactly one place."""
+    import os
+    if os.environ.get("MOTHERDUCK_TOKEN"):
+        return duckdb.connect("md:sf_inspections")
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    return duckdb.connect(str(DB_PATH), read_only=read_only)
+
 SOURCES = {
     "new": {
         "dataset": "tvy3-wexg",
@@ -206,8 +217,7 @@ def run(era: str, full_refresh: bool) -> None:
         else "incremental"
     run_id = str(uuid.uuid4())[:8]
     started = dt.datetime.now()
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    con = duckdb.connect(str(DB_PATH))
+    con = connect()
     ensure_schema(con)
     log(f"run {run_id} start source={src['dataset']} mode={mode}")
 

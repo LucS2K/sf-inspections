@@ -1,9 +1,14 @@
 # Project-local profile: run dbt from this directory and it is picked up
-# automatically, no ~/.dbt setup needed.
+# automatically. dev = local file; prod = MotherDuck (cloud runners set
+# MOTHERDUCK_TOKEN, which the md: extension reads from the environment).
 sf_inspections:
-  target: dev
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
   outputs:
     dev:
       type: duckdb
       path: ../db/inspections.duckdb
+      threads: 4
+    prod:
+      type: duckdb
+      path: "md:sf_inspections"
       threads: 4

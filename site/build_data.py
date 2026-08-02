@@ -14,6 +14,9 @@ from pathlib import Path
 import duckdb
 
 ROOT = Path(__file__).resolve().parent.parent
+import sys
+sys.path.insert(0, str(ROOT / "ingest"))
+from fetch import connect  # noqa: E402  (single switch for local vs MotherDuck)
 OUT = Path(__file__).resolve().parent / "data"
 OUT.mkdir(exist_ok=True)
 
@@ -36,8 +39,7 @@ def dump(name, obj):
 
 
 def main():
-    con = duckdb.connect(str(ROOT / "db" / "inspections.duckdb"),
-                         read_only=True)
+    con = connect(read_only=True)
 
     window = con.execute(
         "SELECT min(inspection_date), max(inspection_date) "

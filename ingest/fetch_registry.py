@@ -17,7 +17,7 @@ import uuid
 import duckdb
 import requests
 
-from fetch import DB_PATH, TIMEOUT, canonical_hash, log
+from fetch import TIMEOUT, canonical_hash, connect, log
 
 DATASET = "g8m3-pdis"
 URL = f"https://data.sfgov.org/resource/{DATASET}.json"
@@ -52,7 +52,7 @@ def fetch_candidates(where: str) -> list[dict]:
 def main() -> None:
     run_id = str(uuid.uuid4())[:8]
     started = dt.datetime.now()
-    con = duckdb.connect(str(DB_PATH))
+    con = connect()
     cols = ", ".join(f'"{c}" VARCHAR' for c in FIELDS)
     con.execute(f"""
         CREATE TABLE IF NOT EXISTS raw.registry_candidates (

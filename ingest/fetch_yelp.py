@@ -23,7 +23,7 @@ from pathlib import Path
 import duckdb
 import requests
 
-from fetch import DB_PATH, TIMEOUT, canonical_hash, log
+from fetch import TIMEOUT, canonical_hash, connect, log
 
 MATCH_URL = "https://api.yelp.com/v3/businesses/matches"
 DETAIL_URL = "https://api.yelp.com/v3/businesses/{}"
@@ -73,7 +73,7 @@ def main() -> None:
     headers = {"Authorization": f"Bearer {api_key()}"}
     run_id = str(uuid.uuid4())[:8]
     started = dt.datetime.now()
-    con = duckdb.connect(str(DB_PATH))
+    con = connect()
     cols = ", ".join(f'"{c}" VARCHAR' for c in FIELDS)
     con.execute(f"""
         CREATE TABLE IF NOT EXISTS raw.yelp_businesses (

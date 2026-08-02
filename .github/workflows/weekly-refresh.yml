@@ -1,0 +1,43 @@
+name: weekly-refresh
+
+on:
+  schedule:
+    # Monday 16:00 UTC = 09:00 Pacific ish (DPH publishes monthly with lag;
+    # weekly catches the drop without hammering the API)
+    - cron: "0 16 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+      DBT_TARGET: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Incremental ingest (tvy3-wexg)
+        run: python ingest/fetch.py --era new
+
+      - name: Build and test models
+        working-directory: dbt
+        run: dbt build
+
+      - name: Export dashboard data
+        run: python site/build_data.py
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        working-directory: site
+        run: npx vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
