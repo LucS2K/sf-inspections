@@ -121,7 +121,7 @@ def main() -> None:
             match = get(MATCH_URL, headers, {
                 "name": (dba or "")[:64], "address1": (address or "")[:64],
                 "city": "San Francisco", "state": "CA", "country": "US",
-                "limit": 1})
+                "match_threshold": "default", "limit": 1})
             fetched += 1
             time.sleep(0.25)
             rec: dict = {}
