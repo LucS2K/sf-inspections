@@ -45,7 +45,17 @@ class RateLimited(Exception):
 
 
 def get(url: str, headers: dict, params: dict | None = None) -> dict | None:
-    resp = requests.get(url, headers=headers, params=params, timeout=TIMEOUT)
+    # transient network errors get 3 retries with backoff; a mid-run blip
+    # otherwise kills a 25-minute fetch at minute 24
+    for attempt in range(3):
+        try:
+            resp = requests.get(url, headers=headers, params=params,
+                                timeout=TIMEOUT)
+            break
+        except (requests.ConnectionError, requests.Timeout):
+            if attempt == 2:
+                raise
+            time.sleep(5 * (attempt + 1))
     if resp.status_code == 429:
         raise RateLimited
     if resp.status_code == 404:
