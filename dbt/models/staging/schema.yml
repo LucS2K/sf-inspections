@@ -22,6 +22,21 @@ models:
       - name: event_seq
         tests: [not_null]
 
+  - name: stg_inspections_2020_2023
+    description: >
+      Context-only old era, one row per inspection_id (raw is violation
+      grain). Covers 2020-03-09 to 2023-08-03 only; there is a five-month
+      gap before the new era begins. No permit_number exists; linkage to
+      modern facilities is name+address inference. Never feeds outcomes.
+    columns:
+      - name: inspection_id
+        tests: [unique, not_null]
+      - name: facility_status
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Pass', 'Conditional Pass', 'Closure']
+
 seeds:
   - name: permit_type_classification
     description: >

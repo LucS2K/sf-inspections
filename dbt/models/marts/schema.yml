@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: fct_inspection_timeline
+    description: >
+      Facility timelines over stg_inspections, umbrella permits excluded.
+      Same grain as staging minus umbrella rows. days_since_prev / days_to_next
+      are NULL at timeline boundaries (censoring, not absence).
+    columns:
+      - name: permit_number
+        tests: [not_null]
+      - name: visit_number
+        tests: [not_null]
