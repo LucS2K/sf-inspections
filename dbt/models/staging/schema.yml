@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_inspections
+    description: >
+      One row per inspection event at a food facility, 2024-present.
+      Grain: (permit_number, inspection_date, inspection_type, event_seq).
+      Republished versions are collapsed to the latest data_as_of; real
+      same-day multiplicity (umbrella-permit stalls, repeat visits) is
+      preserved and numbered by event_seq. inspection_type is NULL for
+      roughly the most recent year of data (DPH backfills it with lag),
+      so type-dependent analyses must state their coverage window.
+    columns:
+      - name: permit_number
+        tests: [not_null]
+      - name: inspection_date
+        tests: [not_null]
+      - name: facility_rating_status
+        tests:
+          - accepted_values:
+              values: ['Pass', 'Conditional Pass', 'Closure']
+      - name: event_seq
+        tests: [not_null]
+
+seeds:
+  - name: permit_type_classification
+    description: >
+      Reviewed classification of every permit_type observed in raw.
+      Generated verbatim from the data 2026-08-02 so string matching is
+      exact; is_food and is_umbrella flags hand-reviewed. Non-food: tobacco,
+      pet facilities, laundries, pools, massage, tattoo. Umbrella: farmers
+      markets and community-event vendor permits, where one permit covers
+      many stalls and per-facility timelines are meaningless.
+    columns:
+      - name: permit_type
+        tests: [unique, not_null]
