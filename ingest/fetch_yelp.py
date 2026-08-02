@@ -51,6 +51,10 @@ def get(url: str, headers: dict, params: dict | None = None) -> dict | None:
         try:
             resp = requests.get(url, headers=headers, params=params,
                                 timeout=TIMEOUT)
+            if resp.status_code >= 500:
+                # server-side blips (503) deserve the same retries as
+                # network errors; only give up after backoff
+                raise requests.ConnectionError(f"HTTP {resp.status_code}")
             break
         except (requests.ConnectionError, requests.Timeout):
             if attempt == 2:
