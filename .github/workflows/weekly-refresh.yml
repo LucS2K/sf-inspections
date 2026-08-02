@@ -31,6 +31,11 @@ jobs:
         working-directory: dbt
         run: dbt build
 
+      - name: Refresh business-registry cross-check
+        # keeps the attrition split current: newly unresolved failures get
+        # their registry candidates fetched each week (idempotent, small)
+        run: python ingest/fetch_registry.py
+
       - name: Export dashboard data
         run: python site/build_data.py
 
