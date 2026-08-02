@@ -19,3 +19,7 @@ dbt/logs/
 
 # secrets
 .env
+
+# vercel
+site/.vercel
+site/data/

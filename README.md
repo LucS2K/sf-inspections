@@ -26,6 +26,16 @@ flagged wherever used):
 | Registered Business Locations (`g8m3-pdis`) | Splits unresolved failures into attrition (business died) vs censoring. |
 | Yelp Fusion API | Present-day rating snapshot for failure cohort + control. Cross-sectional correlation only. Key in gitignored `.env`. |
 
+## Published dashboard
+
+`site/` is a static interactive dashboard (KPIs, monthly trends, the
+enforcement funnel, neighborhood failure rates, facility lookup) deployed to
+Vercel. `site/build_data.py` exports event-level JSON from the marts; all
+filtering happens client-side so the page needs no server. The weekly
+Task Scheduler chain refreshes and redeploys it. Palette and chart specs
+follow a validated accessible dataviz method (CVD-checked, dark mode,
+table-view twins for every chart).
+
 ## Layout
 
 ```
@@ -34,7 +44,8 @@ ingest/fetch_registry.py   business-registry candidates for unresolved failures
 ingest/fetch_yelp.py       Yelp ratings, failure cohort + control (resumable)
 db/                inspections.duckdb (gitignored, rebuildable)
 dbt/               staging and analysis models (run dbt from this directory)
-schedule/          weekly Task Scheduler job (Mon 09:00)
+site/              static dashboard + data export (deployed to Vercel)
+schedule/          weekly Task Scheduler job (Mon 09:00): ingest -> dbt -> export -> deploy
 logs/              ingest.log (gitignored)
 data/tmp/          transient bulk-load files (gitignored)
 ```

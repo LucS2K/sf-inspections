@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SF Health Inspections: Does Enforcement Work?</title>
+<meta name="description" content="San Francisco food facility inspections 2024-present: enforcement response, outcomes, and durability.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div>
+      <h1>SF health inspections: does enforcement work?</h1>
+      <p class="sub">When a food facility fails an inspection or is closed, does it improve, and does the improvement hold?
+        <span id="window-note" class="muted"></span></p>
+    </div>
+    <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme">◐</button>
+  </header>
+
+  <div class="filter-row" role="group" aria-label="Filters">
+    <label>Period
+      <select id="f-period">
+        <option value="all" selected>All data</option>
+        <option value="12m">Last 12 months</option>
+        <option value="90d">Last 90 days</option>
+      </select>
+    </label>
+    <label>Neighborhood
+      <select id="f-hood"><option value="all" selected>All neighborhoods</option></select>
+    </label>
+  </div>
+
+  <section class="kpi-row" id="kpi-row" aria-label="Key figures"></section>
+
+  <section class="grid">
+    <figure class="card" id="card-monthly">
+      <figcaption>
+        <h2>Inspections per month</h2>
+        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
+      </figcaption>
+      <div class="chart" id="chart-monthly"></div>
+      <div class="table-view" hidden></div>
+    </figure>
+
+    <figure class="card" id="card-failures">
+      <figcaption>
+        <h2>Failures per month</h2>
+        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
+      </figcaption>
+      <div class="legend" id="legend-failures"></div>
+      <div class="chart" id="chart-failures"></div>
+      <div class="table-view" hidden></div>
+    </figure>
+
+    <figure class="card wide" id="card-funnel">
+      <figcaption>
+        <h2>The enforcement funnel</h2>
+        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
+      </figcaption>
+      <p class="note">Each failure followed to its next rated visit, then the one after. "Held" is measured only where a later visit exists; silence is censoring, not success.</p>
+      <div class="chart funnel-pair" id="chart-funnel"></div>
+      <div class="table-view" hidden></div>
+    </figure>
+
+    <figure class="card wide" id="card-hoods">
+      <figcaption>
+        <h2>Failure rate by neighborhood</h2>
+        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
+      </figcaption>
+      <p class="note">Share of rated inspections ending in Conditional Pass or Closure. Neighborhoods with under 100 rated inspections in the selected period are listed in the table only; rates on small samples mislead.</p>
+      <div class="chart" id="chart-hoods"></div>
+      <div class="table-view" hidden></div>
+    </figure>
+
+    <figure class="card wide" id="card-lookup">
+      <figcaption><h2>Facility lookup</h2></figcaption>
+      <input type="search" id="f-search" placeholder="Search by name or address" aria-label="Search facilities">
+      <div id="search-results" class="search-results" role="listbox"></div>
+      <div id="facility-detail" class="facility-detail" hidden></div>
+    </figure>
+  </section>
+
+  <footer class="foot">
+    <p><strong>Read the numbers with these caveats.</strong> One row per inspection event after latest-record dedup; farmers-market umbrella permits excluded from facility timelines. Inspection <em>types</em> are backfilled by DPH with roughly a year's lag, so recent "Reinspection" labels are incomplete; the funnel uses ratings, which do not lag. A failure with no later rated visit is censored, not resolved: registry cross-checks show at least 13 of 150 such facilities closed for good. Post-enforcement facilities fail their next check at roughly 3x the base rate; the data cannot say whether that is enforcement failing or selection of trouble-prone facilities.</p>
+    <p class="muted" id="stamp"></p>
+  </footer>
+</div>
+<div id="tooltip" class="tooltip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
