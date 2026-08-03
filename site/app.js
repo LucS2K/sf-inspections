@@ -101,6 +101,61 @@ function render() {
   renderFunnel(eps);
   renderHoods();
   renderYelp();
+  renderFacilityList(vs);
+}
+
+let listShown = 30;
+let listCache = [];
+
+function renderFacilityList(vs, keepShown) {
+  if (!keepShown) listShown = 30;
+  const per = new Map();
+  for (const [permit, date, type, rating] of vs) {
+    const e = per.get(permit) || { visits: 0, fails: 0, last: "", lastRating: null };
+    e.visits++;
+    if (rating === "Conditional Pass" || rating === "Closure") e.fails++;
+    if (date >= e.last) {
+      e.last = date;
+      if (rating !== null || e.lastRating === null) e.lastRating = rating;
+    }
+    per.set(permit, e);
+  }
+  const facByPermit = new Map(DATA.facilities.map((f) => [f.permit, f]));
+  listCache = [...per.entries()]
+    .map(([permit, e]) => ({ f: facByPermit.get(permit), ...e }))
+    .filter((r) => r.f)
+    .sort((a, b) => b.last.localeCompare(a.last));
+
+  $("#list-head").textContent =
+    `${fmt(listCache.length)} facilities inspected in this selection`;
+  const box = $("#facility-list");
+  box.replaceChildren();
+  for (const r of listCache.slice(0, listShown)) {
+    const b = document.createElement("button");
+    const left = document.createElement("span");
+    const name = document.createElement("strong"); name.textContent = r.f.dba || r.f.permit;
+    const addr = document.createElement("span"); addr.className = "addr";
+    addr.textContent = " " + (r.f.address || "").replace(/\s+/g, " ");
+    left.append(name, addr);
+    const right = document.createElement("span"); right.className = "addr";
+    right.append(document.createTextNode(r.last + " "));
+    right.append(chipFor(r.lastRating));
+    if (r.fails) {
+      const w = document.createElement("span");
+      w.textContent = ` ${r.fails} failure${r.fails === 1 ? "" : "s"} in period`;
+      right.append(w);
+    }
+    b.append(left, right);
+    b.addEventListener("click", () => {
+      showFacility(r.f);
+      $("#facility-detail").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    box.append(b);
+  }
+  const more = $("#list-more");
+  more.hidden = listCache.length <= listShown;
+  more.textContent = `Show more (${fmt(listCache.length - listShown)} remaining)`;
+  more.onclick = () => { listShown += 50; renderFacilityList(vs, true); };
 }
 
 function median(arr) {

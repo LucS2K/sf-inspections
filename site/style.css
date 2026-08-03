@@ -301,3 +301,9 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
   margin: 0; font-family: var(--sans); font-size: 14.5px; line-height: 1.6;
   color: var(--text-secondary);
 }
+
+/* facility list */
+.list-head { font-family: var(--serif); font-size: 17px; margin: 26px 0 4px; }
+#facility-list button { align-items: baseline; }
+#facility-list .chip { vertical-align: baseline; }
+#list-more { margin-top: 12px; }
