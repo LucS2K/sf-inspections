@@ -18,6 +18,11 @@ async function boot() {
   DATA = { summary, facilities, history, episodes };
   DATA.hoodOf = Object.fromEntries(facilities.map((f) => [f.permit, f.hood || "Unknown"]));
 
+  const totalV = Object.values(DATA.history).reduce((a, r) => a + r.length, 0);
+  $("#dek-stats").textContent =
+    `${fmt(totalV)} inspections · ${fmt(Object.keys(DATA.history).length)} facilities · ` +
+    `${summary.window_start.slice(0, 4)}–${summary.window_end.slice(0, 4)}.`;
+
   $("#window-note").textContent =
     ` Data ${summary.window_start} to ${summary.window_end}.`;
   $("#stamp").textContent =
@@ -256,6 +261,18 @@ function renderKPIs(vs, eps) {
     if (hint) { const h = document.createElement("div"); h.className = "hint"; h.textContent = hint; t.append(h); }
     row.append(t);
   }
+
+  /* chapter pull-stat */
+  const ps = $("#pull-funnel");
+  if (resolved.length) {
+    ps.replaceChildren();
+    const big = document.createElement("span"); big.className = "big";
+    big.textContent = Math.round(resolved.length * 100 / eps.length) + "%";
+    const rest = document.createElement("span"); rest.className = "rest";
+    rest.textContent = ` of ${fmt(eps.length)} failures were re-rated; median ` +
+      `${Math.round(median(resolved.map((e) => e.dr)))} days from failure to the next graded visit.`;
+    ps.append(big, rest); ps.hidden = false;
+  } else ps.hidden = true;
 }
 
 /* ---------- chart helpers ---------- */

@@ -22,7 +22,7 @@
   <header class="masthead">
     <p class="kicker">A civic-data analysis &middot; San Francisco<span id="window-note"></span></p>
     <h1>Does enforcement work?</h1>
-    <p class="dek">When a food business fails a health inspection or is shut down, does it fix the problem, and does the fix last?</p>
+    <p class="dek">When a food business fails a health inspection or is shut down, does it fix the problem, and does the fix last? <span class="dek-stats" id="dek-stats"></span></p>
     <p class="meta"><a href="/report">Read the findings report</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="#glossary">Glossary</a></p>
   </header>
 
@@ -62,7 +62,7 @@
         <h2>Failures per month</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Most failures are Conditional Passes: the facility keeps operating under orders. Closure is the rarer, sharper instrument.</p>
+      <p class="note">Most failures are <span class="w-cp">Conditional Passes</span>: the facility keeps operating under orders. <span class="w-closure">Closure</span> is the rarer, sharper instrument.</p>
       <div class="legend" id="legend-failures"></div>
       <div class="chart" id="chart-failures"></div>
       <p class="takeaway" id="tk-failures"></p>
@@ -72,6 +72,7 @@
 
   <section class="chapter">
     <p class="ck">Part 2 &middot; What happens after a failure</p>
+    <p class="pullstat" id="pull-funnel" hidden></p>
     <figure class="card wide" id="card-funnel">
       <figcaption>
         <h2>The enforcement funnel</h2>
@@ -91,14 +92,14 @@
         <h2>Failure rate by neighborhood</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Share of graded inspections that ended in Conditional Pass or Closure. Neighborhoods with fewer than 100 graded inspections in the selected period appear in the table only, because rates from small samples are unreliable.</p>
+      <p class="note">Share of graded inspections that ended in <span class="w-cp">Conditional Pass</span> or <span class="w-closure">Closure</span>. Neighborhoods with fewer than 100 graded inspections in the selected period appear in the table only, because rates from small samples are unreliable.</p>
       <div class="chart" id="chart-hoods"></div>
       <p class="takeaway" id="tk-hoods"></p>
       <div class="table-view" hidden></div>
     </figure>
   </section>
 
-  <section class="chapter">
+  <section class="chapter feature">
     <p class="ck">Part 4 &middot; The null result</p>
     <figure class="card wide" id="card-yelp">
       <figcaption>
