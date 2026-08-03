@@ -732,6 +732,96 @@ function selectHood(name) {
   render();
 }
 
+/* neighborhood detail popover: click a hood/dot/list row for the full
+   picture; filtering the page stays an explicit button inside it */
+
+function hoodDetail(name) {
+  const from = cutoff();
+  const facs = new Set();
+  let rated = 0, failed = 0, cp = 0, cl = 0;
+  for (const [permit, rowsArr] of Object.entries(DATA.history)) {
+    if ((DATA.hoodOf[permit] || "Unknown") !== name) continue;
+    for (const v of rowsArr) {
+      if (v[0] < from) continue;
+      facs.add(permit);
+      if (v[2] === null) continue;
+      rated++;
+      if (v[2] !== "Pass") { failed++; v[2] === "Closure" ? cl++ : cp++; }
+    }
+  }
+  return { facilities: facs.size, rated, failed, cp, cl };
+}
+
+function closeMapPop() {
+  const pop = $("#map-pop");
+  if (pop) pop.remove();
+  document.removeEventListener("pointerdown", onPopOutside, true);
+  document.removeEventListener("keydown", onPopEsc, true);
+}
+function onPopOutside(e) { if (!e.target.closest("#map-pop")) closeMapPop(); }
+function onPopEsc(e) { if (e.key === "Escape") closeMapPop(); }
+
+function openMapPop(name, rank, evt) {
+  closeMapPop();
+  const d = hoodDetail(name);
+  const pop = document.createElement("div");
+  pop.id = "map-pop";
+  pop.setAttribute("role", "dialog");
+  pop.setAttribute("aria-label", name);
+
+  const close = document.createElement("button");
+  close.className = "map-pop-close"; close.textContent = "×";
+  close.setAttribute("aria-label", "Close");
+  close.addEventListener("click", closeMapPop);
+  pop.append(close);
+
+  if (HOOD_PHOTOS[name]) {
+    const img = document.createElement("img");
+    img.src = HOOD_PHOTOS[name]; img.alt = name;
+    pop.append(img);
+  }
+  const h = document.createElement("h3"); h.textContent = name;
+  pop.append(h);
+  const sub = document.createElement("p"); sub.className = "map-pop-sub";
+  sub.textContent = rank
+    ? `#${rank} of the ranked neighborhoods in this period`
+    : "Too few graded inspections to rank fairly in this period";
+  pop.append(sub);
+
+  const rows = [
+    ["Failure rate", d.rated >= 100 ? (d.failed * 100 / d.rated).toFixed(1) + "%"
+                                    : (d.rated ? "n/a (small sample)" : "n/a")],
+    ["Graded inspections", fmt(d.rated)],
+    ["Facilities inspected", fmt(d.facilities)],
+    ["Conditional passes", fmt(d.cp)],
+    ["Closures", fmt(d.cl)],
+  ];
+  const dl = document.createElement("dl");
+  for (const [k, v] of rows) {
+    const dt = document.createElement("dt"); dt.textContent = k;
+    const dd = document.createElement("dd"); dd.textContent = v;
+    dl.append(dt, dd);
+  }
+  pop.append(dl);
+
+  const btn = document.createElement("button");
+  btn.className = "ghost-btn map-pop-btn";
+  btn.textContent = state.hood === name
+    ? "Unfocus the dashboard" : "Focus the dashboard on " + name;
+  btn.addEventListener("click", () => { closeMapPop(); selectHood(name); });
+  pop.append(btn);
+
+  document.body.append(pop);
+  const W = 300, H = pop.offsetHeight || 340;
+  const x = Math.max(8, Math.min((evt.clientX || innerWidth / 2) + 14, innerWidth - W - 12));
+  const y = Math.max(8, Math.min((evt.clientY || innerHeight / 2) - H / 3, innerHeight - H - 12));
+  pop.style.left = x + "px"; pop.style.top = y + "px";
+  setTimeout(() => {
+    document.addEventListener("pointerdown", onPopOutside, true);
+    document.addEventListener("keydown", onPopEsc, true);
+  }, 0);
+}
+
 function renderMap() {
   /* like the neighborhood bars, the map always shows the whole city
      (period-filtered); the hood filter highlights rather than hides */
@@ -753,8 +843,14 @@ function renderMap() {
   const ranked = qualifying.slice(0, 20); // list + markers cap, Japan-style
   const rankOf = {};
   ranked.forEach((r, i) => { rankOf[r.hood] = i + 1; });
-  const max = Math.max(...qualifying.map((r) => r.rate), 1);
-  const ramp = ["--ord-1", "--ord-2", "--ord-3", "--ord-4"].map(CSS);
+  /* quantile shading: rates cluster (most hoods 4-8%), so binning by
+     rate/max drops nearly everything into two pale bins; quintiles of the
+     ranked order spread the palette so differences stay visible */
+  const shades = ["--map-1", "--map-2", "--map-3", "--map-4", "--map-5"].map(CSS);
+  const shadeOf = {};
+  [...qualifying].sort((a, b) => a.rate - b.rate).forEach((r, i, arr) => {
+    shadeOf[r.hood] = shades[Math.min(4, Math.floor((i / arr.length) * 5))];
+  });
 
   const host = $("#map-svg");
   host.replaceChildren();
@@ -777,9 +873,7 @@ function renderMap() {
     const rated = a ? a.rated : 0;
     const qual = rated >= 100;
     const rate = rated ? a.failed * 100 / rated : null;
-    const fill = qual
-      ? ramp[Math.min(3, Math.floor((rate / max) * 4))]
-      : "url(#nodata)";
+    const fill = qual ? shadeOf[name] : "url(#nodata)";
     const p = svgEl("path", { d: g.d, fill, class: "map-hood", tabindex: 0,
                               stroke: CSS("--page"), "stroke-width": 1.5 });
     if (state.hood === name) {
@@ -797,7 +891,7 @@ function renderMap() {
     p.addEventListener("mousemove", show);
     p.addEventListener("pointerleave", hideTip);
     p.addEventListener("blur", hideTip);
-    p.addEventListener("click", () => selectHood(name));
+    p.addEventListener("click", (evt) => { hideTip(); openMapPop(name, rankOf[name], evt); });
     svg.append(p);
     if (rankOf[name]) markers.push({ name, g, rank: rankOf[name], show });
   }
@@ -817,10 +911,17 @@ function renderMap() {
     grp.addEventListener("mousemove", m.show);
     grp.addEventListener("pointerleave", hideTip);
     grp.addEventListener("blur", hideTip);
-    grp.addEventListener("click", () => selectHood(m.name));
+    grp.addEventListener("click", (evt) => { hideTip(); openMapPop(m.name, m.rank, evt); });
     svg.append(grp);
   }
   host.append(svg);
+  const legend = document.createElement("div");
+  legend.className = "map-legend";
+  const lo = document.createElement("span"); lo.textContent = "Fewer failures";
+  const bar = document.createElement("span"); bar.className = "map-legend-bar";
+  const hi = document.createElement("span"); hi.textContent = "More";
+  legend.append(lo, bar, hi);
+  host.append(legend);
 
   const list = $("#map-list");
   list.replaceChildren();
@@ -833,14 +934,14 @@ function renderMap() {
     const vl = document.createElement("span"); vl.className = "map-val";
     vl.textContent = r.rate.toFixed(1) + "%";
     li.append(rk, nm, vl);
-    li.addEventListener("click", () => selectHood(r.hood));
-    li.addEventListener("keydown", (e) => { if (e.key === "Enter") selectHood(r.hood); });
+    li.addEventListener("click", (evt) => openMapPop(r.hood, i + 1, evt));
+    li.addEventListener("keydown", (e) => { if (e.key === "Enter") openMapPop(r.hood, i + 1, e); });
     list.append(li);
   });
 
   const unshaded = Object.keys(HOOD_GEO.hoods).length - qualifying.length;
   if (ranked.length) {
-    takeaway("#tk-map", `${ranked[0].hood} is the darkest cell in this period, `
+    takeaway("#tk-map", `${ranked[0].hood} carries the strongest color in this period, `
       + `with ${ranked[0].rate.toFixed(1)}% of ${fmt(ranked[0].rated)} graded visits `
       + `finding a problem. ${unshaded} neighborhoods are hatched because they have `
       + `too few graded inspections to rate fairly. As with the bars below, business `

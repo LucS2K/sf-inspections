@@ -1,4 +1,4 @@
-/* Editorial redesign. Token NAMES are preserved — app.js reads them via CSS().
+﻿/* Editorial redesign. Token NAMES are preserved â€” app.js reads them via CSS().
    Status hues follow Okabe-Ito (colorblind-safe, both themes); green/amber/red
    mean Pass / Conditional Pass / Closure only, never decoration. */
 :root {
@@ -16,6 +16,7 @@
   --status-critical:#b13a12;  /* Closure */
   --status-good:   #00795a;   /* Pass */
   --ord-1:#94b3d5; --ord-2:#6c92b8; --ord-3:#33608f; --ord-4:#1c3a5c;
+  --map-1:#e3ecf6; --map-2:#b9cfe7; --map-3:#84a9d1; --map-4:#4a78ad; --map-5:#173f70;
   --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
   --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -29,6 +30,7 @@
     --series-1:#82a7cf;
     --status-warning:#f0c649; --status-critical:#dd5b36; --status-good:#2fbb8c;
     --ord-1:#3b5a7c; --ord-2:#557fa9; --ord-3:#82a7cf; --ord-4:#b4cce6;
+  --map-1:#263850; --map-2:#39587e; --map-3:#5379a8; --map-4:#7ba3d4; --map-5:#b0d0f5;
   }
   :root:where(:not([data-theme="light"])) .chip.pass,
   :root:where(:not([data-theme="light"])) .chip.closure { color: #141210; }
@@ -42,6 +44,7 @@
   --series-1:#82a7cf;
   --status-warning:#f0c649; --status-critical:#dd5b36; --status-good:#2fbb8c;
   --ord-1:#3b5a7c; --ord-2:#557fa9; --ord-3:#82a7cf; --ord-4:#b4cce6;
+  --map-1:#263850; --map-2:#39587e; --map-3:#5379a8; --map-4:#7ba3d4; --map-5:#b0d0f5;
 }
 :root[data-theme="dark"] .chip.pass,
 :root[data-theme="dark"] .chip.closure { color: #141210; }
@@ -63,7 +66,7 @@ a:hover { color: var(--text-primary); }
 }
 .skip:focus { left: 8px; top: 8px; }
 
-/* ---- top bar: brand · global search · theme ---- */
+/* ---- top bar: brand Â· global search Â· theme ---- */
 .topbar {
   position: sticky; top: 0; z-index: 20;
   background: color-mix(in srgb, var(--page) 92%, transparent);
@@ -413,3 +416,37 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
   text-transform: uppercase; color: var(--muted); margin: 2px 0 6px;
   border-bottom: 2px solid var(--baseline); padding-bottom: 6px;
 }
+
+/* map legend + neighborhood popover */
+.map-legend {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--sans); font-size: 12px; color: var(--muted); margin-top: 10px;
+}
+.map-legend-bar {
+  width: 160px; height: 10px; border-radius: 999px; border: 1px solid var(--grid);
+  background: linear-gradient(to right, var(--map-1), var(--map-2), var(--map-3), var(--map-4), var(--map-5));
+}
+#map-pop {
+  position: fixed; z-index: 60; width: 300px;
+  background: var(--surface-1); border: 1px solid var(--baseline);
+  border-radius: 10px; padding: 14px 16px 16px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+  font-family: var(--sans);
+}
+#map-pop img {
+  width: 100%; height: 110px; object-fit: cover; border-radius: 6px;
+  margin-bottom: 10px; display: block;
+}
+#map-pop h3 { font-family: var(--serif); font-size: 18px; margin: 0 0 2px; }
+.map-pop-sub { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+#map-pop dl {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin: 0 0 12px;
+  font-size: 13.5px;
+}
+#map-pop dt { color: var(--text-secondary); }
+#map-pop dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+.map-pop-close {
+  position: absolute; top: 8px; right: 10px; border: 0; background: none;
+  font-size: 20px; line-height: 1; color: var(--muted); cursor: pointer;
+}
+.map-pop-btn { width: 100%; }
