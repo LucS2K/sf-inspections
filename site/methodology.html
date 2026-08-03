@@ -25,7 +25,7 @@
   <header class="masthead">
     <div>
       <p class="kicker">Behind the analysis</p>
-      <h1>Methodology</h1>
+      <h1>How this was built</h1>
       <p class="dek">The project behind the dashboard: where the data comes from, what it took
         to make it trustworthy, and the decisions that shaped every number on the page.</p>
       <p class="meta"><a href="/">Dashboard</a> &middot; <a href="/report">Findings report</a></p>
@@ -40,6 +40,9 @@
   business actually fix the problem, and does the fix last? That framing turns a
   public dataset into an evaluation of whether enforcement works, with findings
   someone could act on.</p>
+  <p>The short version of what it found: San Francisco responds to failures
+  within days, and most fixes stick. But one in five does not last a year,
+  and 150 failures have no recorded follow-up.</p>
 
   <h2>Getting the data, and keeping it fresh</h2>
   <p>The core data comes from San Francisco's open data portal through its API:
@@ -51,7 +54,7 @@
   matching, which the analysis labels as inferred rather than measured wherever
   it appears.</p>
 
-  <h2>The detective work: making the data trustworthy</h2>
+  <h2>Making the data trustworthy</h2>
   <p>This is where most of the analytical effort went. Raw open data is never
   analysis-ready, and every finding on the dashboard sits on top of problems
   that had to be found, measured, and handled:</p>
@@ -123,7 +126,7 @@
         <td>No frameworks; ~2&nbsp;MB of static JSON, so it is fast, free to host, and cannot break</td></tr>
   </table>
 
-  <h2>Building the site itself</h2>
+  <h2>Building the site</h2>
   <p>The dashboard is deliberately simple technology doing careful work. Charts
   are hand-built SVG following a validated accessibility method: the color
   palette is machine-checked for color-blind safety in both light and dark
@@ -139,7 +142,7 @@
   commit history is the honest log of how the project actually unfolded,
   including the bugs found and fixed along the way.</p>
 
-  <h2>Who this is for, and who built it</h2>
+  <h2>Who this is for</h2>
   <p><strong>For diners and residents</strong>, the dashboard is a practical
   tool: look up any restaurant before you eat there and see its real inspection
   history, not its star rating. <strong>For food-safety awareness</strong>, it
@@ -150,10 +153,7 @@
   a set of failures with no recorded follow-up deserves attention. Public data
   should be able to answer whether public systems work; this project is that
   idea, executed on one system.</p>
-  <p>It is also, candidly, a work sample: for hiring teams evaluating a
-  business analyst, it shows the complete arc from an ambiguous question to a
-  defensible, published answer, with every judgment call documented on this
-  page.</p>
+  <h2>About me</h2>
   <p>Hi, I'm <strong>Luc</strong>, a business analyst. This started with San
   Francisco's open data portal: the inspection data was public, well
   maintained, and mostly used to make maps of scores. The more interesting
@@ -162,7 +162,9 @@
   <p>I did this end to end: framing the question, sourcing and interrogating
   the data, making the modeling and methodology decisions described on this
   page, and publishing the result. Implementation was AI-assisted (Claude
-  Code); the judgment calls documented above are mine.</p>
+  Code); the judgment calls documented above are mine. If you're a hiring
+  team evaluating a business analyst, this page is the work sample: the full
+  arc from an ambiguous question to a defensible, published answer.</p>
 
   <p class="meta" id="stamp">Built by Luc Nguyen &middot; <a href="https://www.linkedin.com/in/luchnguyen/">LinkedIn</a> &middot; <a href="https://github.com/LucS2K">GitHub</a> &middot; <a href="mailto:ljr.luc.nguyen@gmail.com">ljr.luc.nguyen@gmail.com</a></p>
 </div>
