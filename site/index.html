@@ -23,7 +23,7 @@
     <p class="kicker">A civic-data analysis &middot; San Francisco<span id="window-note"></span></p>
     <h1>Does enforcement work?</h1>
     <p class="dek">When a food business fails a health inspection or is shut down, does it fix the problem, and does the fix last?</p>
-    <p class="meta"><a href="/report">Read the findings report</a> &middot; <a href="/built">How this was built</a></p>
+    <p class="meta"><a href="/report">Read the findings report</a> &middot; <a href="/built">How this was built</a> &middot; <a href="#glossary">Glossary</a></p>
   </header>
 
   <div class="filterbar" role="group" aria-label="Filters">
@@ -115,6 +115,56 @@
       <div id="search-results" class="search-results" role="listbox"></div>
       <div id="facility-detail" class="facility-detail" hidden></div>
     </figure>
+  </section>
+
+  <section class="chapter" id="glossary">
+    <p class="ck">Glossary &middot; What the words mean</p>
+    <dl class="gloss">
+      <dt>Pass</dt>
+      <dd>The facility can operate normally. This does <em>not</em> mean zero
+      violations: a facility can pass with several minor ones (some pass with
+      8 or more). The rating depends on how <em>serious</em> the violations
+      are and whether they were corrected, not on a count. There is no fixed
+      number of "allowed" violations.</dd>
+      <dt>Conditional Pass</dt>
+      <dd>The inspector found serious violations. The facility may keep
+      operating, but under orders to fix the problems, and an inspector
+      comes back to check. Think of it as "on notice".</dd>
+      <dt>Closure</dt>
+      <dd>The inspector found an immediate health hazard (for example a
+      vermin infestation or no hot water). The facility's permit is suspended
+      and it must shut its doors until the problem is fixed and verified.</dd>
+      <dt>Violations count</dt>
+      <dd>How many individual problems the inspector recorded on that visit,
+      from minor (a wall that needs repainting) to major (food at unsafe
+      temperatures). Severity matters more than the number.</dd>
+      <dt>Failure</dt>
+      <dd>Our word for an inspection that ended in Conditional Pass or
+      Closure: the visits where enforcement kicked in.</dd>
+      <dt>Re-rated</dt>
+      <dd>After a failure, the next inspection that assigned a new grade.
+      This is how we know whether the facility responded.</dd>
+      <dt>Passed re-rating</dt>
+      <dd>That follow-up inspection ended in a Pass: the facility fixed the
+      problem, at least for now.</dd>
+      <dt>Held at next check</dt>
+      <dd>At the <em>next</em> graded inspection after the fix, often months
+      later, the facility was still passing. Our measure of whether the fix
+      lasted.</dd>
+      <dt>n=</dt>
+      <dd>The number of cases behind a statistic. A rate computed from 12
+      facilities means much less than one computed from 1,200, so every rate
+      on this site shows its n. Groups too small to trust show their count
+      instead of a rate.</dd>
+      <dt>Inspection types</dt>
+      <dd><strong>Routine</strong>: a regular unannounced visit.
+      <strong>Reinspection</strong>: a follow-up after a problem.
+      <strong>Complaint</strong>: triggered by a public complaint.
+      <strong>Foodborne Illness</strong>: investigating a report of someone
+      getting sick. <strong>New Ownership</strong>: checking a facility that
+      changed hands. <strong>Type pending</strong>: the city publishes this
+      label up to a year late, so recent visits show it as pending.</dd>
+    </dl>
   </section>
 
   <footer class="foot" id="caveats">

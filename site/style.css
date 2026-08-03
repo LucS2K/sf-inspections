@@ -290,3 +290,14 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
   border-left: 3px solid var(--series-1); border-radius: 0 8px 8px 0;
   padding: 10px 14px; margin: 14px 0 0; max-width: 80ch;
 }
+
+/* glossary */
+.gloss { margin: 0; max-width: 76ch; }
+.gloss dt {
+  font-family: var(--serif); font-weight: 700; font-size: 16px;
+  margin: 18px 0 4px;
+}
+.gloss dd {
+  margin: 0; font-family: var(--sans); font-size: 14.5px; line-height: 1.6;
+  color: var(--text-secondary);
+}
