@@ -124,16 +124,18 @@
 
   <h2>Do Yelp ratings know any of this?</h2>
   <p>Essentially no. Facilities that were ever closed average 3.85 stars
-  (n=306); facilities never flagged average 3.99 (n=568). The correlation
-  between rating and failure count is r = -0.065 (n=1,296). Consumer
+  (n=306); facilities never flagged average 3.99 (n=568). Statistically, the relationship between a facility's rating and how
+  often it failed is essentially zero (r = -0.065 on a scale where 0 means
+  no relationship; n=1,296). Consumer
   ratings and kitchen hygiene are close to independent signals, which
   replicates published findings on other cities.</p>
   <p class="aside">Read with the coverage gap in mind: 86% of
   enforcement-history facilities matched on Yelp versus 67% of the
   comparison group, because enforcement lands mostly on restaurants while
   the comparison group includes markets and cafeterias Yelp does not list.
-  Ratings are also a present-day snapshot against 2024-2026 inspections:
-  correlation only, no causal or temporal claims.</p>
+  And the ratings are a snapshot from today measured against inspections
+  from the past two years, so this shows association only, not cause and
+  effect.</p>
 
   <h2>The geography of enforcement</h2>
   <p>Does the system behave differently by place? Raw failure-rate maps
@@ -167,8 +169,9 @@
     <li><strong>Causality.</strong> No counterfactual exists for what
     facilities would have done without enforcement.</li>
     <li><strong>Silence is not success.</strong> A failure with no later
-    visit is censored, not resolved; durability is measured only where a
-    later visit exists.</li>
+    inspection has an unknown outcome, not a good one (statisticians call
+    this censoring). Whether a fix lasted is only measured where a
+    follow-up inspection actually exists.</li>
     <li><strong>Recent inspection types are incomplete.</strong> DPH
     backfills the type label with roughly a year's lag (100% of 2026 rows
     lack it); every metric here uses ratings, which do not lag.</li>
@@ -178,17 +181,17 @@
   </ul>
 
   <h2>Method, briefly</h2>
-  <p>Weekly incremental ingest from the city's open-data API into an
-  append-only raw layer (the feed republishes corrected records; history is
-  kept and deduplicated to the latest version at a tested grain). Staging
-  filters ~110 permit types to food facilities via a reviewed
-  classification, excludes umbrella permits (one farmers-market permit can
-  carry 19 same-day stall inspections), and reconciles exactly: every
-  excluded raw row is accounted for. Facility timelines and enforcement
-  episodes are window-function models over the cleaned events, with 26
-  automated tests on grain, values, and completeness. The pipeline runs
-  fully in the cloud on a weekly schedule, and this page regenerates with
-  it.</p>
+  <p>The data flows automatically each week from the city's open-data API
+  into a pipeline that keeps every version of every record and always
+  analyzes the most recent one (the city republishes corrected records).
+  Roughly 110 permit types were reviewed to isolate food facilities;
+  farmers-market permits, where one permit can carry 19 same-day stall
+  inspections, are handled separately; and every excluded record is
+  accounted for by name, with the cleaned data reconciling exactly against
+  the raw feed. Facility histories and enforcement episodes are built in
+  SQL on top of that, guarded by 26 automated tests that re-check the
+  assumptions on every refresh. The whole pipeline runs in the cloud on a
+  weekly schedule, and this page regenerates with it.</p>
 
   <p class="muted">Built by Luc Nguyen, business analyst &middot; <a href="https://www.linkedin.com/in/luchnguyen/">LinkedIn</a> &middot; <a href="https://github.com/LucS2K">GitHub</a> &middot; <a href="mailto:ljr.luc.nguyen@gmail.com">ljr.luc.nguyen@gmail.com</a> &middot; <a href="/built">about this project</a></p>
   <p class="muted" id="stamp">Sources: SF DPH Health Inspections

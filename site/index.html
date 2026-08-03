@@ -47,7 +47,7 @@
         <h2>Inspections per month</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">The department&rsquo;s cadence is steady; enforcement begins when one of these visits goes wrong.</p>
+      <p class="note">The city inspects at a steady pace; enforcement begins when one of these visits goes wrong.</p>
       <div class="chart" id="chart-monthly"></div>
       <p class="takeaway" id="tk-monthly"></p>
       <div class="table-view" hidden></div>
@@ -72,7 +72,7 @@
         <h2>The enforcement funnel</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Each failure followed to its next rated visit, then the one after. &ldquo;Held&rdquo; is measured only where a later visit exists; silence is censoring, not success.</p>
+      <p class="note">Each failure is followed to its next graded inspection, then the one after. A fix only counts as &ldquo;held&rdquo; where a later inspection actually happened: no follow-up on record means unknown, not fixed.</p>
       <div class="chart funnel-pair" id="chart-funnel"></div>
       <p class="takeaway" id="tk-funnel"></p>
       <div class="table-view" hidden></div>
@@ -86,7 +86,7 @@
         <h2>Failure rate by neighborhood</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Share of rated inspections ending in Conditional Pass or Closure. Neighborhoods with under 100 rated inspections in the selected period are listed in the table only; rates on small samples mislead.</p>
+      <p class="note">Share of graded inspections that ended in Conditional Pass or Closure. Neighborhoods with fewer than 100 graded inspections in the selected period appear in the table only, because rates from small samples are unreliable.</p>
       <div class="chart" id="chart-hoods"></div>
       <p class="takeaway" id="tk-hoods"></p>
       <div class="table-view" hidden></div>
@@ -100,7 +100,7 @@
         <h2>Yelp rating vs enforcement history</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Present-day Yelp ratings against 2024&ndash;2026 enforcement history: correlation only, and the near-identical bars are the finding. Read with the coverage gap in mind: 86% of enforcement-history facilities match on Yelp vs 67% of the never-failed group (enforcement lands on restaurants; the comparison group includes markets and cafeterias Yelp does not list).</p>
+      <p class="note">Today's Yelp ratings compared with each facility's inspection history since 2024. The near-identical bars are the finding: review scores do not reveal kitchen hygiene. One reading note: 86% of facilities with enforcement history are on Yelp versus 67% of the never-failed group, because enforcement mostly lands on restaurants while the comparison group includes markets and cafeterias Yelp does not list.</p>
       <div class="chart" id="chart-yelp"></div>
       <p class="takeaway" id="tk-yelp"></p>
       <div class="table-view" hidden></div>
@@ -170,10 +170,10 @@
   <footer class="foot" id="caveats">
     <h2>Read the numbers with these caveats</h2>
     <ul>
-      <li>One row per inspection event after latest-record dedup; farmers-market umbrella permits are excluded from facility timelines.</li>
-      <li>Inspection <em>types</em> are backfilled by DPH with roughly a year&rsquo;s lag, so recent &ldquo;Reinspection&rdquo; labels are incomplete. The funnel uses ratings, which do not lag.</li>
-      <li>A failure with no later rated visit is censored, not resolved: registry cross-checks show at least 13 of 150 such facilities closed for good.</li>
-      <li>Post-enforcement facilities fail their next check at roughly 3&times; the base rate; the data cannot say whether that is enforcement failing or selection of trouble-prone facilities.</li>
+      <li>Each inspection is counted once, using the city's most recent version of the record. Farmers-market permits, where one permit covers many stalls, are left out of facility histories.</li>
+      <li>The city fills in inspection <em>type</em> labels up to a year late, so recent visits show &ldquo;Type pending&rdquo;. The analysis relies on the grades, which are published on time.</li>
+      <li>A failure with no later graded visit has an unknown outcome, not a resolved one. Cross-checking city business records shows at least 13 of those 150 facilities closed for good.</li>
+      <li>Facilities that failed before are about three times more likely than average to fail their next check. The data cannot say whether enforcement failed to reform them, or whether enforcement simply finds the riskiest businesses.</li>
     </ul>
     <p class="muted">Built by Luc Nguyen, business analyst &middot; <a href="https://www.linkedin.com/in/luchnguyen/">LinkedIn</a> &middot; <a href="https://github.com/LucS2K">GitHub</a> &middot; <a href="mailto:ljr.luc.nguyen@gmail.com">ljr.luc.nguyen@gmail.com</a> &middot; <a href="/built">about this project</a></p>
     <p class="muted" id="stamp"></p>

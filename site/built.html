@@ -108,13 +108,13 @@
   <table class="stack">
     <tr><th>Layer</th><th>Tools</th><th>Why</th></tr>
     <tr><td>Data pipeline</td><td>Python, Socrata API, Yelp Fusion API</td>
-        <td>Weekly incremental ingest; append-only raw layer; idempotent loads that cannot double-count</td></tr>
+        <td>Automated weekly updates; every version of every record is kept; loads are designed so re-running them can never double-count</td></tr>
     <tr><td>Warehouse</td><td>DuckDB + MotherDuck</td>
         <td>Fast analytical SQL locally; the same database in the cloud so nothing depends on one laptop</td></tr>
     <tr><td>Modeling &amp; tests</td><td>dbt</td>
-        <td>Staged, documented models; 26 automated tests on grain, values, and completeness run on every refresh</td></tr>
+        <td>Staged, documented data models; 26 automated tests re-check the structure, values, and completeness on every refresh</td></tr>
     <tr><td>Analysis</td><td>SQL window functions</td>
-        <td>Facility timelines, enforcement episodes, fixed-horizon durability, all reproducible in the repo</td></tr>
+        <td>Facility histories, enforcement episodes, and one-year follow-up comparisons, all reproducible in the repo</td></tr>
     <tr><td>Automation</td><td>GitHub Actions</td>
         <td>Weekly cron runs ingest, tests, export, and deploy end to end; CI validates every change</td></tr>
     <tr><td>Text parsing</td><td>Regex + Claude API</td>

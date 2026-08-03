@@ -118,11 +118,11 @@ function renderKPIs(vs, eps) {
     ["Facilities", fmt(facilities), ""],
     ["Failures", fmt(eps.length), "Conditional Pass or Closure"],
     ["Re-rated", eps.length ? Math.round(resolved.length * 100 / eps.length) + "%" : "n/a",
-     eps.length ? "share of " + fmt(eps.length) + " failures with a later rated visit"
-                : "failures with a later rated visit"],
+     eps.length ? "share of " + fmt(eps.length) + " failures with a later graded visit"
+                : "failures with a later graded visit"],
     ["Median response", resolved.length ? Math.round(median(resolved.map((e) => e.dr))) + " d" : "n/a",
-     resolved.length ? "failure to next rated visit \u00b7 n=" + fmt(resolved.length)
-                     : "failure to next rated visit"],
+     resolved.length ? "days from failure to next graded visit \u00b7 n=" + fmt(resolved.length)
+                     : "days from failure to next graded visit"],
   ];
   const row = $("#kpi-row");
   row.replaceChildren();
@@ -446,7 +446,7 @@ function renderHoods() {
     const hit = svgEl("rect", { x: 0, y: yy - 4, width: W, height: rowH, fill: "transparent", tabindex: 0 });
     const show = (evt) => showTip(evt, r.hood, [
       [CSS("--series-1"), r.rate.toFixed(1) + "%", "failure rate"],
-      [CSS("--baseline"), fmt(r.rated), "rated inspections"],
+      [CSS("--baseline"), fmt(r.rated), "graded inspections"],
     ]);
     hit.addEventListener("pointermove", show);
     hit.addEventListener("mousemove", show);
@@ -458,7 +458,7 @@ function renderHoods() {
 
   const tbl = document.createElement("table");
   const thead = document.createElement("tr");
-  for (const h of ["Neighborhood", "Rated inspections", "Failures", "Failure rate"]) {
+  for (const h of ["Neighborhood", "Graded inspections", "Failures", "Failure rate"]) {
     const th = document.createElement("th"); th.textContent = h; thead.append(th);
   }
   tbl.append(thead);
