@@ -33,8 +33,8 @@ con.execute(f"ATTACH '{ROOT / 'db' / 'inspections.duckdb'}' AS src (READ_ONLY)")
 for schema in ("raw", "meta"):
     con.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
     tables = [r[0] for r in con.execute(f"""
-        SELECT table_name FROM src.information_schema.tables
-        WHERE table_schema = '{schema}'
+        SELECT table_name FROM duckdb_tables()
+        WHERE database_name = 'src' AND schema_name = '{schema}'
     """).fetchall()]
     for t in tables:
         n = con.execute(f"""
