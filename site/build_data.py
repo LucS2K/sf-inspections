@@ -51,6 +51,11 @@ def main():
     })
 
     dump("facilities", rows(con, """
+        WITH yelp AS (SELECT * FROM stg_yelp),
+             sev AS (
+                SELECT permit_number,
+                       max(CASE WHEN failure_rating = 'Closure' THEN 1 ELSE 0 END) AS ever_closed
+                FROM fct_enforcement_episodes GROUP BY 1)
         SELECT t.permit_number AS permit,
                any_value(t.dba) AS dba,
                any_value(s.street_address_clean) AS address,
@@ -60,13 +65,20 @@ def main():
                (array_agg(t.facility_rating_status ORDER BY t.inspection_date DESC)
                 FILTER (WHERE t.facility_rating_status IS NOT NULL))[1] AS last_rating,
                count(*) FILTER (WHERE t.facility_rating_status
-                                IN ('Conditional Pass', 'Closure')) AS failures
+                                IN ('Conditional Pass', 'Closure')) AS failures,
+               any_value(sev.ever_closed) AS ever_closed,
+               any_value(y.rating)        AS yelp_rating,
+               any_value(y.review_count)  AS yelp_reviews,
+               any_value(y.is_closed)     AS yelp_closed
         FROM fct_inspection_timeline t
         JOIN stg_inspections s
           ON s.permit_number = t.permit_number
          AND s.inspection_date = t.inspection_date
          AND s.event_seq = t.event_seq
          AND coalesce(s.inspection_type, '') = coalesce(t.inspection_type, '')
+        LEFT JOIN sev  ON sev.permit_number = t.permit_number
+        LEFT JOIN yelp y ON y.permit_number = t.permit_number
+                        AND y.match_status = 'matched'
         GROUP BY 1
     """))
 

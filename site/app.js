@@ -94,6 +94,7 @@ function render() {
   renderFailures(vs);
   renderFunnel(eps);
   renderHoods();
+  renderYelp();
 }
 
 function median(arr) {
@@ -436,6 +437,64 @@ function renderHoods() {
   $("#card-hoods .table-view").replaceChildren(tbl);
 }
 
+function renderYelp() {
+  const from = cutoff();
+  /* rating snapshot is present-day: the date filter cannot re-slice it,
+     but the neighborhood filter can */
+  const groups = [
+    ["Ever closed", (f) => f.failures > 0 && f.ever_closed === 1],
+    ["Conditional Pass only", (f) => f.failures > 0 && f.ever_closed !== 1],
+    ["Never failed", (f) => !f.failures],
+  ];
+  const rows = groups.map(([name, pred]) => {
+    const g = DATA.facilities.filter((f) =>
+      pred(f) && f.yelp_rating !== null && f.yelp_rating !== undefined &&
+      (state.hood === "all" || f.hood === state.hood));
+    const n = g.length;
+    const mean = n ? g.reduce((s2, f) => s2 + Number(f.yelp_rating), 0) / n : null;
+    return { name, n, mean };
+  });
+
+  const el = $("#chart-yelp");
+  el.replaceChildren();
+  const W = Math.max(el.clientWidth || 640, 320), rowH = 30, m = { l: 170, r: 90 };
+  const H = rows.length * rowH + 4;
+  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img" });
+  rows.forEach((r, i) => {
+    const yy = i * rowH + 8;
+    const lbl = svgEl("text", { x: m.l - 8, y: yy + 11, "text-anchor": "end", class: "stage-label" });
+    lbl.textContent = r.name; svg.append(lbl);
+    if (r.mean === null || r.n < 30) {
+      const note = svgEl("text", { x: m.l, y: yy + 11, class: "dlabel" });
+      note.textContent = r.n === 0 ? "no matched facilities" : `n=${r.n}, too few to quote`;
+      svg.append(note);
+      return;
+    }
+    /* zero-baseline on the 5-star scale, so near-equal bars look near-equal */
+    const bw = (r.mean / 5) * (W - m.l - m.r);
+    svg.append(svgEl("rect", { x: m.l, y: yy, width: bw, height: 12, rx: 4, fill: CSS("--series-1") }));
+    const vl = svgEl("text", { x: m.l + bw + 6, y: yy + 11, class: "dlabel" });
+    vl.textContent = `${r.mean.toFixed(2)} (n=${fmt(r.n)})`; svg.append(vl);
+  });
+  el.append(svg);
+
+  const tbl = document.createElement("table");
+  const thead = document.createElement("tr");
+  for (const h of ["Group", "Matched facilities", "Mean rating"]) {
+    const th = document.createElement("th"); th.textContent = h; thead.append(th);
+  }
+  tbl.append(thead);
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    const c0 = document.createElement("td"); c0.textContent = r.name;
+    const c1 = document.createElement("td"); c1.textContent = fmt(r.n);
+    const c2 = document.createElement("td");
+    c2.textContent = r.mean === null ? "–" : r.n < 30 ? `– (n=${r.n})` : r.mean.toFixed(2);
+    tr.append(c0, c1, c2); tbl.append(tr);
+  }
+  $("#card-yelp .table-view").replaceChildren(tbl);
+}
+
 /* ---------- facility lookup ---------- */
 
 function onSearch(e) {
@@ -476,6 +535,14 @@ function showFacility(f) {
   const sub = document.createElement("div"); sub.className = "muted";
   sub.textContent = `${(f.address || "").replace(/\s+/g, " ")} · ${f.hood || "Unknown"} · permit ${f.permit}`;
   d.append(h, sub);
+  if (f.yelp_rating !== null && f.yelp_rating !== undefined) {
+    const yl = document.createElement("div"); yl.className = "muted";
+    const closed = f.yelp_closed === "True" || f.yelp_closed === true;
+    yl.textContent = `Yelp: ${Number(f.yelp_rating).toFixed(1)} stars, ` +
+      `${fmt(Number(f.yelp_reviews || 0))} reviews` +
+      (closed ? ", marked closed on Yelp" : "");
+    d.append(yl);
+  }
   const ul = document.createElement("ul"); ul.className = "visits";
   const hist = (DATA.history[f.permit] || []).slice().reverse();
   for (const [date, type, rating, viol] of hist) {
