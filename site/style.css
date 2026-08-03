@@ -321,7 +321,8 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
 /* neighborhood photo banner */
 .hood-photo { margin: 16px 0 8px; }
 .hood-photo img {
-  display: block; width: 100%; max-height: 300px; object-fit: cover;
+  /* natural aspect ratio: the full photo shows, nothing is cropped */
+  display: block; width: 100%; height: auto;
   border-radius: 12px; border: 1px solid var(--border);
 }
 .hood-photo figcaption {

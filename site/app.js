@@ -139,9 +139,11 @@ const HOOD_PHOTOS = {
 
 function renderHoodPhoto() {
   const fig = $("#hood-photo");
-  const src = state.hood === "all" ? DEFAULT_PHOTO : HOOD_PHOTOS[state.hood];
-  if (!src) { fig.hidden = true; return; }
-  const caption = state.hood === "all" ? "San Francisco" : state.hood;
+  const own = state.hood !== "all" && HOOD_PHOTOS[state.hood];
+  const src = own || DEFAULT_PHOTO;
+  // neighborhoods without a photo fall back to the citywide shot, captioned
+  // "San Francisco" so the image is never mislabeled
+  const caption = own ? state.hood : "San Francisco";
   const img = $("#hood-photo-img");
   img.onerror = () => { fig.hidden = true; };
   img.onload = () => { fig.hidden = false; };
