@@ -1,4 +1,4 @@
-# SF Health Inspections: does enforcement work?
+# SF Health Inspections: do health inspections work?
 
 When a San Francisco food facility fails a health inspection or is closed,
 does it improve, and does the improvement hold? This repo is the full
