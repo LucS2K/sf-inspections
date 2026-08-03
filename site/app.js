@@ -54,6 +54,11 @@ async function boot() {
       for (const c of card.querySelectorAll(".chart, .legend")) c.style.display = on ? "none" : "";
     });
   }
+  // the Glossary nav link should open the collapsed section it points at
+  for (const a of document.querySelectorAll('a[href="#glossary"]'))
+    a.addEventListener("click", () => { $("#glossary details").open = true; });
+  if (location.hash === "#glossary") $("#glossary details").open = true;
+
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
   addEventListener("resize", debounce(render, 150));
   render();
