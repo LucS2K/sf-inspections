@@ -282,3 +282,11 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
   h2 { font-size: 22px; }
   .search-results .addr { display: none; }
 }
+
+/* plain-language takeaway under each chart */
+.takeaway {
+  font-family: var(--sans); font-size: 14px; line-height: 1.6;
+  color: var(--text-primary); background: color-mix(in srgb, var(--series-1) 7%, var(--surface-1));
+  border-left: 3px solid var(--series-1); border-radius: 0 8px 8px 0;
+  padding: 10px 14px; margin: 14px 0 0; max-width: 80ch;
+}

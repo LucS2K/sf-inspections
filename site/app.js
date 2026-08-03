@@ -282,6 +282,11 @@ function columnChart(el, months, series, tableEl) {
   tableEl.replaceChildren(tbl);
 }
 
+function takeaway(id, text) {
+  const el = $(id);
+  if (el) el.textContent = text;
+}
+
 function renderMonthly(vs) {
   const months = monthKeys(vs);
   const byMonth = {};
@@ -289,6 +294,9 @@ function renderMonthly(vs) {
   columnChart($("#chart-monthly"), months,
     [{ name: "Inspections", color: CSS("--series-1"), byMonth }],
     $("#card-monthly .table-view"));
+  const perMonth = months.length ? Math.round(vs.length / months.length) : 0;
+  takeaway("#tk-monthly", `In plain terms: the health department made ${fmt(vs.length)} `
+    + `inspection visits in this period, about ${fmt(perMonth)} per month.`);
 }
 
 function renderFailures(vs) {
@@ -312,6 +320,13 @@ function renderFailures(vs) {
     k.append(sw, t); legend.append(k);
   }
   columnChart($("#chart-failures"), months, series, $("#card-failures .table-view"));
+  const nCp = Object.values(cp).reduce((a, b) => a + b, 0);
+  const nCl = Object.values(cl).reduce((a, b) => a + b, 0);
+  const rated = vs.filter((v) => v[3] !== null).length;
+  const pct = rated ? ((nCp + nCl) * 100 / rated).toFixed(1) : "0";
+  takeaway("#tk-failures", `In plain terms: ${pct}% of graded visits found a problem serious `
+    + `enough to act on: ${fmt(nCp)} facilities were put on notice (Conditional Pass) and `
+    + `${fmt(nCl)} were shut down on the spot (Closure).`);
 }
 
 function renderFunnel(eps) {
@@ -379,6 +394,18 @@ function renderFunnel(eps) {
     tbl.append(tr);
   }
   $("#card-funnel .table-view").replaceChildren(tbl);
+
+  const cl = eps.filter((e) => e.r === "C");
+  const clRes = cl.filter((e) => e.dr !== null);
+  const medDays = clRes.length ? Math.round(median(clRes.map((e) => e.dr))) : null;
+  const clPass = cl.filter((e) => e.rr === "Pass").length;
+  const passPct = clRes.length ? Math.round(clPass * 100 / clRes.length) : null;
+  takeaway("#tk-funnel", medDays === null
+    ? "In plain terms: no closures in this selection."
+    : `In plain terms: when a facility is shut down, inspectors typically return within `
+      + `${fmt(medDays)} day${medDays === 1 ? "" : "s"}, and ${passPct}% pass that re-check. `
+      + `The catch is durability: across the full data, about one in five facilities that `
+      + `fixed their problem failed again within a year.`);
 }
 
 function renderHoods() {
@@ -445,6 +472,17 @@ function renderHoods() {
     tr.append(c0, c1, c2, c3); tbl.append(tr);
   }
   $("#card-hoods .table-view").replaceChildren(tbl);
+
+  if (big.length) {
+    const top = big[0];
+    takeaway("#tk-hoods", `In plain terms: ${top.hood} tops this view, with `
+      + `${top.rate.toFixed(1)}% of its ${fmt(top.rated)} graded visits finding a problem. `
+      + `Read gently: neighborhoods differ in what kinds of food businesses they have, and `
+      + `restaurants fail more often than markets, so this partly reflects business mix, `
+      + `not just kitchen hygiene.`);
+  } else {
+    takeaway("#tk-hoods", "Not enough graded inspections in this selection to compare neighborhoods fairly.");
+  }
 }
 
 function renderYelp() {
@@ -503,6 +541,17 @@ function renderYelp() {
     tr.append(c0, c1, c2); tbl.append(tr);
   }
   $("#card-yelp .table-view").replaceChildren(tbl);
+
+  const ok = rows.filter((r) => r.mean !== null && r.n >= 30);
+  if (ok.length >= 2) {
+    const worst = ok[0], best = ok[ok.length - 1];
+    takeaway("#tk-yelp", `In plain terms: the ratings barely differ, and that IS the finding. `
+      + `Facilities that were once shut down average ${worst.mean.toFixed(2)} stars; facilities `
+      + `with a clean record average ${best.mean.toFixed(2)}. Star ratings measure taste and `
+      + `service, not kitchen hygiene: you cannot spot a health risk from a review score.`);
+  } else {
+    takeaway("#tk-yelp", "Too few Yelp-matched facilities in this selection to compare fairly.");
+  }
 }
 
 /* ---------- facility lookup ---------- */

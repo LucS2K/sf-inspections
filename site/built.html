@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How this was built - SF Health Inspections</title>
+<meta name="description" content="The business analysis behind the SF health inspections project: data sourcing, quality findings, methods, and the technology stack.">
+<link rel="stylesheet" href="style.css">
+<style>
+  .prose { max-width: 72ch; }
+  .prose h2 { font-size: 22px; margin: 36px 0 10px; }
+  .prose h3 { font-size: 16px; margin: 22px 0 6px; }
+  .prose p, .prose li { font-size: 16px; line-height: 1.65; }
+  .prose ul { padding-left: 22px; }
+  .prose .aside { font-family: var(--sans); color: var(--text-secondary); font-size: 14px; border-left: 3px solid var(--grid); padding-left: 14px; margin: 14px 0; }
+  table.stack { border-collapse: collapse; margin: 14px 0; font-family: var(--sans); font-size: 14px; width: 100%; }
+  table.stack th, table.stack td { text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  table.stack th { color: var(--text-secondary); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+  table.stack td:first-child { white-space: nowrap; font-weight: 600; }
+  a { color: var(--series-1); }
+</style>
+</head>
+<body>
+<div class="page prose">
+  <header class="masthead">
+    <div>
+      <p class="kicker">Behind the analysis</p>
+      <h1>How this was built</h1>
+      <p class="dek">The project behind the dashboard: where the data comes from, what it took
+        to make it trustworthy, and the decisions that shaped every number on the page.</p>
+      <p class="meta"><a href="/">Dashboard</a> &middot; <a href="/report">Findings report</a></p>
+    </div>
+    <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme">◐</button>
+  </header>
+
+  <h2>Start with a question, not a dataset</h2>
+  <p>San Francisco publishes every restaurant health inspection. Most projects on
+  this data stop at a map of scores. The more useful business question is about
+  the <em>system</em>: when the city flags or closes a food business, does the
+  business actually fix the problem, and does the fix last? That framing turns a
+  public dataset into an evaluation of whether enforcement works, with findings
+  someone could act on.</p>
+
+  <h2>Getting the data, and keeping it fresh</h2>
+  <p>The core data comes from San Francisco's open data portal through its API:
+  every health inspection from 2024 to today, refreshed weekly by an automated
+  pipeline. Two supporting sources answer questions the inspection data alone
+  cannot: the city's business registry (is a business still alive?) and the Yelp
+  API (do customer ratings know anything about kitchen hygiene?). Neither shares
+  an ID with the health department, so linking them required name-and-address
+  matching, which the analysis labels as inferred rather than measured wherever
+  it appears.</p>
+
+  <h2>The detective work: making the data trustworthy</h2>
+  <p>This is where most of the analytical effort went. Raw open data is never
+  analysis-ready, and every finding on the dashboard sits on top of problems
+  that had to be found, measured, and handled:</p>
+  <ul>
+    <li><strong>The same inspection appears multiple times.</strong> The city
+    republishes corrected records. The pipeline keeps every version and always
+    analyzes the latest one, so corrections improve the data instead of
+    double-counting it.</li>
+    <li><strong>Recent records are incomplete on purpose.</strong> The
+    inspection-type label is filled in by the city with roughly a year's lag;
+    all of the newest year has no labels yet. Analyses were designed around
+    the rating field, which does not lag.</li>
+    <li><strong>Not every "facility" is a facility.</strong> One farmers-market
+    permit produced 19 same-day inspection rows, one per stall. Treating those
+    as one facility's timeline would be nonsense, so umbrella permits are
+    identified and excluded from facility-level analysis.</li>
+    <li><strong>~110 permit types, from restaurants to tattoo parlors.</strong>
+    Health inspections cover massage parlors, laundromats, and tobacco shops
+    too. Every permit type was reviewed and classified, with an automated test
+    that fails if an unknown type ever appears.</li>
+    <li><strong>One row did not belong.</strong> A single inspection dated 2031,
+    after its own publish date. Found by checking, excluded with a comment.</li>
+  </ul>
+  <p>The discipline behind all of this: <strong>every excluded row is accounted
+  for by name.</strong> The staged data reconciles exactly against the raw data,
+  and 26 automated tests re-verify the assumptions on every weekly refresh.</p>
+
+  <h2>Making the numbers honest</h2>
+  <p>The easy version of this analysis would be wrong in quiet ways. The methods
+  were chosen to avoid that:</p>
+  <ul>
+    <li><strong>Silence is not success.</strong> A failed facility with no
+    later inspection has not "stayed fixed", it just has not been observed.
+    Durability is only measured where a follow-up actually exists.</li>
+    <li><strong>Compare on the same clock.</strong> Closed facilities get
+    re-checked within weeks; conditional passes within months. Comparing their
+    "still passing" rates naively looks fair and is not. The analysis uses a
+    fixed one-year window for both.</li>
+    <li><strong>Small samples do not get quoted.</strong> Any group under a
+    minimum sample size shows its count instead of a rate, on the dashboard
+    and in the report.</li>
+    <li><strong>Cross-check before concluding.</strong> 150 failures were never
+    re-inspected. Business-registry and Yelp data triangulate them: most are
+    businesses that are demonstrably still open, which turns "missing data"
+    into the project's sharpest finding, an enforcement follow-up gap.</li>
+    <li><strong>Name the confounds.</strong> Neighborhood failure rates track
+    business mix (restaurant-heavy districts fail more). Yelp comparisons carry
+    a coverage bias (enforcement lands on restaurants; the comparison group
+    includes markets Yelp does not list). Both caveats travel with the numbers
+    wherever they appear.</li>
+  </ul>
+
+  <h2>The technology</h2>
+  <table class="stack">
+    <tr><th>Layer</th><th>Tools</th><th>Why</th></tr>
+    <tr><td>Data pipeline</td><td>Python, Socrata API, Yelp Fusion API</td>
+        <td>Weekly incremental ingest; append-only raw layer; idempotent loads that cannot double-count</td></tr>
+    <tr><td>Warehouse</td><td>DuckDB + MotherDuck</td>
+        <td>Fast analytical SQL locally; the same database in the cloud so nothing depends on one laptop</td></tr>
+    <tr><td>Modeling &amp; tests</td><td>dbt</td>
+        <td>Staged, documented models; 26 automated tests on grain, values, and completeness run on every refresh</td></tr>
+    <tr><td>Analysis</td><td>SQL window functions</td>
+        <td>Facility timelines, enforcement episodes, fixed-horizon durability, all reproducible in the repo</td></tr>
+    <tr><td>Automation</td><td>GitHub Actions</td>
+        <td>Weekly cron runs ingest, tests, export, and deploy end to end; CI validates every change</td></tr>
+    <tr><td>Text parsing</td><td>Regex + Claude API</td>
+        <td>The violation field concatenates codes and legal text; a deterministic parser handles 97%, an LLM classifies the remainder into risk categories</td></tr>
+    <tr><td>This site</td><td>Vanilla JavaScript + SVG, Vercel</td>
+        <td>No frameworks; ~2&nbsp;MB of static JSON, so it is fast, free to host, and cannot break</td></tr>
+  </table>
+
+  <h2>Building the site itself</h2>
+  <p>The dashboard is deliberately simple technology doing careful work. Charts
+  are hand-built SVG following a validated accessibility method: the color
+  palette is machine-checked for color-blind safety in both light and dark
+  themes, every chart has a data-table twin for screen readers and skeptics,
+  tooltips add detail but never hide it, and every rate on the page carries its
+  sample size. All filtering happens in the browser against pre-computed data,
+  which is why the page needs no server and updates itself when the weekly
+  pipeline redeploys it. Each chart also states its takeaway in plain text, so
+  the reading is never left to chart interpretation alone.</p>
+
+  <p class="aside">Everything described here is version-controlled: the
+  pipeline, the models, the tests, the analyses, and this page. The repo's
+  commit history is the honest log of how the project actually unfolded,
+  including the bugs found and fixed along the way.</p>
+
+  <p class="meta" id="stamp">Built by Luc Nguyen &middot;
+    <a href="https://github.com/LucS2K">GitHub</a></p>
+</div>
+<script>
+  document.getElementById("theme-toggle").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+    const cur = root.dataset.theme || (dark ? "dark" : "light");
+    root.dataset.theme = cur === "dark" ? "light" : "dark";
+  });
+</script>
+</body>
+</html>

@@ -23,7 +23,7 @@
     <p class="kicker">A civic-data analysis &middot; San Francisco<span id="window-note"></span></p>
     <h1>Does enforcement work?</h1>
     <p class="dek">When a food business fails a health inspection or is shut down, does it fix the problem, and does the fix last?</p>
-    <p class="meta"><a href="/report">Read the findings report</a></p>
+    <p class="meta"><a href="/report">Read the findings report</a> &middot; <a href="/built">How this was built</a></p>
   </header>
 
   <div class="filterbar" role="group" aria-label="Filters">
@@ -49,6 +49,7 @@
       </figcaption>
       <p class="note">The department&rsquo;s cadence is steady; enforcement begins when one of these visits goes wrong.</p>
       <div class="chart" id="chart-monthly"></div>
+      <p class="takeaway" id="tk-monthly"></p>
       <div class="table-view" hidden></div>
     </figure>
     <figure class="card" id="card-failures">
@@ -59,6 +60,7 @@
       <p class="note">Most failures are Conditional Passes: the facility keeps operating under orders. Closure is the rarer, sharper instrument.</p>
       <div class="legend" id="legend-failures"></div>
       <div class="chart" id="chart-failures"></div>
+      <p class="takeaway" id="tk-failures"></p>
       <div class="table-view" hidden></div>
     </figure>
   </section>
@@ -72,6 +74,7 @@
       </figcaption>
       <p class="note">Each failure followed to its next rated visit, then the one after. &ldquo;Held&rdquo; is measured only where a later visit exists; silence is censoring, not success.</p>
       <div class="chart funnel-pair" id="chart-funnel"></div>
+      <p class="takeaway" id="tk-funnel"></p>
       <div class="table-view" hidden></div>
     </figure>
   </section>
@@ -85,6 +88,7 @@
       </figcaption>
       <p class="note">Share of rated inspections ending in Conditional Pass or Closure. Neighborhoods with under 100 rated inspections in the selected period are listed in the table only; rates on small samples mislead.</p>
       <div class="chart" id="chart-hoods"></div>
+      <p class="takeaway" id="tk-hoods"></p>
       <div class="table-view" hidden></div>
     </figure>
   </section>
@@ -98,6 +102,7 @@
       </figcaption>
       <p class="note">Present-day Yelp ratings against 2024&ndash;2026 enforcement history: correlation only, and the near-identical bars are the finding. Read with the coverage gap in mind: 86% of enforcement-history facilities match on Yelp vs 67% of the never-failed group (enforcement lands on restaurants; the comparison group includes markets and cafeterias Yelp does not list).</p>
       <div class="chart" id="chart-yelp"></div>
+      <p class="takeaway" id="tk-yelp"></p>
       <div class="table-view" hidden></div>
     </figure>
   </section>
