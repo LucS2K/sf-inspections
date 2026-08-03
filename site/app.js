@@ -145,6 +145,11 @@ function renderFacilityList(vs, keepShown) {
       w.textContent = ` ${r.fails} failure${r.fails === 1 ? "" : "s"} in period`;
       right.append(w);
     }
+    if (r.f.yelp_rating !== null && r.f.yelp_rating !== undefined) {
+      const y = document.createElement("span");
+      y.textContent = ` ★ ${Number(r.f.yelp_rating).toFixed(1)}`;
+      right.append(y);
+    }
     b.append(left, right);
     b.addEventListener("click", () => {
       showFacility(r.f);
@@ -631,7 +636,11 @@ function onSearch(e) {
     b.setAttribute("role", "option");
     const name = document.createElement("span"); name.textContent = f.dba || f.permit;
     const addr = document.createElement("span"); addr.className = "addr";
-    addr.textContent = `${(f.address || "").replace(/\s+/g, " ")} · ${f.hood || ""}`;
+    const bits = [`${(f.address || "").replace(/\s+/g, " ")} · ${f.hood || ""}`];
+    if (f.failures > 0) bits.push(`${f.failures} failure${f.failures === 1 ? "" : "s"}`);
+    if (f.yelp_rating !== null && f.yelp_rating !== undefined)
+      bits.push(`★ ${Number(f.yelp_rating).toFixed(1)}`);
+    addr.textContent = bits.join(" · ");
     b.append(name, addr);
     b.addEventListener("click", () => showFacility(f));
     box.append(b);
