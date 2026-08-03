@@ -424,7 +424,7 @@ html { scroll-behavior: smooth; }
   color: var(--text-primary); max-width: 58ch; margin: 0 0 18px; text-wrap: pretty;
 }
 .ov-band {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
   border-top: 2px solid var(--baseline); border-bottom: 1px solid var(--grid);
 }
 .ov-tile {
