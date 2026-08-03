@@ -23,4 +23,5 @@ models:
       - name: failure_rating
         tests:
           - accepted_values:
-              values: ['Conditional Pass', 'Closure']
+              arguments:
+                  values: ['Conditional Pass', 'Closure']

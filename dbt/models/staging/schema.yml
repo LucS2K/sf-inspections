@@ -18,7 +18,8 @@ models:
       - name: facility_rating_status
         tests:
           - accepted_values:
-              values: ['Pass', 'Conditional Pass', 'Closure']
+              arguments:
+                  values: ['Pass', 'Conditional Pass', 'Closure']
       - name: event_seq
         tests: [not_null]
 
@@ -35,7 +36,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['Pass', 'Conditional Pass', 'Closure']
+              arguments:
+                  values: ['Pass', 'Conditional Pass', 'Closure']
 
   - name: stg_yelp
     description: >
@@ -48,7 +50,8 @@ models:
       - name: match_status
         tests:
           - accepted_values:
-              values: ['matched', 'no_match']
+              arguments:
+                  values: ['matched', 'no_match']
 
 seeds:
   - name: permit_type_classification
