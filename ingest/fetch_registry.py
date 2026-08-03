@@ -43,10 +43,22 @@ def street_prefix(address: str) -> str | None:
 
 
 def fetch_candidates(where: str) -> list[dict]:
-    resp = requests.get(URL, params={
-        "$select": SELECT, "$where": where, "$limit": 100}, timeout=TIMEOUT)
-    resp.raise_for_status()
-    return resp.json()
+    # transient Socrata 5xx or network blips get 3 retries with backoff;
+    # a persistent outage still fails the run visibly after that
+    import time
+    for attempt in range(3):
+        try:
+            resp = requests.get(URL, params={
+                "$select": SELECT, "$where": where, "$limit": 100},
+                timeout=TIMEOUT)
+            if resp.status_code >= 500:
+                raise requests.ConnectionError(f"HTTP {resp.status_code}")
+            resp.raise_for_status()
+            return resp.json()
+        except (requests.ConnectionError, requests.Timeout):
+            if attempt == 2:
+                raise
+            time.sleep(5 * (attempt + 1))
 
 
 def main() -> None:
