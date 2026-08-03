@@ -843,13 +843,16 @@ function renderMap() {
   const ranked = qualifying.slice(0, 20); // list + markers cap, Japan-style
   const rankOf = {};
   ranked.forEach((r, i) => { rankOf[r.hood] = i + 1; });
-  /* quantile shading: rates cluster (most hoods 4-8%), so binning by
-     rate/max drops nearly everything into two pale bins; quintiles of the
-     ranked order spread the palette so differences stay visible */
-  const shades = ["--map-1", "--map-2", "--map-3", "--map-4", "--map-5"].map(CSS);
+  /* quartile shading with familiar semantics: blues = the calmer half,
+     amber = the third quarter, red = the city's highest failure rates.
+     Amber and red are the same hues the dashboard already reserves for
+     Conditional Pass and Closure, which is literally what the rate counts.
+     Quantiles (not rate/max) because rates cluster at 4-8% and a linear
+     scale drops nearly everything into one pale bin. CVD-validated. */
+  const shades = ["--map-1", "--map-2", "--map-3", "--map-4"].map(CSS);
   const shadeOf = {};
   [...qualifying].sort((a, b) => a.rate - b.rate).forEach((r, i, arr) => {
-    shadeOf[r.hood] = shades[Math.min(4, Math.floor((i / arr.length) * 5))];
+    shadeOf[r.hood] = shades[Math.min(3, Math.floor((i / arr.length) * 4))];
   });
 
   const host = $("#map-svg");
@@ -941,12 +944,13 @@ function renderMap() {
 
   const unshaded = Object.keys(HOOD_GEO.hoods).length - qualifying.length;
   if (ranked.length) {
-    takeaway("#tk-map", `${ranked[0].hood} carries the strongest color in this period, `
+    takeaway("#tk-map", `${ranked[0].hood} sits deepest in the red this period, `
       + `with ${ranked[0].rate.toFixed(1)}% of ${fmt(ranked[0].rated)} graded visits `
-      + `finding a problem. ${unshaded} neighborhoods are hatched because they have `
-      + `too few graded inspections to rate fairly. As with the bars below, business `
-      + `mix differs by neighborhood, so read the shading as enforcement activity, `
-      + `not a hygiene league table.`);
+      + `finding a problem. Red marks the city's highest quarter of failure rates, `
+      + `not an absolute danger zone: even there, most inspections pass. `
+      + `${unshaded} neighborhoods are hatched because they have too few graded `
+      + `inspections to rate fairly, and business mix differs by neighborhood, so `
+      + `read the colors as enforcement activity, not a hygiene league table.`);
   } else {
     takeaway("#tk-map", "No neighborhood clears 100 graded inspections in this "
       + "selection; widen the period for a fair map.");
