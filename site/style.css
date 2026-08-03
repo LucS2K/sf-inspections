@@ -386,3 +386,30 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
   .story-card { padding: 20px 18px 14px; min-height: 340px; }
   .story-text { font-size: 17px; }
 }
+
+/* the city, mapped */
+.map-wrap { display: grid; grid-template-columns: 250px 1fr; gap: 22px; align-items: start; }
+.map-list { list-style: none; margin: 0; padding: 0; font-family: var(--sans); font-size: 13.5px; }
+.map-list li {
+  display: flex; align-items: baseline; gap: 10px; padding: 6px 4px;
+  border-bottom: 1px solid var(--grid); cursor: pointer;
+}
+.map-list li:hover, .map-list li:focus-visible { background: color-mix(in srgb, var(--series-1) 8%, transparent); }
+.map-list li.active .map-name { font-weight: 700; }
+.map-rank { color: var(--muted); font-size: 11.5px; min-width: 16px; font-variant-numeric: tabular-nums; }
+.map-name { flex: 1 1 auto; }
+.map-val { font-variant-numeric: tabular-nums; font-weight: 600; }
+.map-svg svg { display: block; max-width: 560px; margin: 0 auto; }
+.map-hood { cursor: pointer; }
+.map-hood:hover, .map-hood:focus-visible { stroke: var(--text-primary); stroke-width: 2; }
+.map-marker { cursor: pointer; }
+@media (max-width: 700px) {
+  .map-wrap { grid-template-columns: 1fr; }
+  .map-list { order: 2; }
+  .map-svg { order: 1; }
+}
+.map-list-cap {
+  font-family: var(--sans); font-size: 11.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); margin: 2px 0 6px;
+  border-bottom: 2px solid var(--baseline); padding-bottom: 6px;
+}

@@ -119,6 +119,25 @@
 
   <section class="chapter">
     <p class="ck">Part 3 &middot; Where failures cluster</p>
+    <figure class="card wide" id="card-map">
+      <figcaption>
+        <h2>The city, mapped</h2>
+      </figcaption>
+      <p class="note">Failure rate by neighborhood: darker means a higher share
+      of graded inspections ending in <span class="w-cp">Conditional Pass</span>
+      or <span class="w-closure">Closure</span>, and the numbered dots match the
+      ranking. Hatched neighborhoods have fewer than 100 graded inspections in
+      the selected period, too few to rate fairly. Hover any neighborhood for
+      its numbers; click one to focus the whole page on it.</p>
+      <div class="map-wrap">
+        <div>
+          <p class="map-list-cap">Top 20 neighborhoods by failure rate</p>
+          <ol class="map-list" id="map-list" aria-label="Neighborhoods ranked by failure rate"></ol>
+        </div>
+        <div class="map-svg" id="map-svg"></div>
+      </div>
+      <p class="takeaway" id="tk-map"></p>
+    </figure>
     <figure class="card wide" id="card-hoods">
       <figcaption>
         <h2>Failure rate by neighborhood</h2>
@@ -223,6 +242,7 @@
 </main>
 
 <div id="tooltip" class="tooltip" hidden></div>
+<script src="hoods_geo.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

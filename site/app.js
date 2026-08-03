@@ -264,6 +264,7 @@ function render() {
   renderMonthly(vs);
   renderFailures(vs);
   renderFunnel(eps);
+  renderMap();
   renderHoods();
   renderYelp();
   renderFacilityList(vs);
@@ -720,6 +721,134 @@ function renderHoods() {
       + `not just kitchen hygiene.`);
   } else {
     takeaway("#tk-hoods", "Not enough graded inspections in this selection to compare neighborhoods fairly.");
+  }
+}
+
+/* ---------- the city, mapped ---------- */
+
+function selectHood(name) {
+  state.hood = state.hood === name ? "all" : name;
+  $("#f-hood").value = state.hood;
+  render();
+}
+
+function renderMap() {
+  /* like the neighborhood bars, the map always shows the whole city
+     (period-filtered); the hood filter highlights rather than hides */
+  const from = cutoff();
+  const agg = {};
+  for (const [permit, rowsArr] of Object.entries(DATA.history)) {
+    const hood = DATA.hoodOf[permit] || "Unknown";
+    for (const v of rowsArr) {
+      if (v[0] < from || v[2] === null) continue;
+      agg[hood] = agg[hood] || { rated: 0, failed: 0 };
+      agg[hood].rated++;
+      if (v[2] !== "Pass") agg[hood].failed++;
+    }
+  }
+  const qualifying = Object.entries(agg)
+    .filter(([h, a]) => a.rated >= 100 && HOOD_GEO.hoods[h])
+    .map(([hood, a]) => ({ hood, ...a, rate: a.failed * 100 / a.rated }))
+    .sort((a, b) => b.rate - a.rate);
+  const ranked = qualifying.slice(0, 20); // list + markers cap, Japan-style
+  const rankOf = {};
+  ranked.forEach((r, i) => { rankOf[r.hood] = i + 1; });
+  const max = Math.max(...qualifying.map((r) => r.rate), 1);
+  const ramp = ["--ord-1", "--ord-2", "--ord-3", "--ord-4"].map(CSS);
+
+  const host = $("#map-svg");
+  host.replaceChildren();
+  const svg = svgEl("svg", { viewBox: `0 0 ${HOOD_GEO.w} ${HOOD_GEO.h}`,
+                             width: "100%", role: "img" });
+  /* no-data texture: hatching reads as "no rating" in both themes, where a
+     plain grey would sort into the light-to-dark ramp and mislead */
+  const defs = svgEl("defs", {});
+  const pat = svgEl("pattern", { id: "nodata", width: 7, height: 7,
+                                 patternUnits: "userSpaceOnUse",
+                                 patternTransform: "rotate(45)" });
+  pat.append(svgEl("rect", { width: 7, height: 7, fill: CSS("--surface-1") }));
+  pat.append(svgEl("line", { x1: 0, y1: 0, x2: 0, y2: 7,
+                             stroke: CSS("--baseline"), "stroke-width": 1.2 }));
+  defs.append(pat);
+  svg.append(defs);
+  const markers = [];
+  for (const [name, g] of Object.entries(HOOD_GEO.hoods)) {
+    const a = agg[name];
+    const rated = a ? a.rated : 0;
+    const qual = rated >= 100;
+    const rate = rated ? a.failed * 100 / rated : null;
+    const fill = qual
+      ? ramp[Math.min(3, Math.floor((rate / max) * 4))]
+      : "url(#nodata)";
+    const p = svgEl("path", { d: g.d, fill, class: "map-hood", tabindex: 0,
+                              stroke: CSS("--page"), "stroke-width": 1.5 });
+    if (state.hood === name) {
+      p.setAttribute("stroke", CSS("--text-primary"));
+      p.setAttribute("stroke-width", 2.5);
+    }
+    const head = rankOf[name] ? `#${rankOf[name]} · ${name}` : name;
+    const rows = qual
+      ? [[CSS("--series-1"), rate.toFixed(1) + "%", "failure rate"],
+         [CSS("--baseline"), fmt(rated), "graded inspections"]]
+      : [[CSS("--baseline"), fmt(rated), "graded inspections"],
+         [CSS("--grid"), "too few to rate", "fair rating needs 100+"]];
+    const show = (evt) => showTip(evt, head, rows);
+    p.addEventListener("pointermove", show);
+    p.addEventListener("mousemove", show);
+    p.addEventListener("pointerleave", hideTip);
+    p.addEventListener("blur", hideTip);
+    p.addEventListener("click", () => selectHood(name));
+    svg.append(p);
+    if (rankOf[name]) markers.push({ name, g, rank: rankOf[name], show });
+  }
+  /* markers drawn after all polygons so they sit on top */
+  for (const m of markers) {
+    const grp = svgEl("g", { class: "map-marker", tabindex: 0 });
+    grp.append(
+      svgEl("circle", { cx: m.g.cx, cy: m.g.cy, r: 11,
+                        fill: CSS("--text-primary"),
+                        stroke: CSS("--page"), "stroke-width": 1.5 }));
+    const t = svgEl("text", { x: m.g.cx, y: m.g.cy + 3.5,
+                              "text-anchor": "middle", fill: CSS("--page"),
+                              "font-size": "11", "font-weight": "700" });
+    t.textContent = m.rank;
+    grp.append(t);
+    grp.addEventListener("pointermove", m.show);
+    grp.addEventListener("mousemove", m.show);
+    grp.addEventListener("pointerleave", hideTip);
+    grp.addEventListener("blur", hideTip);
+    grp.addEventListener("click", () => selectHood(m.name));
+    svg.append(grp);
+  }
+  host.append(svg);
+
+  const list = $("#map-list");
+  list.replaceChildren();
+  ranked.forEach((r, i) => {
+    const li = document.createElement("li");
+    if (state.hood === r.hood) li.className = "active";
+    li.tabIndex = 0;
+    const rk = document.createElement("span"); rk.className = "map-rank"; rk.textContent = i + 1;
+    const nm = document.createElement("span"); nm.className = "map-name"; nm.textContent = r.hood;
+    const vl = document.createElement("span"); vl.className = "map-val";
+    vl.textContent = r.rate.toFixed(1) + "%";
+    li.append(rk, nm, vl);
+    li.addEventListener("click", () => selectHood(r.hood));
+    li.addEventListener("keydown", (e) => { if (e.key === "Enter") selectHood(r.hood); });
+    list.append(li);
+  });
+
+  const unshaded = Object.keys(HOOD_GEO.hoods).length - qualifying.length;
+  if (ranked.length) {
+    takeaway("#tk-map", `${ranked[0].hood} is the darkest cell in this period, `
+      + `with ${ranked[0].rate.toFixed(1)}% of ${fmt(ranked[0].rated)} graded visits `
+      + `finding a problem. ${unshaded} neighborhoods are hatched because they have `
+      + `too few graded inspections to rate fairly. As with the bars below, business `
+      + `mix differs by neighborhood, so read the shading as enforcement activity, `
+      + `not a hygiene league table.`);
+  } else {
+    takeaway("#tk-map", "No neighborhood clears 100 graded inspections in this "
+      + "selection; widen the period for a fair map.");
   }
 }
 
