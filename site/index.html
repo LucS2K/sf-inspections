@@ -8,62 +8,76 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="page">
+<a class="skip" href="#kpi-row">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top">SF Health Inspections</a>
+    <input type="search" id="f-search" placeholder="Search facilities by name or address" aria-label="Search facilities" autocomplete="off">
+    <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme">&#9680;</button>
+  </div>
+</header>
+
+<main class="page" id="top">
   <header class="masthead">
-    <div>
-      <h1>SF health inspections: does enforcement work?</h1>
-      <p class="sub">When a food facility fails an inspection or is closed, does it improve, and does the improvement hold?
-        <span id="window-note" class="muted"></span>
-        <a href="/report">Read the findings report</a></p>
-    </div>
-    <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme">◐</button>
+    <p class="kicker">A civic-data analysis &middot; San Francisco<span id="window-note"></span></p>
+    <h1>Does enforcement work?</h1>
+    <p class="dek">When a food facility fails a health inspection &mdash; or is closed outright &mdash; does it improve, and does the improvement hold?</p>
+    <p class="meta"><a href="/report">Read the findings report</a></p>
   </header>
 
-  <div class="filter-row" role="group" aria-label="Filters">
-    <label>Period
-      <select id="f-period">
-        <option value="all" selected>All data</option>
-        <option value="12m">Last 12 months</option>
-        <option value="90d">Last 90 days</option>
-      </select>
-    </label>
-    <label>Neighborhood
+  <div class="filterbar" role="group" aria-label="Filters">
+    <div class="seg" id="f-period" role="group" aria-label="Period">
+      <button type="button" data-value="all" aria-pressed="true">All data</button>
+      <button type="button" data-value="12m" aria-pressed="false">Last 12 months</button>
+      <button type="button" data-value="90d" aria-pressed="false">Last 90 days</button>
+    </div>
+    <label class="hoodpick">Neighborhood
       <select id="f-hood"><option value="all" selected>All neighborhoods</option></select>
     </label>
+    <span class="filter-hint">Filters re-slice every figure below</span>
   </div>
 
   <section class="kpi-row" id="kpi-row" aria-label="Key figures"></section>
 
-  <section class="grid">
+  <section class="chapter">
+    <p class="ck">Part 1 &middot; The record</p>
     <figure class="card" id="card-monthly">
       <figcaption>
         <h2>Inspections per month</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
+      <p class="note">The department&rsquo;s cadence is steady; enforcement begins when one of these visits goes wrong.</p>
       <div class="chart" id="chart-monthly"></div>
       <div class="table-view" hidden></div>
     </figure>
-
     <figure class="card" id="card-failures">
       <figcaption>
         <h2>Failures per month</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
+      <p class="note">Most failures are Conditional Passes &mdash; the facility keeps operating under orders. Closure is the rarer, sharper instrument.</p>
       <div class="legend" id="legend-failures"></div>
       <div class="chart" id="chart-failures"></div>
       <div class="table-view" hidden></div>
     </figure>
+  </section>
 
+  <section class="chapter">
+    <p class="ck">Part 2 &middot; What happens after a failure</p>
     <figure class="card wide" id="card-funnel">
       <figcaption>
         <h2>The enforcement funnel</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Each failure followed to its next rated visit, then the one after. "Held" is measured only where a later visit exists; silence is censoring, not success.</p>
+      <p class="note">Each failure followed to its next rated visit, then the one after. &ldquo;Held&rdquo; is measured only where a later visit exists; silence is censoring, not success.</p>
       <div class="chart funnel-pair" id="chart-funnel"></div>
       <div class="table-view" hidden></div>
     </figure>
+  </section>
 
+  <section class="chapter">
+    <p class="ck">Part 3 &middot; Where failures cluster</p>
     <figure class="card wide" id="card-hoods">
       <figcaption>
         <h2>Failure rate by neighborhood</h2>
@@ -73,30 +87,43 @@
       <div class="chart" id="chart-hoods"></div>
       <div class="table-view" hidden></div>
     </figure>
+  </section>
 
+  <section class="chapter">
+    <p class="ck">Part 4 &middot; The null result</p>
     <figure class="card wide" id="card-yelp">
       <figcaption>
         <h2>Yelp rating vs enforcement history</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Present-day Yelp ratings against 2024-2026 enforcement history: correlation only, and the near-identical bars are the finding. Read with the coverage gap in mind: 86% of enforcement-history facilities match on Yelp vs 67% of the never-failed group (enforcement lands on restaurants; the comparison group includes markets and cafeterias Yelp does not list).</p>
+      <p class="note">Present-day Yelp ratings against 2024&ndash;2026 enforcement history: correlation only, and the near-identical bars are the finding. Read with the coverage gap in mind: 86% of enforcement-history facilities match on Yelp vs 67% of the never-failed group (enforcement lands on restaurants; the comparison group includes markets and cafeterias Yelp does not list).</p>
       <div class="chart" id="chart-yelp"></div>
       <div class="table-view" hidden></div>
     </figure>
+  </section>
 
+  <section class="chapter">
+    <p class="ck">Part 5 &middot; Look it up</p>
     <figure class="card wide" id="card-lookup">
       <figcaption><h2>Facility lookup</h2></figcaption>
-      <input type="search" id="f-search" placeholder="Search by name or address" aria-label="Search facilities">
+      <p class="note">Type in the search bar at the top of the page &mdash; matching facilities and their full inspection history appear here.</p>
       <div id="search-results" class="search-results" role="listbox"></div>
       <div id="facility-detail" class="facility-detail" hidden></div>
     </figure>
   </section>
 
-  <footer class="foot">
-    <p><strong>Read the numbers with these caveats.</strong> One row per inspection event after latest-record dedup; farmers-market umbrella permits excluded from facility timelines. Inspection <em>types</em> are backfilled by DPH with roughly a year's lag, so recent "Reinspection" labels are incomplete; the funnel uses ratings, which do not lag. A failure with no later rated visit is censored, not resolved: registry cross-checks show at least 13 of 150 such facilities closed for good. Post-enforcement facilities fail their next check at roughly 3x the base rate; the data cannot say whether that is enforcement failing or selection of trouble-prone facilities.</p>
+  <footer class="foot" id="caveats">
+    <h2>Read the numbers with these caveats</h2>
+    <ul>
+      <li>One row per inspection event after latest-record dedup; farmers-market umbrella permits are excluded from facility timelines.</li>
+      <li>Inspection <em>types</em> are backfilled by DPH with roughly a year&rsquo;s lag, so recent &ldquo;Reinspection&rdquo; labels are incomplete. The funnel uses ratings, which do not lag.</li>
+      <li>A failure with no later rated visit is censored, not resolved: registry cross-checks show at least 13 of 150 such facilities closed for good.</li>
+      <li>Post-enforcement facilities fail their next check at roughly 3&times; the base rate; the data cannot say whether that is enforcement failing or selection of trouble-prone facilities.</li>
+    </ul>
     <p class="muted" id="stamp"></p>
   </footer>
-</div>
+</main>
+
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="app.js"></script>
 </body>

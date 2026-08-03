@@ -30,7 +30,13 @@ async function boot() {
     $("#f-hood").appendChild(o);
   }
 
-  $("#f-period").addEventListener("change", (e) => { state.period = e.target.value; render(); });
+  for (const b of document.querySelectorAll("#f-period button"))
+    b.addEventListener("click", () => {
+      state.period = b.dataset.value;
+      for (const o of document.querySelectorAll("#f-period button"))
+        o.setAttribute("aria-pressed", String(o === b));
+      render();
+    });
   $("#f-hood").addEventListener("change", (e) => { state.hood = e.target.value; render(); });
   $("#theme-toggle").addEventListener("click", toggleTheme);
   $("#f-search").addEventListener("input", onSearch);
@@ -112,9 +118,11 @@ function renderKPIs(vs, eps) {
     ["Facilities", fmt(facilities), ""],
     ["Failures", fmt(eps.length), "Conditional Pass or Closure"],
     ["Re-rated", eps.length ? Math.round(resolved.length * 100 / eps.length) + "%" : "–",
-     "failures with a later rated visit"],
+     eps.length ? "share of " + fmt(eps.length) + " failures with a later rated visit"
+                : "failures with a later rated visit"],
     ["Median response", resolved.length ? Math.round(median(resolved.map((e) => e.dr))) + " d" : "–",
-     "failure to next rated visit"],
+     resolved.length ? "failure to next rated visit \u00b7 n=" + fmt(resolved.length)
+                     : "failure to next rated visit"],
   ];
   const row = $("#kpi-row");
   row.replaceChildren();
@@ -394,7 +402,8 @@ function renderHoods() {
 
   const el = $("#chart-hoods");
   el.replaceChildren();
-  const W = Math.max(el.clientWidth || 640, 320), rowH = 26, m = { l: 190, r: 60 };
+  const W = Math.max(el.clientWidth || 640, 320), rowH = 26,
+        m = { l: W >= 620 ? 190 : 132, r: W >= 620 ? 156 : 64 };
   const H = big.length * rowH + 4;
   const max = Math.max(...big.map((r) => r.rate), 1);
   const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img" });
@@ -405,7 +414,8 @@ function renderHoods() {
     const bw = ((r.rate / max) * (W - m.l - m.r));
     svg.append(svgEl("rect", { x: m.l, y: yy, width: Math.max(bw, 2), height: 12, rx: 4, fill: CSS("--series-1") }));
     const vl = svgEl("text", { x: m.l + Math.max(bw, 2) + 6, y: yy + 11, class: "dlabel" });
-    vl.textContent = r.rate.toFixed(1) + "%"; svg.append(vl);
+    vl.textContent = W >= 620 ? r.rate.toFixed(1) + "% \u00b7 n=" + fmt(r.rated)
+                              : r.rate.toFixed(1) + "%"; svg.append(vl);
     const hit = svgEl("rect", { x: 0, y: yy - 4, width: W, height: rowH, fill: "transparent", tabindex: 0 });
     const show = (evt) => showTip(evt, r.hood, [
       [CSS("--series-1"), r.rate.toFixed(1) + "%", "failure rate"],
@@ -503,6 +513,11 @@ function onSearch(e) {
   box.replaceChildren();
   $("#facility-detail").hidden = true;
   if (q.length < 2) return;
+  /* search lives in the top bar; bring the results section into view */
+  const card = document.querySelector("#card-lookup");
+  const rct = card.getBoundingClientRect();
+  if (rct.top > innerHeight * 0.7 || rct.bottom < 120)
+    window.scrollTo({ top: rct.top + scrollY - 130, behavior: "smooth" });
   const hits = DATA.facilities
     .filter((f) => (f.dba || "").toUpperCase().includes(q) ||
                    (f.address || "").toUpperCase().includes(q))
