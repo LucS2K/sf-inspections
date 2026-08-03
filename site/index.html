@@ -38,6 +38,26 @@
     <p class="meta"><a href="/report">Read the findings report</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="#glossary">Glossary</a></p>
   </header>
 
+  <section class="story" id="story" aria-label="The 60-second version">
+    <p class="ck">The 60-second version</p>
+    <div class="story-card">
+      <div class="story-step" id="story-step" aria-live="polite"></div>
+      <div class="story-nav">
+        <button type="button" class="ghost-btn" id="story-back" aria-label="Previous">&larr; Back</button>
+        <div class="story-dots" id="story-dots" role="tablist" aria-label="Steps"></div>
+        <button type="button" class="ghost-btn" id="story-next" aria-label="Next">Next &rarr;</button>
+      </div>
+    </div>
+    <p class="story-skip"><a href="#data-divider">Skip the walkthrough, go straight to the data &darr;</a></p>
+  </section>
+
+  <header class="data-divider" id="data-divider">
+    <p class="ck">The full data</p>
+    <p class="note">Everything below is the same story with every number shown.
+    The filters re-slice each chart, every chart has a table view, and any
+    restaurant can be clicked for its inspection history.</p>
+  </header>
+
   <div class="filterbar" role="group" aria-label="Filters">
     <div class="seg" id="f-period" role="group" aria-label="Period">
       <button type="button" data-value="all" aria-pressed="true">All data</button>

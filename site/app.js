@@ -56,6 +56,7 @@ async function boot() {
   }
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
   addEventListener("resize", debounce(render, 150));
+  initStory();
   render();
 }
 
@@ -141,6 +142,105 @@ const HOOD_PHOTOS = {
   "West of Twin Peaks": "photos/west-of-twin-peaks.jpg",
   "Western Addition": "photos/western-addition.jpg"
 };
+
+/* ---------- the 60-second version: guided walkthrough ---------- */
+
+const STORY = [
+  {
+    kicker: "Step 1 · What this is",
+    big: null, // filled at boot with the live inspection count
+    label: "inspections since 2024",
+    text: "San Francisco health inspectors check the city's food businesses " +
+          "year-round. When a visit finds serious problems, the business is " +
+          "put on notice, or shut down on the spot.",
+    cta: ["See the inspection record", "#card-monthly"],
+  },
+  {
+    kicker: "Step 2 · The response",
+    big: "1 day",
+    label: "median wait for the re-check after a shutdown",
+    text: "When a kitchen is shut down, an inspector is usually back the " +
+          "next day. Lesser failures get their follow-up in about eight days.",
+    cta: ["See what happens after a failure", "#card-funnel"],
+  },
+  {
+    kicker: "Step 3 · The fix",
+    big: "3 of 4",
+    label: "shut-down kitchens pass the re-check",
+    text: "Most businesses fix the problem: 75% of shut-down kitchens pass " +
+          "their re-inspection, and 89% of lesser failures clear theirs.",
+    cta: ["See the enforcement funnel", "#card-funnel"],
+  },
+  {
+    kicker: "Step 4 · The catch",
+    big: "1 in 5",
+    label: "fixes fail again within a year",
+    text: "The fix does not always last. About 20% of resolved failures " +
+          "fail again within a year, and it is the place, not the type of " +
+          "problem, that predicts who slips back.",
+    cta: ["Read why in the report", "/report"],
+  },
+  {
+    kicker: "Step 5 · The blind spot",
+    big: "3.85 vs 3.99",
+    label: "Yelp stars: once-closed kitchens vs spotless ones",
+    text: "Review scores cannot see any of this. Facilities that were once " +
+          "shut down average nearly the same stars as facilities that never " +
+          "failed. Stars measure taste and service, not hygiene.",
+    cta: ["See the comparison", "#card-yelp"],
+  },
+  {
+    kicker: "Step 6 · Your turn",
+    big: "🔍",
+    label: "",
+    text: "Every restaurant in the data is searchable, with its full " +
+          "inspection history and its Yelp rating side by side.",
+    cta: ["Search your favorite spot", "focus-search"],
+  },
+];
+
+let storyIdx = 0;
+
+function renderStory() {
+  const host = $("#story-step");
+  const s = STORY[storyIdx];
+  host.replaceChildren();
+  const k = document.createElement("p"); k.className = "story-kicker"; k.textContent = s.kicker;
+  const b = document.createElement("p"); b.className = "story-big"; b.textContent = s.big;
+  const l = document.createElement("p"); l.className = "story-label"; l.textContent = s.label;
+  const t = document.createElement("p"); t.className = "story-text"; t.textContent = s.text;
+  const a = document.createElement("a"); a.className = "story-cta"; a.textContent = s.cta[0] + " →";
+  if (s.cta[1] === "focus-search") {
+    a.href = "#";
+    a.addEventListener("click", (e) => { e.preventDefault(); $("#f-search").focus(); });
+  } else {
+    a.href = s.cta[1];
+  }
+  host.append(k, b, l, t, a);
+  $("#story-back").disabled = storyIdx === 0;
+  $("#story-next").disabled = storyIdx === STORY.length - 1;
+  for (const [i, d] of [...$("#story-dots").children].entries())
+    d.setAttribute("aria-selected", String(i === storyIdx));
+}
+
+function initStory() {
+  STORY[0].big = fmt(Object.values(DATA.history).reduce((a, r) => a + r.length, 0));
+  const dots = $("#story-dots");
+  for (let i = 0; i < STORY.length; i++) {
+    const d = document.createElement("button");
+    d.type = "button"; d.className = "story-dot"; d.setAttribute("role", "tab");
+    d.setAttribute("aria-label", `Step ${i + 1}`);
+    d.addEventListener("click", () => { storyIdx = i; renderStory(); });
+    dots.append(d);
+  }
+  $("#story-back").addEventListener("click", () => { if (storyIdx > 0) { storyIdx--; renderStory(); } });
+  $("#story-next").addEventListener("click", () => { if (storyIdx < STORY.length - 1) { storyIdx++; renderStory(); } });
+  $("#story").addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" && storyIdx < STORY.length - 1) { storyIdx++; renderStory(); }
+    if (e.key === "ArrowLeft" && storyIdx > 0) { storyIdx--; renderStory(); }
+  });
+  renderStory();
+}
 
 function renderHoodPhoto() {
   const fig = $("#hood-photo");

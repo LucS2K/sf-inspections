@@ -338,3 +338,51 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
 .pullstat .big { display: block; font-size: clamp(44px, 6vw, 60px); font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--series-1); margin-bottom: 6px; font-variant-numeric: tabular-nums; }
 .pullstat .rest { font-size: 19px; color: var(--text-secondary); }
 .chapter.feature { background: var(--surface-1); border: 1px solid var(--grid); border-radius: 6px; margin-inline: -20px; padding: 20px 20px 28px; }
+
+/* the 60-second version: guided walkthrough */
+.story { margin: 8px 0 34px; }
+.story-card {
+  background: var(--surface-1); border: 1px solid var(--grid);
+  border-radius: 8px; padding: 26px 26px 18px; min-height: 320px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.story-kicker {
+  font-family: var(--sans); font-size: 12px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); margin: 0 0 14px;
+}
+.story-big {
+  font-family: var(--serif); font-weight: 700; line-height: 1;
+  font-size: clamp(46px, 7vw, 68px); letter-spacing: -0.02em;
+  color: var(--series-1); margin: 0 0 6px; font-variant-numeric: tabular-nums;
+}
+.story-label {
+  font-family: var(--sans); font-size: 14px; color: var(--muted);
+  margin: 0 0 14px;
+}
+.story-text {
+  font-family: var(--serif); font-size: 19px; line-height: 1.5;
+  color: var(--text-primary); margin: 0 0 14px; max-width: 56ch;
+  text-wrap: pretty;
+}
+.story-cta {
+  font-family: var(--sans); font-size: 14.5px; font-weight: 600;
+  display: inline-block; margin-bottom: 6px;
+}
+.story-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; border-top: 1px solid var(--grid); padding-top: 14px;
+}
+.story-nav .ghost-btn:disabled { opacity: 0.35; cursor: default; }
+.story-dots { display: flex; gap: 8px; }
+.story-dot {
+  width: 10px; height: 10px; border-radius: 999px; border: 1px solid var(--baseline);
+  background: transparent; padding: 0; cursor: pointer;
+}
+.story-dot[aria-selected="true"] { background: var(--series-1); border-color: var(--series-1); }
+.story-skip { font-family: var(--sans); font-size: 13px; margin: 10px 2px 0; }
+.data-divider { border-top: 2px solid var(--baseline); padding-top: 18px; margin: 0 0 18px; }
+.data-divider .note { max-width: 70ch; }
+@media (max-width: 640px) {
+  .story-card { padding: 20px 18px 14px; min-height: 340px; }
+  .story-text { font-size: 17px; }
+}
