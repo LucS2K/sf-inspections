@@ -92,25 +92,62 @@ function episodesF() {
 
 /* ---------- render ---------- */
 
-/* neighborhood photos: shown when that neighborhood is selected;
-   missing files simply keep the banner hidden */
+/* neighborhood photos: one per neighborhood, matched from the dataset's
+   own names; the default city photo shows for All neighborhoods */
+const DEFAULT_PHOTO = "photos/default-all-neighborhood.jpg";
 const HOOD_PHOTOS = {
-  "Presidio": ["photos/presidio.jpg", "The Golden Gate Bridge from the Presidio headlands"],
-  "Russian Hill": ["photos/russian-hill.jpg", "Lombard Street, Russian Hill"],
-  "Haight Ashbury": ["photos/haight-ashbury.jpg", "A Victorian corner in the Haight"],
-  "Oceanview/Merced/Ingleside": ["photos/oceanview-merced-ingleside.jpg", "Muni light rail at the Balboa Park yard"],
+  "Bayview Hunters Point": "photos/bayview-hunters-point.jpg",
+  "Bernal Heights": "photos/bernal-heights.jpg",
+  "Castro/Upper Market": "photos/castro-upper-market.jpg",
+  "Chinatown": "photos/chinatown.jpg",
+  "Excelsior": "photos/excelsior.jpg",
+  "Financial District/South Beach": "photos/financial-district-south-beach.jpg",
+  "Glen Park": "photos/glen-park.jpg",
+  "Golden Gate Park": "photos/golden-gate-park.jpg",
+  "Haight Ashbury": "photos/haight-ashbury.jpg",
+  "Hayes Valley": "photos/hayes-valley.jpg",
+  "Inner Richmond": "photos/inner-richmond.jpg",
+  "Inner Sunset": "photos/inner-sunset.jpg",
+  "Japantown": "photos/japantown.jpg",
+  "Lakeshore": "photos/lakeshore.jpg",
+  "Lone Mountain/USF": "photos/lone-mountain-usf.jpg",
+  "Marina": "photos/marina.jpg",
+  "McLaren Park": "photos/mclaren-park.jpg",
+  "Mission": "photos/mission.jpg",
+  "Mission Bay": "photos/mission-bay.jpg",
+  "Nob Hill": "photos/nob-hill.jpg",
+  "North Beach": "photos/north-beach.jpg",
+  "Oceanview/Merced/Ingleside": "photos/oceanview-merced-ingleside.jpg",
+  "Outer Mission": "photos/outer-mission.jpg",
+  "Outer Richmond": "photos/outer-richmond.jpg",
+  "Pacific Heights": "photos/pacific-heights.jpg",
+  "Portola": "photos/portola.jpg",
+  "Potrero Hill": "photos/potrero-hill.jpg",
+  "Presidio": "photos/presidio.jpg",
+  "Presidio Heights": "photos/presidio-heights.jpg",
+  "Russian Hill": "photos/russian-hill.jpg",
+  "Seacliff": "photos/seacliff.jpg",
+  "South of Market": "photos/south-of-market.jpg",
+  "Sunset/Parkside": "photos/sunset-parkside.jpg",
+  "Tenderloin": "photos/tenderloin.jpg",
+  "Treasure Island": "photos/treasure-island.jpg",
+  "Twin Peaks": "photos/twin-peaks.jpg",
+  "Visitacion Valley": "photos/visitacion-valley.jpg",
+  "West of Twin Peaks": "photos/west-of-twin-peaks.jpg",
+  "Western Addition": "photos/western-addition.jpg"
 };
 
 function renderHoodPhoto() {
   const fig = $("#hood-photo");
-  const entry = HOOD_PHOTOS[state.hood];
-  if (!entry) { fig.hidden = true; return; }
+  const src = state.hood === "all" ? DEFAULT_PHOTO : HOOD_PHOTOS[state.hood];
+  if (!src) { fig.hidden = true; return; }
+  const caption = state.hood === "all" ? "San Francisco" : state.hood;
   const img = $("#hood-photo-img");
   img.onerror = () => { fig.hidden = true; };
   img.onload = () => { fig.hidden = false; };
-  img.src = entry[0];
-  img.alt = entry[1];
-  $("#hood-photo-cap").textContent = entry[1];
+  img.src = src;
+  img.alt = caption;
+  $("#hood-photo-cap").textContent = caption;
 }
 
 function render() {
