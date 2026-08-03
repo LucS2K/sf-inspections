@@ -295,7 +295,7 @@ function renderMonthly(vs) {
     [{ name: "Inspections", color: CSS("--series-1"), byMonth }],
     $("#card-monthly .table-view"));
   const perMonth = months.length ? Math.round(vs.length / months.length) : 0;
-  takeaway("#tk-monthly", `In plain terms: the health department made ${fmt(vs.length)} `
+  takeaway("#tk-monthly", `The health department made ${fmt(vs.length)} `
     + `inspection visits in this period, about ${fmt(perMonth)} per month.`);
 }
 
@@ -324,7 +324,7 @@ function renderFailures(vs) {
   const nCl = Object.values(cl).reduce((a, b) => a + b, 0);
   const rated = vs.filter((v) => v[3] !== null).length;
   const pct = rated ? ((nCp + nCl) * 100 / rated).toFixed(1) : "0";
-  takeaway("#tk-failures", `In plain terms: ${pct}% of graded visits found a problem serious `
+  takeaway("#tk-failures", `${pct}% of graded visits found a problem serious `
     + `enough to act on: ${fmt(nCp)} facilities were put on notice (Conditional Pass) and `
     + `${fmt(nCl)} were shut down on the spot (Closure).`);
 }
@@ -401,8 +401,8 @@ function renderFunnel(eps) {
   const clPass = cl.filter((e) => e.rr === "Pass").length;
   const passPct = clRes.length ? Math.round(clPass * 100 / clRes.length) : null;
   takeaway("#tk-funnel", medDays === null
-    ? "In plain terms: no closures in this selection."
-    : `In plain terms: when a facility is shut down, inspectors typically return within `
+    ? "No closures in this selection."
+    : `When a facility is shut down, inspectors typically return within `
       + `${fmt(medDays)} day${medDays === 1 ? "" : "s"}, and ${passPct}% pass that re-check. `
       + `The catch is durability: across the full data, about one in five facilities that `
       + `fixed their problem failed again within a year.`);
@@ -475,7 +475,7 @@ function renderHoods() {
 
   if (big.length) {
     const top = big[0];
-    takeaway("#tk-hoods", `In plain terms: ${top.hood} tops this view, with `
+    takeaway("#tk-hoods", `${top.hood} tops this view, with `
       + `${top.rate.toFixed(1)}% of its ${fmt(top.rated)} graded visits finding a problem. `
       + `Read gently: neighborhoods differ in what kinds of food businesses they have, and `
       + `restaurants fail more often than markets, so this partly reflects business mix, `
@@ -545,7 +545,7 @@ function renderYelp() {
   const ok = rows.filter((r) => r.mean !== null && r.n >= 30);
   if (ok.length >= 2) {
     const worst = ok[0], best = ok[ok.length - 1];
-    takeaway("#tk-yelp", `In plain terms: the ratings barely differ, and that IS the finding. `
+    takeaway("#tk-yelp", `The ratings barely differ, and that IS the finding. `
       + `Facilities that were once shut down average ${worst.mean.toFixed(2)} stars; facilities `
       + `with a clean record average ${best.mean.toFixed(2)}. Star ratings measure taste and `
       + `service, not kitchen hygiene: you cannot spot a health risk from a review score.`);
