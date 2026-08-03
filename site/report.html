@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Does enforcement work? SF health inspections, 2024-2026</title>
+<meta name="description" content="Findings: how San Francisco food-safety enforcement responds, whether facilities improve, and whether improvement holds.">
+<link rel="stylesheet" href="style.css">
+<style>
+  .prose { max-width: 72ch; }
+  .prose h2 { font-size: 19px; margin: 32px 0 8px; }
+  .prose h3 { font-size: 15px; margin: 20px 0 6px; }
+  .prose p, .prose li { color: var(--text-primary); font-size: 15.5px; line-height: 1.65; }
+  .prose .aside { color: var(--text-secondary); font-size: 14px; border-left: 3px solid var(--grid); padding-left: 14px; margin: 14px 0; }
+  .bignum { font-size: 34px; font-weight: 650; }
+  .figrow { display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0; }
+  .figrow .tile { flex: 1 1 150px; }
+  table.mini { border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  table.mini th, table.mini td { text-align: right; padding: 4px 12px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  table.mini th:first-child, table.mini td:first-child { text-align: left; }
+  table.mini th { color: var(--text-secondary); }
+  a { color: var(--series-1); }
+</style>
+</head>
+<body>
+<div class="page prose">
+  <header class="masthead">
+    <div>
+      <h1>Does enforcement work?</h1>
+      <p class="sub">San Francisco food-facility health inspections, January 2024 to July 2026.
+        <a href="/">Interactive dashboard</a></p>
+    </div>
+    <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme">◐</button>
+  </header>
+
+  <p>When San Francisco's health department flags a food facility with a
+  Conditional Pass, or closes it outright, three things can happen next: the
+  facility fixes the problem, the fix holds, or the whole episode repeats.
+  This analysis follows every failure in the public inspection record through
+  that sequence: 20,673 inspection events at 7,777 facilities, including
+  1,126 failures at 846 of them.</p>
+
+  <h2>The short answer</h2>
+  <p>Enforcement responds fast and mostly works on the first pass, but one
+  in five fixes does not survive the year, and the record contains a set of
+  failures with no documented follow-up at all.</p>
+
+  <div class="figrow">
+    <div class="tile"><div class="label">Median time to re-rating after a closure</div><div class="bignum">1 day</div><div class="hint">n=452 closures</div></div>
+    <div class="tile"><div class="label">Pass rate at re-rating</div><div class="bignum">75-89%</div><div class="hint">closures vs conditional passes</div></div>
+    <div class="tile"><div class="label">Relapse within a year of a fix</div><div class="bignum">~20%</div><div class="hint">both failure types</div></div>
+  </div>
+
+  <h2>Response: days, not months</h2>
+  <p>After a closure, the median facility is re-rated the <em>next day</em>
+  (n=452); after a Conditional Pass, within 8 days (n=674). 87% of all
+  failures have an observed re-rating. Whatever else is true of this system,
+  it does not sit on closures.</p>
+
+  <h2>Outcome: the first fix mostly works</h2>
+  <p>At re-rating, 75.1% of closed facilities pass (293 of 390 observed);
+  89.2% of conditional passes clear (523 of 586). Mean violations drop from
+  7.3 to 4.6 after closures, 7.4 to 3.6 after conditional passes. The harsher
+  the sanction, the harder it is to clear on the first attempt.</p>
+
+  <h2>Durability: one in five fixes fails within the year</h2>
+  <p>Among episodes that resolved to a Pass and had a full observable year
+  after resolution, <strong>20.2%</strong> of closure episodes (34 of 168)
+  and <strong>20.6%</strong> of conditional-pass episodes (52 of 252) failed
+  again within 365 days.</p>
+  <p class="aside">Measured at a fixed horizon deliberately. The naive
+  version ("still passing at next observation") makes the two groups look
+  identical at 86-87%, but their observation clocks differ: post-closure
+  facilities are re-checked at a median of 41 days, post-conditional at 207.
+  Comparing those percentages is comparing different clocks.</p>
+  <p>Context: after an ordinary Pass, facilities fail their next observation
+  4.5% of the time (n=11,474). Post-enforcement facilities fail theirs at
+  roughly three times that rate. The data cannot distinguish "enforcement
+  failed to reform them" from "enforcement selects facilities that were
+  always higher-risk"; both readings are consistent with what is measured.</p>
+
+  <h2>The repeat core</h2>
+  <p>24.9% of all failures are a facility's second or later. 189 facilities
+  (22% of those that ever failed) failed at least twice; 57 failed three or
+  more times. A small core of facilities generates a quarter of the
+  enforcement load.</p>
+
+  <h2>The failures nobody followed up</h2>
+  <p>150 facilities have a failure with no later rated visit in the record.
+  Cross-referencing two independent sources splits them:</p>
+  <table class="mini">
+    <tr><th></th><th>Facilities</th></tr>
+    <tr><td>Business registration ended near the failure (confirmed dead)</td><td>13</td></tr>
+    <tr><td>Failed within the last 90 days (too recent to judge)</td><td>17</td></tr>
+    <tr><td>Still registered, and open per Yelp</td><td>~120</td></tr>
+  </table>
+  <p>The ~120 are the uncomfortable finding: businesses the registry and
+  Yelp both say are alive and operating, whose failing inspection was never
+  followed by another recorded visit of any kind. Some registry lag is
+  expected, but the triangulation makes "quiet deaths" an unlikely
+  explanation for most of them. On this record, they read as enforcement
+  follow-up gaps.</p>
+
+  <h2>Do Yelp ratings know any of this?</h2>
+  <p>Essentially no. Facilities that were ever closed average 3.85 stars
+  (n=306); facilities never flagged average 3.99 (n=568). The correlation
+  between rating and failure count is r = -0.065 (n=1,296). Consumer
+  ratings and kitchen hygiene are close to independent signals, which
+  replicates published findings on other cities.</p>
+  <p class="aside">Read with the coverage gap in mind: 86% of
+  enforcement-history facilities matched on Yelp versus 67% of the
+  comparison group, because enforcement lands mostly on restaurants while
+  the comparison group includes markets and cafeterias Yelp does not list.
+  Ratings are also a present-day snapshot against 2024-2026 inspections:
+  correlation only, no causal or temporal claims.</p>
+
+  <h2>What this data cannot establish</h2>
+  <ul>
+    <li><strong>Causality.</strong> No counterfactual exists for what
+    facilities would have done without enforcement.</li>
+    <li><strong>Silence is not success.</strong> A failure with no later
+    visit is censored, not resolved; durability is measured only where a
+    later visit exists.</li>
+    <li><strong>Recent inspection types are incomplete.</strong> DPH
+    backfills the type label with roughly a year's lag (100% of 2026 rows
+    lack it); every metric here uses ratings, which do not lag.</li>
+    <li><strong>Cross-source linkage is inferred.</strong> The business
+    registry and Yelp have no shared key with DPH; matching is by name and
+    address.</li>
+  </ul>
+
+  <h2>Method, briefly</h2>
+  <p>Weekly incremental ingest from the city's open-data API into an
+  append-only raw layer (the feed republishes corrected records; history is
+  kept and deduplicated to the latest version at a tested grain). Staging
+  filters ~110 permit types to food facilities via a reviewed
+  classification, excludes umbrella permits (one farmers-market permit can
+  carry 19 same-day stall inspections), and reconciles exactly: every
+  excluded raw row is accounted for. Facility timelines and enforcement
+  episodes are window-function models over the cleaned events, with 26
+  automated tests on grain, values, and completeness. The pipeline runs
+  fully in the cloud on a weekly schedule, and this page regenerates with
+  it.</p>
+
+  <p class="muted" id="stamp">Sources: SF DPH Health Inspections
+  (data.sfgov.org, tvy3-wexg and 5tti-66ds), SF Registered Business
+  Locations (g8m3-pdis), Yelp Fusion API. Figures as of the 2026-07-31 data
+  window.</p>
+</div>
+<script>
+  document.getElementById("theme-toggle").addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+    const cur = root.dataset.theme || (dark ? "dark" : "light");
+    root.dataset.theme = cur === "dark" ? "light" : "dark";
+  });
+</script>
+</body>
+</html>
