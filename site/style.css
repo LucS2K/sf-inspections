@@ -16,7 +16,7 @@
   --status-critical:#b13a12;  /* Closure */
   --status-good:   #00795a;   /* Pass */
   --ord-1:#94b3d5; --ord-2:#6c92b8; --ord-3:#33608f; --ord-4:#1c3a5c;
-  --map-1:#b6cde6; --map-2:#4a78ad; --map-3:#e6a30f; --map-4:#b13a12;
+  --map-1:#b6cde6; --map-2:#4a78ad; --map-3:#e6a30f; --map-4:#b13a12; --map-nodata-bg:#ece8dd; --map-nodata-line:#b3ac9a;
   --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
   --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -30,7 +30,7 @@
     --series-1:#82a7cf;
     --status-warning:#f0c649; --status-critical:#dd5b36; --status-good:#2fbb8c;
     --ord-1:#3b5a7c; --ord-2:#557fa9; --ord-3:#82a7cf; --ord-4:#b4cce6;
-  --map-1:#3d648f; --map-2:#82a7cf; --map-3:#f2c14e; --map-4:#e8552f;
+  --map-1:#3d648f; --map-2:#82a7cf; --map-3:#f2c14e; --map-4:#e8552f; --map-nodata-bg:#3a352d; --map-nodata-line:#77705f;
   }
   :root:where(:not([data-theme="light"])) .chip.pass,
   :root:where(:not([data-theme="light"])) .chip.closure { color: #141210; }
@@ -44,7 +44,7 @@
   --series-1:#82a7cf;
   --status-warning:#f0c649; --status-critical:#dd5b36; --status-good:#2fbb8c;
   --ord-1:#3b5a7c; --ord-2:#557fa9; --ord-3:#82a7cf; --ord-4:#b4cce6;
-  --map-1:#3d648f; --map-2:#82a7cf; --map-3:#f2c14e; --map-4:#e8552f;
+  --map-1:#3d648f; --map-2:#82a7cf; --map-3:#f2c14e; --map-4:#e8552f; --map-nodata-bg:#3a352d; --map-nodata-line:#77705f;
 }
 :root[data-theme="dark"] .chip.pass,
 :root[data-theme="dark"] .chip.closure { color: #141210; }
@@ -450,3 +450,16 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
   font-size: 20px; line-height: 1; color: var(--muted); cursor: pointer;
 }
 .map-pop-btn { width: 100%; }
+
+/* motion: step transitions, smooth anchors, cross-page fade */
+html { scroll-behavior: smooth; }
+@keyframes story-fwd { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+@keyframes story-back { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: none; } }
+.story-step.slide-fwd { animation: story-fwd 0.28s ease both; }
+.story-step.slide-back { animation: story-back 0.28s ease both; }
+#map-pop { animation: story-fwd 0.2s ease both; }
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .story-step.slide-fwd, .story-step.slide-back, #map-pop { animation: none; }
+}

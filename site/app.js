@@ -201,9 +201,14 @@ const STORY = [
 
 let storyIdx = 0;
 
-function renderStory() {
+function renderStory(dir) {
   const host = $("#story-step");
   const s = STORY[storyIdx];
+  host.classList.remove("slide-fwd", "slide-back");
+  if (dir) {
+    void host.offsetWidth; // restart the animation
+    host.classList.add(dir === "back" ? "slide-back" : "slide-fwd");
+  }
   host.replaceChildren();
   const k = document.createElement("p"); k.className = "story-kicker"; k.textContent = s.kicker;
   const b = document.createElement("p"); b.className = "story-big"; b.textContent = s.big;
@@ -230,14 +235,17 @@ function initStory() {
     const d = document.createElement("button");
     d.type = "button"; d.className = "story-dot"; d.setAttribute("role", "tab");
     d.setAttribute("aria-label", `Step ${i + 1}`);
-    d.addEventListener("click", () => { storyIdx = i; renderStory(); });
+    d.addEventListener("click", () => {
+      const dir = i > storyIdx ? "fwd" : i < storyIdx ? "back" : null;
+      storyIdx = i; renderStory(dir);
+    });
     dots.append(d);
   }
-  $("#story-back").addEventListener("click", () => { if (storyIdx > 0) { storyIdx--; renderStory(); } });
-  $("#story-next").addEventListener("click", () => { if (storyIdx < STORY.length - 1) { storyIdx++; renderStory(); } });
+  $("#story-back").addEventListener("click", () => { if (storyIdx > 0) { storyIdx--; renderStory("back"); } });
+  $("#story-next").addEventListener("click", () => { if (storyIdx < STORY.length - 1) { storyIdx++; renderStory("fwd"); } });
   $("#story").addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight" && storyIdx < STORY.length - 1) { storyIdx++; renderStory(); }
-    if (e.key === "ArrowLeft" && storyIdx > 0) { storyIdx--; renderStory(); }
+    if (e.key === "ArrowRight" && storyIdx < STORY.length - 1) { storyIdx++; renderStory("fwd"); }
+    if (e.key === "ArrowLeft" && storyIdx > 0) { storyIdx--; renderStory("back"); }
   });
   renderStory();
 }
@@ -865,9 +873,9 @@ function renderMap() {
   const pat = svgEl("pattern", { id: "nodata", width: 7, height: 7,
                                  patternUnits: "userSpaceOnUse",
                                  patternTransform: "rotate(45)" });
-  pat.append(svgEl("rect", { width: 7, height: 7, fill: CSS("--surface-1") }));
+  pat.append(svgEl("rect", { width: 7, height: 7, fill: CSS("--map-nodata-bg") }));
   pat.append(svgEl("line", { x1: 0, y1: 0, x2: 0, y2: 7,
-                             stroke: CSS("--baseline"), "stroke-width": 1.2 }));
+                             stroke: CSS("--map-nodata-line"), "stroke-width": 1.2 }));
   defs.append(pat);
   svg.append(defs);
   const markers = [];
