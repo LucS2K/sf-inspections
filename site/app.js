@@ -848,7 +848,7 @@ function renderMap() {
     .filter(([h, a]) => a.rated >= 100 && HOOD_GEO.hoods[h])
     .map(([hood, a]) => ({ hood, ...a, rate: a.failed * 100 / a.rated }))
     .sort((a, b) => b.rate - a.rate);
-  const ranked = qualifying.slice(0, 20); // list + markers cap, Japan-style
+  const ranked = qualifying; // every rated neighborhood, fully ranked
   const rankOf = {};
   ranked.forEach((r, i) => { rankOf[r.hood] = i + 1; });
   /* quartile shading with familiar semantics: blues = the calmer half,

@@ -392,7 +392,7 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
 
 /* the city, mapped */
 .map-wrap { display: grid; grid-template-columns: 250px 1fr; gap: 22px; align-items: start; }
-.map-list { list-style: none; margin: 0; padding: 0; font-family: var(--sans); font-size: 13.5px; }
+.map-list { list-style: none; margin: 0; padding: 0 6px 0 0; font-family: var(--sans); font-size: 13.5px; max-height: 600px; overflow-y: auto; scrollbar-width: thin; }
 .map-list li {
   display: flex; align-items: baseline; gap: 10px; padding: 6px 4px;
   border-bottom: 1px solid var(--grid); cursor: pointer;
