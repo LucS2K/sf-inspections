@@ -101,7 +101,10 @@ def reparse_disagreeing_rows(client: anthropic.Anthropic, con) -> None:
         with client.messages.stream(
             model=MODEL,
             max_tokens=16000,
-            output_config={"format": {"type": "json_schema", "schema": schema}},
+            # mechanical extraction: low effort is faster and cheaper with
+            # no quality need for deep reasoning
+            output_config={"format": {"type": "json_schema", "schema": schema},
+                           "effort": "low"},
             messages=[{"role": "user", "content": (
                 "This is one inspection's violation field from a health "
                 "inspection database. It concatenates individual violations; "

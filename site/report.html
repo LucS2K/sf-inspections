@@ -101,6 +101,27 @@
   explanation for most of them. On this record, they read as enforcement
   follow-up gaps.</p>
 
+  <h2>Does what you failed for predict failing again?</h2>
+  <p>Mostly no, and that is informative. Parsing the inspection record's
+  violation text into categories (temperature control, vermin, handwashing,
+  contamination, equipment, and so on) lets us ask whether some kinds of
+  problems come back more than others. They barely do: relapse within a year
+  runs 15-20% for every major category, against a 20.5% baseline, and having
+  more high-risk violations at the failure does not raise it either. Facility
+  and equipment issues sit at the low end (15-16%) and vermin and temperature
+  problems at the high end (about 20%), a gradient too small to lean on at
+  these sample sizes.</p>
+  <p>The sharper reading: <strong>relapse is a property of the facility, not
+  of the violation.</strong> Which fits the repeat-offender finding above,
+  where 22% of ever-failed facilities produce a quarter of all failures. If
+  the goal is preventing repeat failures, targeting facilities with a failure
+  history beats targeting any particular violation type.</p>
+  <p class="aside">Method note: each violation was extracted from a
+  concatenated text field (a parser validated against the recorded violation
+  counts handles 97%; an AI model re-parsed most of the remainder) and
+  classified by a reviewed keyword ruleset. Groups under 30 episodes are not
+  quoted.</p>
+
   <h2>Do Yelp ratings know any of this?</h2>
   <p>Essentially no. Facilities that were ever closed average 3.85 stars
   (n=306); facilities never flagged average 3.99 (n=568). The correlation

@@ -30,6 +30,16 @@ sources:
           Yelp Fusion lookups per facility (failure cohort + control),
           one row per facility per fetch outcome.
 
+  - name: derived
+    schema: derived
+    tables:
+      - name: violation_segments
+        description: One row per parsed violation (deterministic parser).
+      - name: violation_segments_llm
+        description: LLM re-parse of rows the parser could not segment confidently.
+      - name: violation_categories
+        description: Description -> category and risk tier (keyword-rules-v1).
+
   - name: meta
     schema: meta
     tables:
