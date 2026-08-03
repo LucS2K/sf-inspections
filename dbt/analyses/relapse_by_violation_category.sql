@@ -1,12 +1,21 @@
 -- Stage 6 payoff: does WHAT a facility failed for predict whether the fix
 -- lasts? Violations parsed from the concatenated violation_codes field
--- (deterministic parser at 97.4% agreement; LLM re-parse for most of the
--- remainder), classified into categories by reviewed keyword rules
--- (method keyword-rules-v1; see scripts/classify_violations_rules.py).
+-- (deterministic parser at 97.4% agreement; LLM re-parse of the full
+-- remainder, count-validated against the inspector's recorded totals),
+-- classified into categories by reviewed keyword rules (method
+-- keyword-rules-v1; see scripts/classify_violations_rules.py).
 -- Finding: relapse rates are flat across categories (15-20% vs 20.5%
 -- baseline) and flat across high-risk violation counts. Relapse behaves
 -- like a facility property, not a violation-type property, consistent
 -- with the repeat-offender concentration in the core findings.
+--
+-- Robustness check (2026-08-03): every description was independently
+-- re-classified by an LLM (derived.violation_categories_llm). Label-level
+-- agreement with the keyword rules is 65% (the disagreements are mostly
+-- keyword false positives on boilerplate, e.g. "will call you back"
+-- matching the illness pattern), but the finding is unchanged: swapping
+-- in the LLM classification, relapse still runs 17-23% across every
+-- category with a different ordering, confirming the gradient is noise.
 WITH unified AS (
     SELECT permit_number, inspection_date, inspection_type, description
     FROM {{ source('derived', 'violation_segments') }} s

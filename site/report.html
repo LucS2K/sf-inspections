@@ -131,9 +131,15 @@
   history beats targeting any particular violation type.</p>
   <p class="aside">Method note: each violation was extracted from a
   concatenated text field (a parser validated against the recorded violation
-  counts handles 97%; an AI model re-parsed most of the remainder) and
-  classified by a reviewed keyword ruleset. Groups under 30 episodes are not
-  quoted.</p>
+  counts handles 97%; an AI model re-parsed the remainder, with every row
+  checked against the inspector's recorded count) and classified by a
+  reviewed keyword ruleset. As a robustness check, an AI model independently
+  re-classified every violation description: the two methods label
+  individual descriptions differently often enough (65% agreement), yet the
+  finding does not move. Under either classification, relapse stays in a
+  narrow flat band across all categories, which is exactly what a
+  facility-level (not violation-level) effect predicts. Groups under 30
+  episodes are not quoted.</p>
 
   <h2>Do Yelp ratings know any of this?</h2>
   <p>Essentially no. Facilities that were ever closed average 3.85 stars

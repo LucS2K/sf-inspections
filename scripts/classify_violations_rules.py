@@ -20,6 +20,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "ingest"))
 from fetch import connect  # noqa: E402
 
 # (category, risk_tier, pattern) — first match wins, order is load-bearing
+# Known false positives (kept: v1 is frozen as the published basis, and an
+# LLM re-classification confirmed the analysis result is insensitive to
+# them): "ill " matches "will call you back" in suspension boilerplate,
+# "rodent-proof" pulls waste-container rules into vermin.
 RULES = [
     ("vermin", "high",
      r"cockroach|rodent|vermin|flies|infestation|pest"),

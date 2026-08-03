@@ -133,7 +133,7 @@
     <tr><td>Automation</td><td>GitHub Actions</td>
         <td>Weekly cron runs ingest, tests, export, and deploy end to end; CI validates every change</td></tr>
     <tr><td>Text parsing</td><td>Regex + Claude API</td>
-        <td>The violation field concatenates codes and legal text; a deterministic parser validated against recorded counts handles 97%, an LLM re-parsed most of the hard remainder, and a reviewed keyword ruleset maps every violation to a category and risk tier</td></tr>
+        <td>The violation field concatenates codes and legal text; a deterministic parser validated against recorded counts handles 97%, an LLM re-parsed the hard remainder (every row checked against the inspector's recorded count), and a reviewed keyword ruleset maps every violation to a category and risk tier. An independent LLM re-classification of all descriptions agreed with the ruleset on 65% of labels but left the published finding unchanged, which is the check that matters</td></tr>
     <tr><td>This site</td><td>Vanilla JavaScript + SVG, Vercel</td>
         <td>No frameworks; ~2&nbsp;MB of static JSON, so it is fast, free to host, and cannot break</td></tr>
   </table>
