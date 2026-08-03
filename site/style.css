@@ -446,3 +446,6 @@ html { scroll-behavior: smooth; }
   .ov-band { grid-template-columns: 1fr 1fr; }
   .ov-tile { border-left: 0; padding-left: 0; }
 }
+/* overview verdict colors: green = working, red = the weak link */
+.ov-good .ov-num { color: var(--status-good); }
+.ov-bad .ov-num { color: var(--status-critical); }
