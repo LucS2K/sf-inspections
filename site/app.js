@@ -1,5 +1,5 @@
 /* SF inspections dashboard. Static data, client-side slicing.
-   All injected names use textContent — never innerHTML with data. */
+   All injected names use textContent, never innerHTML with data. */
 "use strict";
 
 const $ = (s) => document.querySelector(s);
@@ -117,10 +117,10 @@ function renderKPIs(vs, eps) {
     ["Inspections", fmt(vs.length), ""],
     ["Facilities", fmt(facilities), ""],
     ["Failures", fmt(eps.length), "Conditional Pass or Closure"],
-    ["Re-rated", eps.length ? Math.round(resolved.length * 100 / eps.length) + "%" : "–",
+    ["Re-rated", eps.length ? Math.round(resolved.length * 100 / eps.length) + "%" : "n/a",
      eps.length ? "share of " + fmt(eps.length) + " failures with a later rated visit"
                 : "failures with a later rated visit"],
-    ["Median response", resolved.length ? Math.round(median(resolved.map((e) => e.dr))) + " d" : "–",
+    ["Median response", resolved.length ? Math.round(median(resolved.map((e) => e.dr))) + " d" : "n/a",
      resolved.length ? "failure to next rated visit \u00b7 n=" + fmt(resolved.length)
                      : "failure to next rated visit"],
   ];
@@ -441,7 +441,7 @@ function renderHoods() {
     const c1 = document.createElement("td"); c1.textContent = fmt(r.rated);
     const c2 = document.createElement("td"); c2.textContent = fmt(r.failed);
     const c3 = document.createElement("td");
-    c3.textContent = r.rated >= 100 ? r.rate.toFixed(1) + "%" : `– (n=${r.rated})`;
+    c3.textContent = r.rated >= 100 ? r.rate.toFixed(1) + "%" : `n/a (n=${r.rated})`;
     tr.append(c0, c1, c2, c3); tbl.append(tr);
   }
   $("#card-hoods .table-view").replaceChildren(tbl);
@@ -499,7 +499,7 @@ function renderYelp() {
     const c0 = document.createElement("td"); c0.textContent = r.name;
     const c1 = document.createElement("td"); c1.textContent = fmt(r.n);
     const c2 = document.createElement("td");
-    c2.textContent = r.mean === null ? "–" : r.n < 30 ? `– (n=${r.n})` : r.mean.toFixed(2);
+    c2.textContent = r.mean === null ? "n/a" : r.n < 30 ? `n/a (n=${r.n})` : r.mean.toFixed(2);
     tr.append(c0, c1, c2); tbl.append(tr);
   }
   $("#card-yelp .table-view").replaceChildren(tbl);
