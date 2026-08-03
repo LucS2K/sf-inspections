@@ -144,8 +144,10 @@ def main() -> None:
     try:
         for permit, dba, address, cohort in todo:
             try:
+                import re as _re
+                clean = lambda t: _re.sub(r"\s+", " ", (t or "").strip())
                 match = get(MATCH_URL, headers, {
-                    "name": (dba or "")[:64], "address1": (address or "")[:64],
+                    "name": clean(dba)[:64], "address1": clean(address)[:64],
                     "city": "San Francisco", "state": "CA", "country": "US",
                     "match_threshold": "default", "limit": 1})
             except SkipFacility:

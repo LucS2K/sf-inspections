@@ -660,15 +660,15 @@ function showFacility(f) {
   const d = $("#facility-detail");
   d.replaceChildren();
   const h = document.createElement("h3"); h.textContent = f.dba || f.permit;
-  const sub = document.createElement("div"); sub.className = "muted";
+  const sub = document.createElement("div"); sub.className = "fac-sub";
   sub.textContent = `${(f.address || "").replace(/\s+/g, " ")} · ${f.hood || "Unknown"} · permit ${f.permit}`;
   d.append(h, sub);
   if (f.yelp_rating !== null && f.yelp_rating !== undefined) {
-    const yl = document.createElement("div"); yl.className = "muted";
+    const yl = document.createElement("div"); yl.className = "fac-yelp";
     const closed = f.yelp_closed === "True" || f.yelp_closed === true;
-    yl.textContent = `Yelp: ${Number(f.yelp_rating).toFixed(1)} stars, ` +
+    yl.textContent = `★ ${Number(f.yelp_rating).toFixed(1)} on Yelp · ` +
       `${fmt(Number(f.yelp_reviews || 0))} reviews` +
-      (closed ? ", marked closed on Yelp" : "");
+      (closed ? " · marked closed on Yelp" : "");
     d.append(yl);
   }
   const ul = document.createElement("ul"); ul.className = "visits";

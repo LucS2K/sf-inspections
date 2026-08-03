@@ -307,3 +307,13 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
 #facility-list button { align-items: baseline; }
 #facility-list .chip { vertical-align: baseline; }
 #list-more { margin-top: 12px; }
+
+/* facility detail: address and Yelp line readable, not whispered */
+.fac-sub {
+  font-family: var(--sans); font-size: 14.5px; color: var(--text-secondary);
+}
+.fac-yelp {
+  font-family: var(--sans); font-size: 15.5px; font-weight: 650;
+  color: var(--text-primary); margin-top: 6px;
+}
+.search-results .addr { color: var(--text-secondary); font-size: 13.5px; }
