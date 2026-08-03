@@ -317,3 +317,13 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
   color: var(--text-primary); margin-top: 6px;
 }
 .search-results .addr { color: var(--text-secondary); font-size: 13.5px; }
+
+/* neighborhood photo banner */
+.hood-photo { margin: 16px 0 8px; }
+.hood-photo img {
+  display: block; width: 100%; max-height: 300px; object-fit: cover;
+  border-radius: 12px; border: 1px solid var(--border);
+}
+.hood-photo figcaption {
+  font-family: var(--sans); font-size: 12.5px; margin-top: 6px;
+}

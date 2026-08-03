@@ -92,6 +92,27 @@ function episodesF() {
 
 /* ---------- render ---------- */
 
+/* neighborhood photos: shown when that neighborhood is selected;
+   missing files simply keep the banner hidden */
+const HOOD_PHOTOS = {
+  "Presidio": ["photos/presidio.jpg", "The Golden Gate Bridge from the Presidio headlands"],
+  "Russian Hill": ["photos/russian-hill.jpg", "Lombard Street, Russian Hill"],
+  "Haight Ashbury": ["photos/haight-ashbury.jpg", "A Victorian corner in the Haight"],
+  "Oceanview/Merced/Ingleside": ["photos/oceanview-merced-ingleside.jpg", "Muni light rail at the Balboa Park yard"],
+};
+
+function renderHoodPhoto() {
+  const fig = $("#hood-photo");
+  const entry = HOOD_PHOTOS[state.hood];
+  if (!entry) { fig.hidden = true; return; }
+  const img = $("#hood-photo-img");
+  img.onerror = () => { fig.hidden = true; };
+  img.onload = () => { fig.hidden = false; };
+  img.src = entry[0];
+  img.alt = entry[1];
+  $("#hood-photo-cap").textContent = entry[1];
+}
+
 function render() {
   const vs = visits();
   const eps = episodesF();
@@ -102,6 +123,7 @@ function render() {
   renderHoods();
   renderYelp();
   renderFacilityList(vs);
+  renderHoodPhoto();
 }
 
 let listShown = 30;
