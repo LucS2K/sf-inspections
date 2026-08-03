@@ -342,53 +342,8 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
 .pullstat .rest { font-size: 19px; color: var(--text-secondary); }
 .chapter.feature { background: var(--surface-1); border: 1px solid var(--grid); border-radius: 6px; margin-inline: -20px; padding: 20px 20px 28px; }
 
-/* the 60-second version: guided walkthrough */
-.story { margin: 8px 0 34px; }
-.story-card {
-  background: var(--surface-1); border: 1px solid var(--grid);
-  border-radius: 8px; padding: 26px 26px 18px; min-height: 320px;
-  display: flex; flex-direction: column; justify-content: space-between;
-}
-.story-kicker {
-  font-family: var(--sans); font-size: 12px; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--muted); margin: 0 0 14px;
-}
-.story-big {
-  font-family: var(--serif); font-weight: 700; line-height: 1;
-  font-size: clamp(46px, 7vw, 68px); letter-spacing: -0.02em;
-  color: var(--series-1); margin: 0 0 6px; font-variant-numeric: tabular-nums;
-}
-.story-label {
-  font-family: var(--sans); font-size: 14px; color: var(--muted);
-  margin: 0 0 14px;
-}
-.story-text {
-  font-family: var(--serif); font-size: 19px; line-height: 1.5;
-  color: var(--text-primary); margin: 0 0 14px; max-width: 56ch;
-  text-wrap: pretty;
-}
-.story-cta {
-  font-family: var(--sans); font-size: 14.5px; font-weight: 600;
-  display: inline-block; margin-bottom: 6px;
-}
-.story-nav {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; border-top: 1px solid var(--grid); padding-top: 14px;
-}
-.story-nav .ghost-btn:disabled { opacity: 0.35; cursor: default; }
-.story-dots { display: flex; gap: 8px; }
-.story-dot {
-  width: 10px; height: 10px; border-radius: 999px; border: 1px solid var(--baseline);
-  background: transparent; padding: 0; cursor: pointer;
-}
-.story-dot[aria-selected="true"] { background: var(--series-1); border-color: var(--series-1); }
-.story-skip { font-family: var(--sans); font-size: 13px; margin: 10px 2px 0; }
 .data-divider { border-top: 2px solid var(--baseline); padding-top: 18px; margin: 0 0 18px; }
 .data-divider .note { max-width: 70ch; }
-@media (max-width: 640px) {
-  .story-card { padding: 20px 18px 14px; min-height: 340px; }
-  .story-text { font-size: 17px; }
-}
 
 /* the city, mapped */
 .map-wrap { display: grid; grid-template-columns: 250px 1fr; gap: 22px; align-items: start; }
@@ -455,11 +410,39 @@ svg .stage-label { fill: var(--text-secondary); font-size: 12px; }
 html { scroll-behavior: smooth; }
 @keyframes story-fwd { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
 @keyframes story-back { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: none; } }
-.story-step.slide-fwd { animation: story-fwd 0.28s ease both; }
-.story-step.slide-back { animation: story-back 0.28s ease both; }
 #map-pop { animation: story-fwd 0.2s ease both; }
 @view-transition { navigation: auto; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .story-step.slide-fwd, .story-step.slide-back, #map-pop { animation: none; }
+  #map-pop { animation: none; }
+}
+
+/* at-a-glance overview */
+.overview { margin: 8px 0 34px; }
+.ov-lede {
+  font-family: var(--serif); font-size: 19px; line-height: 1.55;
+  color: var(--text-primary); max-width: 58ch; margin: 0 0 18px; text-wrap: pretty;
+}
+.ov-band {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  border-top: 2px solid var(--baseline); border-bottom: 1px solid var(--grid);
+}
+.ov-tile {
+  display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px;
+  text-decoration: none; color: inherit; border-left: 1px solid var(--grid);
+}
+.ov-tile:first-child { border-left: 0; padding-left: 0; }
+.ov-tile:hover .ov-num { text-decoration: underline; text-underline-offset: 4px; }
+.ov-num {
+  font-family: var(--serif); font-weight: 700; font-size: clamp(24px, 3vw, 34px);
+  letter-spacing: -0.01em; color: var(--series-1); font-variant-numeric: tabular-nums;
+}
+.ov-lab { font-family: var(--sans); font-size: 12.5px; color: var(--text-secondary); line-height: 1.45; }
+.ov-verdict {
+  font-family: var(--sans); font-size: 14.5px; color: var(--text-secondary);
+  margin: 14px 0 0; max-width: 70ch;
+}
+@media (max-width: 700px) {
+  .ov-band { grid-template-columns: 1fr 1fr; }
+  .ov-tile { border-left: 0; padding-left: 0; }
 }
