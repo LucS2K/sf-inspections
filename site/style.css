@@ -4,7 +4,7 @@
 :root {
   color-scheme: light;
   --page:#fbfbfd; --surface-1:#ffffff;
-  --text-primary:#1d1d1f; --text-secondary:#515154; --muted:#86868b;
+  --text-primary:#1d1d1f; --text-secondary:#515154; --muted:#74747b;
   --grid:#e8e8ed; --baseline:#d2d2d7; --border:rgba(29,29,31,0.12);
   --series-1:#0071e3;
   --status-warning:#dd9500; --status-critical:#c53a1a; --status-good:#00795a;
@@ -17,7 +17,7 @@
 :root[data-theme="dark"], :root[data-theme="auto-dark"] {
   color-scheme: dark;
   --page:#000000; --surface-1:#161617;
-  --text-primary:#f5f5f7; --text-secondary:#b8b8bd; --muted:#86868b;
+  --text-primary:#f5f5f7; --text-secondary:#c6c6cc; --muted:#9c9ca3;
   --grid:#26262a; --baseline:#424245; --border:rgba(245,245,247,0.16);
   --series-1:#2997ff;
   --status-warning:#ecb54a; --status-critical:#f07a55; --status-good:#2fbb8c;
@@ -170,7 +170,14 @@ svg .fadein { opacity: 0; transition: opacity 0.6s ease 0.55s; }
 h1 { font-size: clamp(40px, 7.5vw, 76px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.03; margin: 0 0 18px; text-wrap: balance; }
 .dek { font-size: clamp(17px, 2.2vw, 21px); line-height: 1.5; color: var(--text-secondary); margin: 0 auto 18px; max-width: 54ch; text-wrap: pretty; }
 .hero-links { font-size: 15px; margin: 0 0 44px; }
-.hero-glance { max-width: 62ch; margin: 42px auto 0; }
+/* a soft scrim keeps the grey copy readable over the photo */
+.hero-glance {
+  max-width: 62ch; margin: 42px auto 0;
+  background: color-mix(in srgb, var(--page) 58%, transparent);
+  border-radius: 14px; padding: 20px 26px;
+  backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+}
+.hero .dek { color: var(--text-primary); }
 .hg-lede { font-size: 15px; line-height: 1.6; color: var(--text-secondary); margin: 0 0 10px; text-wrap: pretty; }
 .hg-verdict { font-size: 17px; line-height: 1.55; margin: 0; text-wrap: pretty; }
 .hg-why { font-size: 15px; line-height: 1.55; color: var(--text-secondary); margin: 12px 0 0; text-wrap: pretty; }
@@ -254,6 +261,9 @@ h1 { font-size: clamp(40px, 7.5vw, 76px); font-weight: 700; letter-spacing: -0.0
 /* in-scene lookup: search bar + browse list */
 .lookup-search { width: 100%; max-width: 440px; padding: 10px 18px; font-size: 15px; margin-bottom: 16px; }
 .browse-head { font-size: 13px; margin: 4px 0 10px; }
+/* DPH names arrive in mixed case (MOLLIE STONES vs Golden Boy Pizza);
+   display uppercase everywhere so lists read consistently */
+#search-results button > span:first-child, .fq-name, .facility-detail h3 { text-transform: uppercase; }
 
 /* clickable violation details in facility history */
 .viol-toggle {
@@ -409,7 +419,11 @@ svg .gridline { stroke: var(--grid); }
   .topbar-in { flex-wrap: wrap; padding: 8px 12px; gap: 8px; }
   .brand { display: none; }
   .topbar-in input[type="search"] { flex: 1 1 100%; max-width: none; order: 3; }
-  .scene { padding-top: 118px; }
+  /* the wrapped top bar stands ~3 rows tall on phones; scenes clear it,
+     and the hero flows from the top instead of centering under it */
+  .scene { padding-top: 190px; }
+  .hero { min-height: auto; justify-content: flex-start; padding-bottom: 56px; }
+  .scroll-cue { display: none; }
   .dots { display: none; }
   .kpi-row { gap: 14px 28px; }
   .tile { min-width: 100px; }
