@@ -223,7 +223,7 @@ function renderKPIs(S) {
     ["Re-checked", fails ? Math.round(resolved.length * 100 / fails) + "%" : "n/a",
       fails ? `share of ${fmt(fails)} failures with a follow-up inspection` : "failures with a follow-up inspection"],
     ["Median response", resolved.length ? Math.round(median(resolved.map((e) => e.dr))) + " d" : "n/a",
-      resolved.length ? `from failure to the follow-up · n=${fmt(resolved.length)}` : "from failure to the follow-up"],
+      resolved.length ? `how quickly an inspector returns after a failure · n=${fmt(resolved.length)}` : "how quickly an inspector returns after a failure"],
   ];
   const row = $("#kpi-row"); row.replaceChildren();
   for (const [label, value, hint] of tiles) {
