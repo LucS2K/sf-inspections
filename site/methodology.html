@@ -95,18 +95,20 @@
   for by name.</strong> The staged data reconciles exactly against the raw data,
   and 26 automated tests re-verify the assumptions on every weekly refresh.</p>
 
-  <h2>Making the numbers honest</h2>
+  <h2 id="honest">Making the numbers honest</h2>
   <p>The easy version of this analysis would be wrong in quiet ways. The methods
   were chosen to avoid that:</p>
   <ul>
-    <li><strong>Silence is not success.</strong> A failed facility with no
+    <li id="censoring"><strong>Silence is not success.</strong> A failed facility with no
     later inspection has not "stayed fixed", it just has not been observed.
     Durability is only measured where a follow-up actually exists.</li>
-    <li><strong>Compare on the same clock.</strong> Closed facilities get
-    re-checked within weeks; conditional passes within months. Comparing their
-    "still passing" rates naively looks fair and is not. The analysis uses a
-    fixed one-year window for both.</li>
-    <li><strong>Small samples do not get quoted.</strong> Any group under a
+    <li id="same-clock"><strong>Compare on the same clock.</strong> Closed facilities get
+    re-checked within weeks; conditional passes within months. Concretely,
+    post-closure facilities are re-checked at a median of 41 days versus 207
+    for conditional passes, so comparing their "still passing" rates naively
+    looks fair and is not: the two groups are observed on different clocks.
+    The analysis uses a fixed one-year window for both.</li>
+    <li id="small-samples"><strong>Small samples do not get quoted.</strong> Any group under a
     minimum sample size shows its count instead of a rate, on the dashboard
     and in the report.</li>
     <li><strong>Cross-check before concluding.</strong> 150 failures were never
@@ -134,10 +136,23 @@
     <tr><td>Automation</td><td>GitHub Actions</td>
         <td>Weekly cron runs ingest, tests, export, and deploy end to end; CI validates every change</td></tr>
     <tr><td>Text parsing</td><td>Regex + Claude API</td>
-        <td>The violation field concatenates codes and legal text; a deterministic parser validated against recorded counts handles 97%, an LLM re-parsed the hard remainder (every row checked against the inspector's recorded count), and a reviewed keyword ruleset maps every violation to a category and risk tier. An independent LLM re-classification of all descriptions agreed with the ruleset on 65% of labels but left the published finding unchanged, which is the check that matters</td></tr>
+        <td>A deterministic parser handles 97% of the violation text; an LLM re-parses the remainder, every row validated against recorded counts</td></tr>
     <tr><td>This site</td><td>Vanilla JavaScript + SVG, Vercel</td>
         <td>No frameworks; ~2&nbsp;MB of static JSON, so it is fast, free to host, and cannot break</td></tr>
   </table>
+
+  <h3 id="parsing">Parsing and classifying violations</h3>
+  <p>The violation field concatenates statutory codes and legal boilerplate
+  into one text blob per inspection. A deterministic parser, validated
+  against the inspector's recorded violation counts, handles 97% of rows
+  exactly; an AI model re-parsed the hard remainder, with every row checked
+  against the recorded count before loading. A reviewed keyword ruleset then
+  maps every violation to a category and risk tier. As a robustness check,
+  an AI model independently re-classified every violation description: the
+  two methods agree on 65% of labels, yet the published finding does not
+  move. Relapse stays in a narrow flat band across categories under either
+  classification, which is the check that matters. As everywhere else,
+  category groups under 30 episodes are not quoted.</p>
 
   <h2>Building the site</h2>
   <p>The dashboard is deliberately simple technology doing careful work. Charts
@@ -156,11 +171,9 @@
   history, not its star rating. <strong>For food-safety awareness</strong>, it
   makes a public record legible that normally sits in a database nobody reads.
   And <strong>for the city and anyone who holds it accountable</strong>, it
-  measures the enforcement system itself: San Francisco responds to failures
-  within days and most fixes stick, but one in five does not last a year, and
-  a set of failures with no recorded follow-up deserves attention. Public data
-  should be able to answer whether public systems work; this project is that
-  idea, executed on one system.</p>
+  measures the enforcement system itself. Public data should be able to
+  answer whether public systems work; this project is that idea, executed on
+  one system.</p>
   <h2>About me</h2>
   <p>Hi, I'm <strong>Luc</strong>, a business analyst. This started with San
   Francisco's open data portal: the inspection data was public, well
