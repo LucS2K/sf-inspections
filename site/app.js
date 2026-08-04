@@ -362,7 +362,7 @@ function renderMonthly(S) {
   const totPass = rows.reduce((s2, r) => s2 + r.pass, 0);
   const totRated = rows.reduce((s2, r) => s2 + r.pass + r.cp + r.cl, 0);
   const greenShare = totRated ? Math.round(totPass * 100 / totRated) : 0;
-  takeaway("#tk-monthly", `The health department made ${fmt(totalVisits)} inspection visits in this period, about ${fmt(perMonth)} per month. The bars show the ${fmt(totRated)} that received a rating: ${greenShare}% came back green, and the thin amber and red band on top is where enforcement begins.` + drop);
+  takeaway("#tk-monthly", `The health department made ${fmt(totalVisits)} inspection visits in this period, about ${fmt(perMonth)} per month. The bars show the ${fmt(totRated)} that received a rating: ${greenShare}% came back green, which speaks well of the city's food businesses; the thin amber and red band on top is where enforcement begins.` + drop);
 }
 
 /* ---- chart: failures per month (Count bars / Rate line, one card) ---- */
