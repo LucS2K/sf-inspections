@@ -188,6 +188,8 @@ h1 { font-size: clamp(40px, 7.5vw, 76px); font-weight: 700; letter-spacing: -0.0
 .funnel-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
 @media (max-width: 760px) { .funnel-pair { grid-template-columns: 1fr; gap: 20px; } }
 
+.cap-tools { display: inline-flex; align-items: center; gap: 10px; }
+
 /* chart note under the caption */
 .note { font-size: 13.5px; line-height: 1.55; color: var(--text-secondary); max-width: 68ch; margin: 0 0 14px; text-wrap: pretty; }
 
@@ -208,7 +210,9 @@ h1 { font-size: clamp(40px, 7.5vw, 76px); font-weight: 700; letter-spacing: -0.0
     var(--map-nodata-bg) 2px, var(--map-nodata-line) 2px, var(--map-nodata-line) 3px);
 }
 
-/* static full-record fact band (scene 04) */
+.yelp-foot { font-size: 13px; line-height: 1.6; max-width: 68ch; margin: 22px 0 14px; text-wrap: pretty; }
+
+/* static full-record fact band (scene 02 tail) */
 .factband { margin-top: 34px; border-top: 1px solid var(--grid); padding-top: 26px; max-width: 760px; }
 .factband-head { font-size: 15px; line-height: 1.6; color: var(--text-secondary); margin: 0 0 18px; max-width: 62ch; text-wrap: pretty; }
 .factrow { display: flex; flex-wrap: wrap; gap: 14px 44px; margin: 0 0 18px; }

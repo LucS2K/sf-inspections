@@ -91,20 +91,22 @@
       </figure>
     </div>
     <figure class="viz" id="card-monthly">
-      <figcaption class="viz-cap"><span>Inspections per month</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
+      <figcaption class="viz-cap"><span>Rated inspections per month</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
       <div class="legend" id="legend-monthly"></div>
       <div class="chart" id="chart-monthly"></div>
       <p class="tk" id="tk-monthly"></p>
       <div class="table-view" hidden></div>
     </figure>
-    <figure class="viz" id="card-rate">
-      <figcaption class="viz-cap"><span>Failure rate per month</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
-      <div class="chart" id="chart-rate"></div>
-      <p class="tk" id="tk-rate"></p>
-      <div class="table-view" hidden></div>
-    </figure>
     <figure class="viz" id="card-failures">
-      <figcaption class="viz-cap"><span>Failures per month</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
+      <figcaption class="viz-cap"><span>Failures per month</span>
+        <span class="cap-tools">
+          <span class="seg" id="failview" role="group" aria-label="Chart mode">
+            <button type="button" data-value="count" aria-pressed="true">Count</button>
+            <button type="button" data-value="rate" aria-pressed="false">Rate</button>
+          </span>
+          <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
+        </span>
+      </figcaption>
       <div class="legend" id="legend-failures"></div>
       <div class="chart" id="chart-failures"></div>
       <p class="tk" id="tk-failures"></p>
@@ -130,6 +132,19 @@
       <p class="tk" id="tk-funnel"></p>
       <div class="table-view" hidden></div>
     </figure>
+    <aside class="factband viz" aria-label="What failures cite">
+      <p class="factband-head">What do those failures actually cite? They are pile-ons, not single issues. Share of the 1,126 failures citing each problem:</p>
+      <div class="factrow">
+        <div class="fact"><span class="fact-num">71%</span><span class="fact-lab">cleaning and sanitizing</span></div>
+        <div class="fact"><span class="fact-num">69%</span><span class="fact-lab">vermin</span></div>
+        <div class="fact"><span class="fact-num">59%</span><span class="fact-lab">temperature control</span></div>
+        <div class="fact"><span class="fact-num">33%</span><span class="fact-lab">food storage</span></div>
+      </div>
+      <p class="factband-foot">The typical failure spans 4.3 distinct problem categories, and 81% of closures cite
+      a vermin infestation. Yet relapse barely varies by category: repeat failure tracks the
+      <em>facility</em>, not the violation. Full-record figures, unaffected by the filters above.
+      <a href="/report">More in the findings report</a>.</p>
+    </aside>
   </section>
 
   <section class="scene" id="s-hoods" data-nav="Where it clusters">
@@ -157,36 +172,9 @@
     </figure>
   </section>
 
-  <section class="scene" id="s-yelp" data-nav="The null result">
-    <div class="scene-head">
-      <p class="eyebrow">04 &middot; The null result</p>
-      <h2>Yelp can&rsquo;t tell</h2>
-      <p class="lede">Present-day ratings barely differ by enforcement history; the near-identical bars <em>are</em> the finding. Correlation only, on a zero-based 5-star scale. Coverage differs: 86% of enforcement-history facilities match on Yelp vs 67% of the never-failed group, which includes markets and cafeterias Yelp doesn&rsquo;t list.</p>
-    </div>
-    <figure class="viz" id="card-yelp">
-      <figcaption class="viz-cap"><span>Average Yelp rating by enforcement history</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
-      <div class="chart" id="chart-yelp"></div>
-      <p class="tk" id="tk-yelp"></p>
-      <div class="table-view" hidden></div>
-    </figure>
-    <aside class="factband viz" aria-label="What failures cite">
-      <p class="factband-head">So what does the record find? Failures are pile-ons, not single issues. Share of the 1,126 failures citing each problem:</p>
-      <div class="factrow">
-        <div class="fact"><span class="fact-num">71%</span><span class="fact-lab">cleaning and sanitizing</span></div>
-        <div class="fact"><span class="fact-num">69%</span><span class="fact-lab">vermin</span></div>
-        <div class="fact"><span class="fact-num">59%</span><span class="fact-lab">temperature control</span></div>
-        <div class="fact"><span class="fact-num">33%</span><span class="fact-lab">food storage</span></div>
-      </div>
-      <p class="factband-foot">The typical failure spans 4.3 distinct problem categories, and 81% of closures cite
-      a vermin infestation. Yet relapse barely varies by category: repeat failure tracks the
-      <em>facility</em>, not the violation. Full-record figures, unaffected by the filters above.
-      <a href="/report">More in the findings report</a>.</p>
-    </aside>
-  </section>
-
   <section class="scene" id="s-lookup" data-nav="Look it up">
     <div class="scene-head">
-      <p class="eyebrow">05 &middot; Receipts</p>
+      <p class="eyebrow">04 &middot; Receipts</p>
       <h2>Look up any spot</h2>
       <p class="lede">Search any facility by name or address, or browse the list below. The neighborhood filter up top narrows both.</p>
     </div>
@@ -233,6 +221,10 @@
         <dd>The number of cases behind a statistic. Every rate on this site shows its n; groups too small to trust show their count instead of a rate.</dd>
       </dl>
     </details>
+    <p class="muted yelp-foot">The Yelp footnote: review scores barely move with enforcement history. Never-flagged
+    facilities average 3.99 stars (n=568); ever-closed facilities average 3.85 (n=306), a 0.14-star
+    gap on a 5-star scale. Review scores do not reveal kitchen hygiene; this record is the only
+    signal there is. Correlation only, with coverage caveats in the <a href="/report">report</a>.</p>
     <p class="muted stampline"><a href="/report">Read the findings report</a> &middot; <a href="/methodology">How this was built</a> &middot; <span id="stamp"></span></p>
   </section>
 </main>

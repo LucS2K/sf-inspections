@@ -16,7 +16,7 @@ const svgEl = (t, at = {}) => { const e = document.createElementNS("http://www.w
 const el = (t, cls, txt) => { const e = document.createElement(t); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
 const MIN_HOOD_N = 100, MIN_YELP_N = 30;
 
-const state = { period: "all", hood: "all", q: "" };
+const state = { period: "all", hood: "all", q: "", failview: "count" };
 let DATA = null;
 
 /* hero background follows the neighborhood filter; the citywide shot is the
@@ -108,6 +108,12 @@ async function boot() {
       render();
     });
   $("#f-hood").addEventListener("change", (e) => { state.hood = e.target.value; render(); });
+  for (const b of $$("#failview button"))
+    b.addEventListener("click", () => {
+      state.failview = b.dataset.value;
+      for (const o of $$("#failview button")) o.setAttribute("aria-pressed", String(o === b));
+      render();
+    });
   $("#f-search").addEventListener("input", onSearch);
   $("#f-search-scene").addEventListener("input", onSearch);
   for (const btn of $$(".table-toggle"))
@@ -201,12 +207,10 @@ function render() {
   updateLookup();
   renderKPIs(S);
   renderMonthly(S);
-  renderRate(S);
   renderFailures(S);
   renderFunnel(S);
   renderHoods(S);
   renderMap(S);
-  renderYelp(S);
 }
 
 function renderKPIs(S) {
@@ -299,7 +303,10 @@ function renderMonthly(S) {
     else a.un++;
   }
   const rows = keys.map((k) => by[k] || { pass: 0, cp: 0, cl: 0, un: 0 });
-  const counts = rows.map((r) => r.pass + r.cp + r.cl + r.un);
+  /* bars carry rated visits only; unrated stay in tooltip and table so
+     the totals still reconcile without grey noise in the visual */
+  const counts = rows.map((r) => r.pass + r.cp + r.cl);
+  const allCounts = rows.map((r) => r.pass + r.cp + r.cl + r.un);
   const W = chartWidth("#chart-monthly", 900), H = 240, m = { l: 8, r: 8, t: 16, b: 26 };
   const max = Math.max(...counts, 1);
   const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Stacked bar chart, inspections per month by outcome" });
@@ -311,9 +318,9 @@ function renderMonthly(S) {
     const r = rows[i];
     const x = m.l + i * iw + (iw - bw) / 2;
     const scale = (n) => n / max * (H - m.t - m.b);
-    /* pass sits on the baseline; amber, red, then grey stack upward */
+    /* pass sits on the baseline; amber, then red stack upward */
     let y = H - m.b;
-    for (const [n, color] of [[r.pass, cG], [r.cp, cW], [r.cl, cC], [r.un, cU]]) {
+    for (const [n, color] of [[r.pass, cG], [r.cp, cW], [r.cl, cC]]) {
       if (!n) continue;
       const h = Math.max(scale(n), 1);
       y -= h;
@@ -330,8 +337,8 @@ function renderMonthly(S) {
       [cG, "Pass", fmt(r.pass)],
       [cW, "Conditional Pass", fmt(r.cp)],
       [cC, "Closure", fmt(r.cl)],
-      ...(r.un ? [[cU, "No rating", fmt(r.un)]] : []),
-      [null, "Total", fmt(counts[i])]]));
+      [null, "Rated total", fmt(counts[i])],
+      ...(r.un ? [[cU, "No rating (not shown)", fmt(r.un)]] : [])]));
   });
   const peak = counts.indexOf(max);
   const pl = svgEl("text", { x: m.l + peak * iw + iw / 2, y: Math.max(H - m.b - max / max * (H - m.t - m.b) - 6, 12), "text-anchor": "middle", class: "fadein dlabel" });
@@ -340,130 +347,137 @@ function renderMonthly(S) {
   const lg = $("#legend-monthly");
   if (lg) {
     lg.replaceChildren();
-    for (const [c, n] of [[cG, "Pass"], [cW, "Conditional Pass"], [cC, "Closure"], [cU, "No rating"]]) {
+    for (const [c, n] of [[cG, "Pass"], [cW, "Conditional Pass"], [cC, "Closure"]]) {
       const key = el("span", "key"); const sw = el("span", "swatch"); sw.style.background = c;
       key.append(sw, document.createTextNode(n)); lg.append(key);
     }
   }
   tableTwin("#card-monthly", ["Month", "Pass", "Conditional Pass", "Closure", "No rating", "Total"],
-    keys.map((k, i) => [k, fmt(rows[i].pass), fmt(rows[i].cp), fmt(rows[i].cl), fmt(rows[i].un), fmt(counts[i])]));
-  const perMonth = keys.length ? Math.round(counts.reduce((a2, b2) => a2 + b2, 0) / keys.length) : 0;
+    keys.map((k, i) => [k, fmt(rows[i].pass), fmt(rows[i].cp), fmt(rows[i].cl), fmt(rows[i].un), fmt(allCounts[i])]));
+  const totalVisits = allCounts.reduce((a2, b2) => a2 + b2, 0);
+  const perMonth = keys.length ? Math.round(totalVisits / keys.length) : 0;
   let drop = "";
   if (keys.length >= 18) {
     const avg = (arr) => arr.reduce((a2, b2) => a2 + b2, 0) / arr.length;
-    const rAvg = Math.round(avg(counts.slice(-12))), pAvg = Math.round(avg(counts.slice(0, -12)));
+    const rAvg = Math.round(avg(allCounts.slice(-12))), pAvg = Math.round(avg(allCounts.slice(0, -12)));
     if (rAvg < pAvg * 0.75) drop = ` Monthly volume in the most recent year runs well below what came before (about ${fmt(rAvg)} vs ${fmt(pAvg)} per month); whether that is a real slowdown or records still arriving will become clear as weekly refreshes accumulate.`;
   }
   const totPass = rows.reduce((s2, r) => s2 + r.pass, 0);
   const totRated = rows.reduce((s2, r) => s2 + r.pass + r.cp + r.cl, 0);
   const greenShare = totRated ? Math.round(totPass * 100 / totRated) : 0;
-  takeaway("#tk-monthly", `The health department made ${fmt(counts.reduce((a2, b2) => a2 + b2, 0))} inspection visits in this period, about ${fmt(perMonth)} per month, and ${greenShare}% of the rated ones came back green. The thin amber and red band on top is where enforcement begins.` + drop);
+  takeaway("#tk-monthly", `The health department made ${fmt(totalVisits)} inspection visits in this period, about ${fmt(perMonth)} per month. The bars show the ${fmt(totRated)} that received a rating: ${greenShare}% came back green, and the thin amber and red band on top is where enforcement begins.` + drop);
 }
 
-/* ---- chart: failure rate per month (rate line; months under 50 rated visits stay blank) ---- */
-function renderRate(S) {
-  const keys = monthKeys(S.cut);
-  const agg = {};
-  for (const v of S.visits) {
-    if (v[2] === null) continue; /* unrated visits carry no grade */
-    const k = v[0].slice(0, 7);
-    agg[k] = agg[k] || { rated: 0, failed: 0 };
-    agg[k].rated++;
-    if (v[2] !== "Pass") agg[k].failed++;
-  }
-  const pts = keys.map((k) => {
-    const a = agg[k] || { rated: 0, failed: 0 };
-    return { k, ...a, rate: a.rated >= 50 ? a.failed * 100 / a.rated : null };
-  });
-  const elc = $("#chart-rate");
-  const W = chartWidth("#chart-rate", 900), H = 190, m = { l: 40, r: 10, t: 12, b: 26 };
-  const maxRate = Math.max(...pts.map((p) => p.rate || 0), 4);
-  const yMax = Math.ceil(maxRate / 2) * 2;
-  const x = (i) => m.l + (W - m.l - m.r) * (keys.length > 1 ? i / (keys.length - 1) : 0.5);
-  const y = (r) => m.t + (H - m.t - m.b) * (1 - r / yMax);
-  const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Line chart, failure rate per month" });
-  for (let t = 0; t <= yMax; t += yMax / 4) {
-    svg.append(svgEl("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: t === 0 ? "axisline" : "gridline" }));
-    const lbl = svgEl("text", { x: m.l - 6, y: y(t) + 4, "text-anchor": "end" });
-    lbl.textContent = t + "%"; svg.append(lbl);
-  }
-  /* the line is drawn in gap-separated runs so suppressed months stay honest blanks */
-  let run = [];
-  const flush = () => {
-    if (run.length > 1) svg.append(svgEl("polyline", { points: run.map(([i, r]) => `${x(i)},${y(r)}`).join(" "), fill: "none", stroke: CSS("--series-1"), "stroke-width": 2, class: "fadein" }));
-    run = [];
-  };
-  pts.forEach((p, i) => { p.rate === null ? flush() : run.push([i, p.rate]); });
-  flush();
-  const step = Math.ceil(keys.length / Math.floor(W / 76));
-  pts.forEach((p, i) => {
-    if (i % step === 0) {
-      const lbl = svgEl("text", { x: x(i), y: H - 8, "text-anchor": "middle" });
-      lbl.textContent = monthLabel(p.k); svg.append(lbl);
-    }
-    if (p.rate === null) return;
-    svg.append(svgEl("circle", { cx: x(i), cy: y(p.rate), r: 3, fill: CSS("--series-1"), stroke: CSS("--page"), "stroke-width": 1, class: "fadein" }));
-    hitArea(svg, x(i) - 8, m.t, 16, H - m.t - m.b, () => tipShow(monthLabel(p.k) + " " + p.k.slice(0, 4), [
-      [CSS("--series-1"), "Failure rate", p.rate.toFixed(1) + "%"],
-      [null, "Failures", fmt(p.failed)],
-      [null, "Rated visits", fmt(p.rated)]]));
-  });
-  elc.replaceChildren(svg);
-  tableTwin("#card-rate", ["Month", "Rated visits", "Failures", "Failure rate"],
-    pts.map((p) => [p.k, fmt(p.rated), fmt(p.failed), p.rate === null ? `too few to quote (n=${fmt(p.rated)})` : p.rate.toFixed(1) + "%"]));
-  const shown = pts.filter((p) => p.rate !== null);
-  if (shown.length >= 2) {
-    const avgOf = (arr) => arr.reduce((a2, p) => a2 + p.failed, 0) * 100 / Math.max(arr.reduce((a2, p) => a2 + p.rated, 0), 1);
-    let cmp = "";
-    if (shown.length > 12 && shown.slice(0, -12).length >= 6) {
-      const rA = avgOf(shown.slice(-12)), pA = avgOf(shown.slice(0, -12));
-      cmp = ` The most recent year runs at ${rA.toFixed(1)}% versus ${pA.toFixed(1)}% before, so enforcement intensity ${Math.abs(rA - pA) < 1.5 ? "held roughly steady" : rA > pA ? "rose" : "eased"} even as inspection volume changed.`;
-    }
-    takeaway("#tk-rate", "Month to month, the share of rated visits that fail stays in a narrow band. A rate, so it stays comparable even when inspection volume swings; months under 50 rated visits are left blank." + cmp);
-  } else {
-    takeaway("#tk-rate", "Too few rated visits per month in this selection to chart a fair rate.");
-  }
-}
-
-/* ---- chart: failures per month, stacked ---- */
+/* ---- chart: failures per month (Count bars / Rate line, one card) ---- */
 function renderFailures(S) {
   const keys = monthKeys(S.cut);
   const cp = {}, cl = {};
   for (const e of S.eps) { const k = e.d.slice(0, 7); (e.r === "C" ? cl : cp)[k] = ((e.r === "C" ? cl : cp)[k] || 0) + 1; }
   const a = keys.map((k) => cp[k] || 0), b = keys.map((k) => cl[k] || 0);
-  const W = chartWidth("#chart-failures", 900), H = 220, m = { l: 8, r: 8, t: 16, b: 26 };
-  const max = Math.max(...keys.map((k, i) => a[i] + b[i]), 1);
-  const cWarn = CSS("--status-warning"), cCrit = CSS("--status-critical");
-  const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Stacked bar chart, failures per month" });
-  const iw = (W - m.l - m.r) / keys.length, bw = Math.min(iw * 0.62, 34);
-  svg.append(svgEl("line", { x1: m.l, x2: W - m.r, y1: H - m.b + 0.5, y2: H - m.b + 0.5, class: "axisline" }));
-  keys.forEach((k, i) => {
-    const hA = a[i] / max * (H - m.t - m.b), hB = b[i] / max * (H - m.t - m.b);
-    const x = m.l + i * iw + (iw - bw) / 2;
-    const g = svgEl("g", { class: "grow" }); g.style.setProperty("--i", i);
-    if (a[i]) g.append(svgEl("rect", { x, y: H - m.b - hA, width: bw, height: hA, fill: cWarn }));
-    if (b[i]) g.append(svgEl("rect", { x, y: H - m.b - hA - hB, width: bw, height: hB, rx: Math.min(3, bw / 4), fill: cCrit }));
-    svg.append(g);
-    const step = Math.ceil(keys.length / Math.floor(W / 76));
-    if (i % step === 0) {
-      const t = svgEl("text", { x: m.l + i * iw + iw / 2, y: H - 8, "text-anchor": "middle" });
-      t.textContent = monthLabel(k); svg.append(t);
-    }
-    hitArea(svg, m.l + i * iw, m.t, iw, H - m.t - m.b, () => tipShow(monthLabel(k) + " " + k.slice(0, 4),
-      [[cWarn, "Conditional Pass", fmt(a[i])], [cCrit, "Closure", fmt(b[i])], [null, "Total", fmt(a[i] + b[i])]]));
-  });
-  $("#chart-failures").replaceChildren(svg);
-  const lg = $("#legend-failures"); lg.replaceChildren();
-  for (const [c, n] of [[cWarn, "Conditional Pass"], [cCrit, "Closure"]]) {
-    const k = el("span", "key"); const sw = el("span", "swatch"); sw.style.background = c;
-    k.append(sw, document.createTextNode(n)); lg.append(k);
+  const agg = {};
+  for (const v of S.visits) {
+    if (v[2] === null) continue; /* unrated visits carry no grade */
+    const k = v[0].slice(0, 7);
+    const r = agg[k] || (agg[k] = { rated: 0, failed: 0 });
+    r.rated++;
+    if (v[2] !== "Pass") r.failed++;
   }
-  tableTwin("#card-failures", ["Month", "Conditional Pass", "Closure", "Total"],
-    keys.map((k, i) => [k, fmt(a[i]), fmt(b[i]), fmt(a[i] + b[i])]));
-  const nCp = a.reduce((s2, v2) => s2 + v2, 0), nCl = b.reduce((s2, v2) => s2 + v2, 0);
-  const rated = S.visits.filter((v) => v[2] !== null).length;
-  const pct = rated ? ((nCp + nCl) * 100 / rated).toFixed(1) : "0";
-  takeaway("#tk-failures", `${pct}% of rated visits found a problem serious enough to act on: ${fmt(nCp)} facilities were put on notice (Conditional Pass) and ${fmt(nCl)} were shut down on the spot (Closure).`);
+  const pts = keys.map((k) => {
+    const r = agg[k] || { rated: 0, failed: 0 };
+    return { k, ...r, rate: r.rated >= 50 ? r.failed * 100 / r.rated : null };
+  });
+
+  const chart = $("#chart-failures");
+  const lg = $("#legend-failures"); lg.replaceChildren();
+  const cWarn = CSS("--status-warning"), cCrit = CSS("--status-critical");
+
+  if (state.failview === "rate") {
+    /* rate line: comparable across volume swings; months under 50 rated visits stay blank */
+    const W = chartWidth("#chart-failures", 900), H = 220, m = { l: 40, r: 10, t: 12, b: 26 };
+    const maxRate = Math.max(...pts.map((p) => p.rate || 0), 4);
+    const yMax = Math.ceil(maxRate / 2) * 2;
+    const x = (i) => m.l + (W - m.l - m.r) * (keys.length > 1 ? i / (keys.length - 1) : 0.5);
+    const y = (r) => m.t + (H - m.t - m.b) * (1 - r / yMax);
+    const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Line chart, failure rate per month" });
+    for (let t = 0; t <= yMax; t += yMax / 4) {
+      svg.append(svgEl("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: t === 0 ? "axisline" : "gridline" }));
+      const lbl = svgEl("text", { x: m.l - 6, y: y(t) + 4, "text-anchor": "end" });
+      lbl.textContent = t + "%"; svg.append(lbl);
+    }
+    /* the line is drawn in gap-separated runs so suppressed months stay honest blanks */
+    let run = [];
+    const flush = () => {
+      if (run.length > 1) svg.append(svgEl("polyline", { points: run.map(([i, r]) => `${x(i)},${y(r)}`).join(" "), fill: "none", stroke: CSS("--series-1"), "stroke-width": 2, class: "fadein" }));
+      run = [];
+    };
+    pts.forEach((p, i) => { p.rate === null ? flush() : run.push([i, p.rate]); });
+    flush();
+    const step = Math.ceil(keys.length / Math.floor(W / 76));
+    pts.forEach((p, i) => {
+      if (i % step === 0) {
+        const lbl = svgEl("text", { x: x(i), y: H - 8, "text-anchor": "middle" });
+        lbl.textContent = monthLabel(p.k); svg.append(lbl);
+      }
+      if (p.rate === null) return;
+      svg.append(svgEl("circle", { cx: x(i), cy: y(p.rate), r: 3, fill: CSS("--series-1"), stroke: CSS("--page"), "stroke-width": 1, class: "fadein" }));
+      hitArea(svg, x(i) - 8, m.t, 16, H - m.t - m.b, () => tipShow(monthLabel(p.k) + " " + p.k.slice(0, 4), [
+        [CSS("--series-1"), "Failure rate", p.rate.toFixed(1) + "%"],
+        [null, "Failures", fmt(p.failed)],
+        [null, "Rated visits", fmt(p.rated)]]));
+    });
+    chart.replaceChildren(svg);
+    const shown = pts.filter((p) => p.rate !== null);
+    if (shown.length >= 2) {
+      const avgOf = (arr) => arr.reduce((a2, p) => a2 + p.failed, 0) * 100 / Math.max(arr.reduce((a2, p) => a2 + p.rated, 0), 1);
+      let cmp = "";
+      if (shown.length > 12 && shown.slice(0, -12).length >= 6) {
+        const rA = avgOf(shown.slice(-12)), pA = avgOf(shown.slice(0, -12));
+        cmp = ` The most recent year runs at ${rA.toFixed(1)}% versus ${pA.toFixed(1)}% before, so enforcement intensity ${Math.abs(rA - pA) < 1.5 ? "held roughly steady" : rA > pA ? "rose" : "eased"} even as inspection volume changed.`;
+      }
+      takeaway("#tk-failures", "The share of rated visits that fail stays in a narrow band month to month. A rate, so it stays comparable even when inspection volume swings; months under 50 rated visits are left blank." + cmp);
+    } else {
+      takeaway("#tk-failures", "Too few rated visits per month in this selection to chart a fair rate.");
+    }
+  } else {
+    /* count bars, stacked Conditional Pass / Closure */
+    const W = chartWidth("#chart-failures", 900), H = 220, m = { l: 8, r: 8, t: 16, b: 26 };
+    const max = Math.max(...keys.map((k, i) => a[i] + b[i]), 1);
+    const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Stacked bar chart, failures per month" });
+    const iw = (W - m.l - m.r) / keys.length, bw = Math.min(iw * 0.62, 34);
+    svg.append(svgEl("line", { x1: m.l, x2: W - m.r, y1: H - m.b + 0.5, y2: H - m.b + 0.5, class: "axisline" }));
+    keys.forEach((k, i) => {
+      const hA = a[i] / max * (H - m.t - m.b), hB = b[i] / max * (H - m.t - m.b);
+      const x = m.l + i * iw + (iw - bw) / 2;
+      const g = svgEl("g", { class: "grow" }); g.style.setProperty("--i", i);
+      if (a[i]) g.append(svgEl("rect", { x, y: H - m.b - hA, width: bw, height: hA, fill: cWarn }));
+      if (b[i]) g.append(svgEl("rect", { x, y: H - m.b - hA - hB, width: bw, height: hB, rx: Math.min(3, bw / 4), fill: cCrit }));
+      svg.append(g);
+      const step = Math.ceil(keys.length / Math.floor(W / 76));
+      if (i % step === 0) {
+        const t = svgEl("text", { x: m.l + i * iw + iw / 2, y: H - 8, "text-anchor": "middle" });
+        t.textContent = monthLabel(k); svg.append(t);
+      }
+      hitArea(svg, m.l + i * iw, m.t, iw, H - m.t - m.b, () => tipShow(monthLabel(k) + " " + k.slice(0, 4),
+        [[cWarn, "Conditional Pass", fmt(a[i])], [cCrit, "Closure", fmt(b[i])], [null, "Total", fmt(a[i] + b[i])]]));
+    });
+    chart.replaceChildren(svg);
+    for (const [c, n] of [[cWarn, "Conditional Pass"], [cCrit, "Closure"]]) {
+      const k = el("span", "key"); const sw = el("span", "swatch"); sw.style.background = c;
+      k.append(sw, document.createTextNode(n)); lg.append(k);
+    }
+    const nCp = a.reduce((s2, v2) => s2 + v2, 0), nCl = b.reduce((s2, v2) => s2 + v2, 0);
+    const rated = S.visits.filter((v) => v[2] !== null).length;
+    const pct = rated ? ((nCp + nCl) * 100 / rated).toFixed(1) : "0";
+    takeaway("#tk-failures", `${pct}% of rated visits found a problem serious enough to act on: ${fmt(nCp)} facilities were put on notice (Conditional Pass) and ${fmt(nCl)} were shut down on the spot (Closure). Flip to Rate for the volume-proof view.`);
+  }
+
+  /* one table twin serves both views */
+  tableTwin("#card-failures", ["Month", "Conditional Pass", "Closure", "Total failures", "Rated visits", "Failure rate"],
+    keys.map((k, i) => {
+      const p = pts[i];
+      return [k, fmt(a[i]), fmt(b[i]), fmt(a[i] + b[i]), fmt(p.rated),
+              p.rate === null ? `n/a (n=${fmt(p.rated)})` : p.rate.toFixed(1) + "%"];
+    }));
 }
 
 /* ---- chart: enforcement funnel (waffle: one square per failure) ---- */
@@ -758,61 +772,6 @@ function renderMap(S) {
   takeaway("#tk-map", qualifying.length
     ? `${qualifying[0].h} sits deepest in the red this period, with ${qualifying[0].rate.toFixed(1)}% of ${fmt(qualifying[0].rated)} rated visits finding a problem. Red marks the city's highest quarter of failure rates, not an absolute danger zone: even there, most inspections pass. ${unshaded} neighborhoods are hatched because they have too few rated inspections to rate fairly, so read the colors as enforcement activity, not a hygiene league table.`
     : "No neighborhood clears 100 rated inspections in this selection; widen the period for a fair map.");
-}
-
-/* ---- chart: Yelp vs enforcement history (zero-based 5-star scale) ---- */
-function renderYelp(S) {
-  const groups = { never: [], cond: [], closed: [] };
-  for (const { cp, cl, f } of S.perFac.values()) {
-    if (f.yelp_rating == null) continue;
-    (cl ? groups.closed : cp ? groups.cond : groups.never).push(f.yelp_rating);
-  }
-  const defs = [
-    ["never", "Never failed", CSS("--status-good")],
-    ["cond", "Conditional Pass only", CSS("--status-warning")],
-    ["closed", "Ever closed", CSS("--status-critical")]];
-  const W = chartWidth("#chart-yelp", 900), H = 300, m = { l: 34, r: 8, t: 20, b: 56 };
-  const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Bar chart, average Yelp rating by enforcement history, zero-based five-star scale" });
-  for (let s = 0; s <= 5; s++) {
-    const y = H - m.b - s / 5 * (H - m.t - m.b);
-    svg.append(svgEl("line", { x1: m.l, x2: W - m.r, y1: y + 0.5, y2: y + 0.5, class: s === 0 ? "axisline" : "gridline" }));
-    const t = svgEl("text", { x: m.l - 8, y: y + 4, "text-anchor": "end" }); t.textContent = s; svg.append(t);
-  }
-  const iw = (W - m.l - m.r) / defs.length, bw = Math.min(iw * 0.4, 120);
-  const rows = [];
-  defs.forEach(([key, name, color], i) => {
-    const arr = groups[key];
-    const n = arr.length, ok = n >= MIN_YELP_N;
-    const mean = n ? arr.reduce((a, b) => a + b, 0) / n : 0;
-    const cx = m.l + i * iw + iw / 2;
-    if (ok) {
-      const h = mean / 5 * (H - m.t - m.b);
-      const rect = svgEl("rect", { x: cx - bw / 2, y: H - m.b - h, width: bw, height: h, rx: 6, fill: color, class: "grow" });
-      rect.style.setProperty("--i", i * 4); svg.append(rect);
-      const vl = svgEl("text", { x: cx, y: H - m.b - h - 8, "text-anchor": "middle", class: "fadein dlabel" });
-      vl.textContent = mean.toFixed(2); svg.append(vl);
-    } else {
-      const t = svgEl("text", { x: cx, y: H - m.b - 16, "text-anchor": "middle", class: "sublabel" });
-      t.textContent = "too few to quote"; svg.append(t);
-    }
-    const l1 = svgEl("text", { x: cx, y: H - m.b + 20, "text-anchor": "middle", class: "dlabel" });
-    l1.textContent = name; svg.append(l1);
-    const l2 = svgEl("text", { x: cx, y: H - m.b + 38, "text-anchor": "middle", class: "sublabel" });
-    l2.textContent = `n=${fmt(n)}`; svg.append(l2);
-    hitArea(svg, m.l + i * iw, m.t, iw, H - m.t - m.b, () => tipShow(name, ok
-      ? [[color, "Mean Yelp rating", mean.toFixed(2)], [null, "Facilities with a rating", fmt(n)]]
-      : [[color, "Facilities with a rating", fmt(n)], [null, "Rate", "too few to quote"]]));
-    rows.push([name, fmt(n), ok ? mean.toFixed(2) : `too few to quote (n=${fmt(n)})`]);
-  });
-  $("#chart-yelp").replaceChildren(svg);
-  tableTwin("#card-yelp", ["Enforcement history", "Facilities with a Yelp rating", "Mean rating (of 5)"], rows);
-  const mean = (arr) => arr.reduce((s2, x2) => s2 + Number(x2), 0) / arr.length;
-  if (groups.never.length >= MIN_YELP_N && groups.closed.length >= MIN_YELP_N) {
-    const gap = Math.abs(mean(groups.never) - mean(groups.closed));
-    takeaway("#tk-yelp", `Facilities that were ever closed average ${mean(groups.closed).toFixed(2)} stars (n=${fmt(groups.closed.length)}); facilities never flagged average ${mean(groups.never).toFixed(2)} (n=${fmt(groups.never.length)}); the gap is ${gap.toFixed(2)} stars. The near-identical bars are the finding: review scores do not reveal kitchen hygiene, and the inspection record is the only signal there is.`);
-  } else {
-    takeaway("#tk-yelp", "Too few Yelp-matched facilities in this selection to compare groups fairly.");
-  }
 }
 
 /* ---------- facility search + neighborhood browse list ---------- */
