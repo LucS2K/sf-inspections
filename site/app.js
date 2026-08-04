@@ -83,9 +83,10 @@ mq.addEventListener("change", applyTheme);
 
 /* ---------- boot ---------- */
 async function boot() {
-  const [summary, facilities, history, episodes] = await Promise.all(
-    ["summary", "facilities", "history", "episodes"].map((f) => fetch(`data/${f}.json`).then((r) => r.json())));
-  DATA = { summary, facilities, history, episodes };
+  const [summary, facilities, history, episodes, violDefs] = await Promise.all(
+    ["summary", "facilities", "history", "episodes", "viol_defs"].map((f) =>
+      fetch(`data/${f}.json`).then((r) => r.ok ? r.json() : null)));
+  DATA = { summary, facilities, history, episodes, violDefs };
   DATA.byPermit = Object.fromEntries(facilities.map((f) => [f.permit, f]));
 
   $("#window-note").textContent = ` · ${summary.window_start.slice(0, 4)} to ${summary.window_end.slice(0, 4)}`;
@@ -426,54 +427,98 @@ function renderFailures(S) {
   takeaway("#tk-failures", `${pct}% of rated visits found a problem serious enough to act on: ${fmt(nCp)} facilities were put on notice (Conditional Pass) and ${fmt(nCl)} were shut down on the spot (Closure).`);
 }
 
-/* ---- chart: enforcement funnel (two panels) ---- */
+/* ---- chart: enforcement funnel (waffle: one square per failure) ---- */
 function renderFunnel(S) {
   const eps = S.eps;
-  const resolved = eps.filter((e) => e.rr !== null);
-  const passed = resolved.filter((e) => e.rr === "Pass");
-  const measurable = passed.filter((e) => e.du !== null);
-  const held = measurable.filter((e) => e.du === "Pass");
+  /* chapter pull-stat above the card: number left, explanation right */
+  const resolvedAll = eps.filter((e) => e.rr !== null);
+  const ps = $("#pull-funnel");
+  if (ps) {
+    if (resolvedAll.length) {
+      ps.replaceChildren();
+      const med = Math.round(median(resolvedAll.map((e) => e.dr)));
+      const big = el("span", "big", Math.round(resolvedAll.length * 100 / eps.length) + "%");
+      const wrapT = el("span", "pull-text");
+      wrapT.append(
+        el("span", "rest", `of ${fmt(eps.length)} failures were re-rated; median ${med} days from failure to the next graded visit.`),
+        el("span", "pull-plain", `Meaning: after almost every failure, an inspector came back to re-check, typically in about ${med} day${med === 1 ? "" : "s"}.`));
+      ps.append(big, wrapT); ps.hidden = false;
+    } else ps.hidden = true;
+  }
+
   const wrap = $("#chart-funnel"); wrap.replaceChildren();
-  const panel = (title, stages) => {
-    const div = el("div");
-    const W = Math.max(Math.min((wrap.clientWidth || 800) / (innerWidth > 760 ? 2 : 1) - 20, 480), 280);
-    const rowH = 66, H = stages.length * rowH + 30;
-    const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": title });
-    const t = svgEl("text", { x: 0, y: 14, class: "dlabel" }); t.textContent = title; svg.append(t);
-    const maxN = Math.max(...stages.map((s) => s.n), 1);
-    stages.forEach((s, i) => {
-      const y = 30 + i * rowH;
-      const bw = Math.max(s.n / maxN * (W - 4), s.n ? 3 : 0);
-      const lab = svgEl("text", { x: 0, y: y + 14, class: "sublabel" });
-      lab.textContent = s.label; svg.append(lab);
-      const r = svgEl("rect", { x: 0, y: y + 22, width: bw, height: 18, rx: 5, fill: s.color, class: "grow-x" });
-      r.style.setProperty("--i", i); svg.append(r);
-      const val = svgEl("text", { x: 0, y: y + 56, class: "fadein" });
-      val.textContent = s.value; svg.append(val);
-      hitArea(svg, 0, y + 18, W, 26, () => tipShow(s.label, [[s.color, "n", fmt(s.n)], ...(s.tip || [])]));
-    });
-    div.append(svg); return div;
-  };
-  const pc = (a, b) => b ? Math.round(a * 100 / b) + "%" : "n/a";
-  const cB = CSS("--series-1"), cG = CSS("--status-good");
-  wrap.append(
-    panel("Response", [
-      { label: "Failures", n: eps.length, value: fmt(eps.length), color: cB },
-      { label: "Re-rated at a later visit", n: resolved.length, value: `${fmt(resolved.length)} · ${pc(resolved.length, eps.length)} of failures`, color: cB },
-      { label: "Passed at that recheck", n: passed.length, value: `${fmt(passed.length)} · ${pc(passed.length, resolved.length)} of re-rated`, color: cG },
-    ]),
-    panel("Durability", [
-      { label: "Passed rechecks with one more rated visit", n: measurable.length, value: fmt(measurable.length), color: cB,
-        tip: [[null, "of passed rechecks", pc(measurable.length, passed.length)]] },
-      { label: "Still passing at that next visit (held)", n: held.length, value: measurable.length ? `${fmt(held.length)} · ${pc(held.length, measurable.length)} held` : "too few to quote", color: cG },
-    ]));
-  tableTwin("#card-funnel", ["Stage", "n", "Share"], [
-    ["Failures", fmt(eps.length), "n/a"],
-    ["Re-rated at a later visit", fmt(resolved.length), pc(resolved.length, eps.length) + " of failures"],
-    ["Passed at that recheck", fmt(passed.length), pc(passed.length, resolved.length) + " of re-rated"],
-    ["Passed rechecks with one more rated visit", fmt(measurable.length), pc(measurable.length, passed.length) + " of passed"],
-    ["Held (still passing at next visit)", fmt(held.length), pc(held.length, measurable.length) + " of measurable"],
-  ]);
+  const groups = [["C", "After a Closure"], ["P", "After a Conditional Pass"]];
+  const tableRows = [];
+  for (const [code, title] of groups) {
+    const g = eps.filter((e) => e.r === code);
+    const resolved = g.filter((e) => e.rr !== null);
+    const passed = g.filter((e) => e.rr === "Pass");
+    const observed = passed.filter((e) => e.du !== null);
+    const held = observed.filter((e) => e.du === "Pass");
+    tableRows.push([title, g.length, resolved.length, passed.length, held.length]);
+
+    const cats = [
+      ["Held at next check", held.length, CSS("--status-good")],
+      ["Passed, awaiting the next check", passed.length - observed.length,
+       `color-mix(in srgb, ${CSS("--status-good")} 55%, ${CSS("--page")})`],
+      ["Relapsed at next check", observed.length - held.length, CSS("--status-warning")],
+      ["Failed the re-rating", resolved.length - passed.length, CSS("--status-critical")],
+      ["Never re-rated (unknown)", g.length - resolved.length, "url(#nodata-" + code + ")"],
+    ];
+    const panel = el("div");
+    const h = el("h3", "waffle-title", `${title} (${fmt(g.length)} failures)`);
+    panel.append(h);
+    const cols = 25, cell = 11, gap = 2;
+    const rowsN = Math.ceil(g.length / cols);
+    const W = cols * (cell + gap), H = Math.max(rowsN * (cell + gap), cell);
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%",
+                               style: "max-width:" + W * 1.6 + "px", role: "img",
+                               "aria-label": `Waffle chart, outcomes ${title.toLowerCase()}` });
+    const defs = svgEl("defs", {});
+    const pat = svgEl("pattern", { id: "nodata-" + code, width: 5, height: 5,
+                                   patternUnits: "userSpaceOnUse",
+                                   patternTransform: "rotate(45)" });
+    pat.append(svgEl("rect", { width: 5, height: 5, fill: CSS("--map-nodata-bg") }));
+    pat.append(svgEl("line", { x1: 0, y1: 0, x2: 0, y2: 5,
+                               stroke: CSS("--map-nodata-line"), "stroke-width": 1 }));
+    defs.append(pat);
+    svg.append(defs);
+    let idx = 0;
+    for (const [name, count, color] of cats) {
+      for (let k = 0; k < count; k++, idx++) {
+        const r = svgEl("rect", {
+          x: (idx % cols) * (cell + gap), y: Math.floor(idx / cols) * (cell + gap),
+          width: cell, height: cell, rx: 2, fill: color });
+        r.dataset.cat = name; r.dataset.count = count; r.dataset.color = color;
+        svg.append(r);
+      }
+    }
+    /* one delegated tooltip handler instead of a thousand listeners */
+    const show = (evt) => {
+      const t = evt.target;
+      if (!t.dataset || !t.dataset.cat) { tipHide(); return; }
+      tipShow(title, [[t.dataset.color.startsWith("url") ? CSS("--map-nodata-line") : t.dataset.color,
+                       t.dataset.cat, fmt(Number(t.dataset.count))]]);
+      tipMove(evt);
+    };
+    svg.addEventListener("pointermove", show);
+    svg.addEventListener("pointerleave", tipHide);
+    panel.append(svg);
+    const lg = el("div", "waffle-legend");
+    for (const [name, count, color] of cats) {
+      if (!count) continue;
+      const k = el("span", "key");
+      const sw = el("span", "swatch");
+      if (color.startsWith("url")) sw.classList.add("swatch-hatch");
+      else sw.style.background = color;
+      k.append(sw, el("span", "", `${name}: ${fmt(count)}`));
+      lg.append(k);
+    }
+    panel.append(lg);
+    wrap.append(panel);
+  }
+  tableTwin("#card-funnel", ["", "Failures", "Re-rated", "Passed re-rating", "Held at next check"],
+    tableRows.map((r) => r.map((c, i) => i === 0 ? c : fmt(c))));
   const cls = eps.filter((e) => e.r === "C");
   const clRes = cls.filter((e) => e.dr !== null);
   const medDays = clRes.length ? Math.round(median(clRes.map((e) => e.dr))) : null;
@@ -769,11 +814,30 @@ function showFacility(f) {
     det.append(el("div", "muted", `Yelp ${f.yelp_rating.toFixed(1)}★ (${fmt(f.yelp_reviews)} reviews)`));
   const ul = el("ul", "visits");
   const rows = hist;
-  for (const [date, type, rating, viol] of rows) {
+  for (const [date, type, rating, viol, defIds] of rows) {
     const li = el("li");
     const chip = el("span", "chip " + (rating === "Pass" ? "pass" : rating === "Conditional Pass" ? "cp" : rating === "Closure" ? "closure" : "unrated"), rating || "No rating");
     li.append(el("span", "muted", date), chip);
-    if (viol != null) li.append(el("span", "", `${viol} violation${viol === 1 ? "" : "s"}`));
+    const label = viol != null ? `${viol} violation${viol === 1 ? "" : "s"}` : "";
+    if (label && defIds && defIds.length && DATA.violDefs) {
+      /* clickable: expand what the inspector actually wrote up */
+      const btn = el("button", "viol-toggle", label + " ▸");
+      btn.type = "button";
+      btn.setAttribute("aria-expanded", "false");
+      const detail = el("ul", "viol-list"); detail.hidden = true;
+      for (const id of defIds) detail.append(el("li", "", DATA.violDefs[id] || ""));
+      btn.addEventListener("click", () => {
+        const open = detail.hidden;
+        detail.hidden = !open;
+        btn.setAttribute("aria-expanded", String(open));
+        btn.textContent = label + (open ? " ▾" : " ▸");
+      });
+      li.append(btn);
+      if (type) li.append(el("span", "muted", type));
+      ul.append(li, detail);
+      continue;
+    }
+    if (label) li.append(el("span", "", label));
     if (type) li.append(el("span", "muted", type));
     ul.append(li);
   }

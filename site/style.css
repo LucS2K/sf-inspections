@@ -185,6 +185,41 @@ h1 { font-size: clamp(40px, 7.5vw, 76px); font-weight: 700; letter-spacing: -0.0
 .funnel-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
 @media (max-width: 760px) { .funnel-pair { grid-template-columns: 1fr; gap: 20px; } }
 
+/* chart note under the caption */
+.note { font-size: 13.5px; line-height: 1.55; color: var(--text-secondary); max-width: 68ch; margin: 0 0 14px; text-wrap: pretty; }
+
+/* chapter pull-stat: number left, explanation right */
+.pullstat { margin: 0 0 26px; line-height: 1.3; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.pullstat .big { display: block; font-size: clamp(44px, 6vw, 60px); font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--series-1); font-variant-numeric: tabular-nums; }
+.pull-text { flex: 1 1 300px; min-width: 260px; max-width: 60ch; }
+.pull-text .rest { display: block; font-size: 17px; color: var(--text-primary); }
+.pull-plain { display: block; margin-top: 8px; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
+
+/* waffle funnel */
+.waffle-title { font-size: 13px; margin: 0 0 8px; color: var(--text-secondary); font-weight: 600; }
+.waffle-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12.5px; color: var(--text-secondary); }
+.waffle-legend .key { display: inline-flex; align-items: center; gap: 6px; }
+.waffle-legend .swatch { width: 11px; height: 11px; border-radius: 3.5px; display: inline-block; }
+.swatch-hatch {
+  background: repeating-linear-gradient(45deg, var(--map-nodata-bg),
+    var(--map-nodata-bg) 2px, var(--map-nodata-line) 2px, var(--map-nodata-line) 3px);
+}
+
+/* clickable violation details in facility history */
+.viol-toggle {
+  border: 0; background: none; padding: 0; cursor: pointer;
+  font-family: var(--sans); font-size: 14px; color: var(--series-1);
+  text-decoration: underline dotted; text-underline-offset: 3px;
+}
+.viol-toggle:hover { color: var(--text-primary); }
+.viol-list {
+  list-style: disc; margin: 2px 0 10px; padding: 0 0 0 110px;
+  font-size: 13.5px; line-height: 1.55; color: var(--text-secondary);
+}
+/* specificity must beat .facility-detail .visits li, which flexes rows */
+.facility-detail .visits .viol-list li,
+.viol-list li { display: list-item; margin: 4px 0 4px 16px; padding: 0; border-bottom: none; }
+
 .legend { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
 .legend .key { display: inline-flex; align-items: center; gap: 6px; }
 .legend .swatch { width: 11px; height: 11px; border-radius: 3.5px; display: inline-block; }

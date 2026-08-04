@@ -117,8 +117,14 @@
       <h2 id="funnel-headline">The system responds fast</h2>
       <p class="lede">Each failure followed to its next rated visit, then the one after. &ldquo;Held&rdquo; is measured only where a later visit exists; silence is censoring, not success.</p>
     </div>
+    <p class="pullstat" id="pull-funnel" hidden></p>
     <figure class="viz" id="card-funnel">
       <figcaption class="viz-cap"><span>The enforcement funnel</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
+      <p class="note">Every square is one failure, followed to its next graded
+      inspection and the one after. Green means fixed (full green means it was
+      still fixed at the next check); <span class="w-cp">amber</span> slipped
+      back; <span class="w-closure">red</span> failed the re-check. Hatched
+      squares were never re-rated: unknown, not fixed.</p>
       <div class="chart funnel-pair" id="chart-funnel"></div>
       <p class="tk" id="tk-funnel"></p>
       <div class="table-view" hidden></div>
