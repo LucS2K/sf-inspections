@@ -231,11 +231,8 @@ function renderKPIs(S) {
     t.append(el("div", "value", value), el("div", "label", label), el("div", "hint", hint));
     row.append(t);
   }
-  const hl = $("#funnel-headline");
-  if (fails && resolved.length) {
-    const pct = Math.round(resolved.length * 100 / fails);
-    hl.textContent = `${pct}% re-rated, median ${Math.round(median(resolved.map((e) => e.dr)))} days`;
-  } else hl.textContent = "The system responds fast";
+  /* the scene 02 headline stays static ("The system responds fast");
+     the pull-stat below it carries the numbers, once */
 }
 
 /* ---- tooltip ---- */
