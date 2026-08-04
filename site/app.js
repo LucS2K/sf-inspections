@@ -344,8 +344,13 @@ const TERM_DEFS = {
 };
 
 function initTermDefs() {
+  /* definitions only on the first appearance of each term; later tinted
+     mentions stay plain so the page is not littered with dotted underlines */
+  const seen = new Set();
   for (const el of document.querySelectorAll(".w-cp, .w-closure")) {
     const key = el.classList.contains("w-cp") ? "w-cp" : "w-closure";
+    if (seen.has(key)) continue;
+    seen.add(key);
     const [term, colorVar, def] = TERM_DEFS[key];
     el.classList.add("has-def");
     el.tabIndex = 0;
