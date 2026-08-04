@@ -19,6 +19,58 @@ const MIN_HOOD_N = 100, MIN_YELP_N = 30;
 const state = { period: "all", hood: "all" };
 let DATA = null;
 
+/* hero background follows the neighborhood filter; the citywide shot is the
+   default and the fallback for hoods without a photo */
+const DEFAULT_PHOTO = "photos/default-all-neighborhood.jpg";
+const HOOD_PHOTOS = {
+  "Bayview Hunters Point": "photos/bayview-hunters-point.jpg",
+  "Bernal Heights": "photos/bernal-heights.jpg",
+  "Castro/Upper Market": "photos/castro-upper-market.jpg",
+  "Chinatown": "photos/chinatown.jpg",
+  "Excelsior": "photos/excelsior.jpg",
+  "Financial District/South Beach": "photos/financial-district-south-beach.jpg",
+  "Glen Park": "photos/glen-park.jpg",
+  "Golden Gate Park": "photos/golden-gate-park.jpg",
+  "Haight Ashbury": "photos/haight-ashbury.jpg",
+  "Hayes Valley": "photos/hayes-valley.jpg",
+  "Inner Richmond": "photos/inner-richmond.jpg",
+  "Inner Sunset": "photos/inner-sunset.jpg",
+  "Japantown": "photos/japantown.jpg",
+  "Lakeshore": "photos/lakeshore.jpg",
+  "Lone Mountain/USF": "photos/lone-mountain-usf.jpg",
+  "Marina": "photos/marina.jpg",
+  "McLaren Park": "photos/mclaren-park.jpg",
+  "Mission": "photos/mission.jpg",
+  "Mission Bay": "photos/mission-bay.jpg",
+  "Nob Hill": "photos/nob-hill.jpg",
+  "North Beach": "photos/north-beach.jpg",
+  "Oceanview/Merced/Ingleside": "photos/oceanview-merced-ingleside.jpg",
+  "Outer Mission": "photos/outer-mission.jpg",
+  "Outer Richmond": "photos/outer-richmond.jpg",
+  "Pacific Heights": "photos/pacific-heights.jpg",
+  "Portola": "photos/portola.jpg",
+  "Potrero Hill": "photos/potrero-hill.jpg",
+  "Presidio": "photos/presidio.jpg",
+  "Presidio Heights": "photos/presidio-heights.jpg",
+  "Russian Hill": "photos/russian-hill.jpg",
+  "Seacliff": "photos/seacliff.jpg",
+  "South of Market": "photos/south-of-market.jpg",
+  "Sunset/Parkside": "photos/sunset-parkside.jpg",
+  "Tenderloin": "photos/tenderloin.jpg",
+  "Treasure Island": "photos/treasure-island.jpg",
+  "Twin Peaks": "photos/twin-peaks.jpg",
+  "Visitacion Valley": "photos/visitacion-valley.jpg",
+  "West of Twin Peaks": "photos/west-of-twin-peaks.jpg",
+  "Western Addition": "photos/western-addition.jpg"
+};
+function updateHeroPhoto() {
+  const hero = document.querySelector(".hero");
+  if (!hero) return;
+  const src = HOOD_PHOTOS[state.hood] || DEFAULT_PHOTO;
+  hero.style.backgroundImage =
+    `linear-gradient(to bottom, var(--hero-veil), var(--hero-veil) 72%, var(--page)), url("${src}")`;
+}
+
 /* ---------- theme ---------- */
 const mq = matchMedia("(prefers-color-scheme: dark)");
 function applyTheme() {
@@ -143,6 +195,7 @@ function monthKeys(cut) {
 /* ---------- render ---------- */
 function render() {
   const S = computeSlice();
+  updateHeroPhoto();
   renderKPIs(S);
   renderMonthly(S);
   renderRate(S);
