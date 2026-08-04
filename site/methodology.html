@@ -55,7 +55,6 @@
     <li><strong>Recent records are incomplete on purpose.</strong> The inspection-type label is filled in by the city with roughly a year&rsquo;s lag; all of the newest year has no labels yet. Analyses were designed around the rating field, which does not lag.</li>
     <li><strong>Not every &ldquo;facility&rdquo; is a facility.</strong> One farmers-market permit produced 19 same-day inspection rows, one per stall. Treating those as one facility&rsquo;s timeline would be nonsense, so umbrella permits are identified and excluded from facility-level analysis.</li>
     <li><strong>~110 permit types, from restaurants to tattoo parlors.</strong> Health inspections cover massage parlors, laundromats, and tobacco shops too. Every permit type was reviewed and classified, with an automated test that fails if an unknown type ever appears.</li>
-    <li><strong>One row did not belong.</strong> A single inspection dated 2031, after its own publish date. Found by checking, excluded with a comment.</li>
   </ul>
   <p>The discipline behind all of this: <strong>every excluded row is accounted for by name.</strong> The staged data reconciles exactly against the raw data, and 26 automated tests re-verify the assumptions on every weekly refresh.</p>
 

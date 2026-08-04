@@ -92,6 +92,8 @@ main .scene + .scene { border-top: 1px solid var(--grid); }
 .eyebrow { font-size: 17px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--series-1); margin: 0 0 12px; }
 h2 { font-size: clamp(30px, 4.5vw, 46px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.06; margin: 0 0 14px; text-wrap: balance; }
 .lede { font-size: 17px; line-height: 1.6; color: var(--text-secondary); margin: 0; text-wrap: pretty; }
+.filter-hint { font-size: 14px; color: var(--muted); margin: 12px 0 0; }
+.filter-hint::before { content: "\2699\FE0E"; margin-right: 7px; color: var(--series-1); }
 .w-cp { color: color-mix(in srgb, var(--status-warning) 72%, var(--text-primary)); font-weight: 600; }
 .w-closure { color: var(--status-critical); font-weight: 600; }
 .w-pass { color: var(--status-good); font-weight: 600; }
