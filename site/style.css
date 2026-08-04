@@ -173,6 +173,7 @@ h1 { font-size: clamp(40px, 7.5vw, 76px); font-weight: 700; letter-spacing: -0.0
 .hero-glance { max-width: 62ch; margin: 42px auto 0; }
 .hg-lede { font-size: 15px; line-height: 1.6; color: var(--text-secondary); margin: 0 0 10px; text-wrap: pretty; }
 .hg-verdict { font-size: 17px; line-height: 1.55; margin: 0; text-wrap: pretty; }
+.hg-why { font-size: 15px; line-height: 1.55; color: var(--text-secondary); margin: 12px 0 0; text-wrap: pretty; }
 .scroll-cue { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); animation: cue 2.2s ease-in-out infinite; }
 @keyframes cue { 0%,100% { transform: translate(-50%, 0); opacity: 0.55; } 50% { transform: translate(-50%, 6px); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .scroll-cue { animation: none; } }
