@@ -12,10 +12,10 @@ let state = { period: "all", hood: "all" };
 /* ---------- boot ---------- */
 
 async function boot() {
-  const [summary, facilities, history, episodes] = await Promise.all(
-    ["summary", "facilities", "history", "episodes"].map((f) =>
-      fetch(`data/${f}.json`).then((r) => r.json())));
-  DATA = { summary, facilities, history, episodes };
+  const [summary, facilities, history, episodes, violDefs] = await Promise.all(
+    ["summary", "facilities", "history", "episodes", "viol_defs"].map((f) =>
+      fetch(`data/${f}.json`).then((r) => r.ok ? r.json() : null)));
+  DATA = { summary, facilities, history, episodes, violDefs };
   DATA.hoodOf = Object.fromEntries(facilities.map((f) => [f.permit, f.hood || "Unknown"]));
 
   const totalV = Object.values(DATA.history).reduce((a, r) => a + r.length, 0);
@@ -58,6 +58,7 @@ async function boot() {
   for (const a of document.querySelectorAll('a[href="#glossary"]'))
     a.addEventListener("click", () => { $("#glossary details").open = true; });
   if (location.hash === "#glossary") $("#glossary details").open = true;
+  initTermDefs();
 
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
   addEventListener("resize", debounce(render, 150));
@@ -268,16 +269,22 @@ function renderKPIs(vs, eps) {
     row.append(t);
   }
 
-  /* chapter pull-stat */
+  /* chapter pull-stat: number left, explanation right */
   const ps = $("#pull-funnel");
   if (resolved.length) {
     ps.replaceChildren();
+    const med = Math.round(median(resolved.map((e) => e.dr)));
     const big = document.createElement("span"); big.className = "big";
     big.textContent = Math.round(resolved.length * 100 / eps.length) + "%";
+    const wrap = document.createElement("span"); wrap.className = "pull-text";
     const rest = document.createElement("span"); rest.className = "rest";
-    rest.textContent = ` of ${fmt(eps.length)} failures were re-rated; median ` +
-      `${Math.round(median(resolved.map((e) => e.dr)))} days from failure to the next graded visit.`;
-    ps.append(big, rest); ps.hidden = false;
+    rest.textContent = `of ${fmt(eps.length)} failures were re-rated; median ` +
+      `${med} days from failure to the next graded visit.`;
+    const plain = document.createElement("span"); plain.className = "pull-plain";
+    plain.textContent = `Meaning: after almost every failure, an inspector ` +
+      `came back to re-check, typically in about ${med} day${med === 1 ? "" : "s"}.`;
+    wrap.append(rest, plain);
+    ps.append(big, wrap); ps.hidden = false;
   } else ps.hidden = true;
 }
 
@@ -304,6 +311,55 @@ function showTip(evt, head, rowsArr) {
   tooltip.style.left = x + "px"; tooltip.style.top = y + "px";
 }
 function hideTip() { tooltip.hidden = true; }
+
+/* definition tooltip: hover a tinted status term for its glossary meaning */
+function showDef(evt, term, colorVar, def) {
+  tooltip.replaceChildren();
+  const h = document.createElement("div"); h.className = "t-head";
+  const k = document.createElement("span"); k.className = "t-key";
+  k.style.background = CSS(colorVar);
+  h.append(k, document.createTextNode(" " + term));
+  const d = document.createElement("div"); d.className = "t-def";
+  d.textContent = def;
+  tooltip.append(h, d);
+  tooltip.hidden = false;
+  const pad = 14;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  const w = tooltip.offsetWidth, hgt = tooltip.offsetHeight;
+  if (x + w > innerWidth - 8) x = evt.clientX - w - pad;
+  if (y + hgt > innerHeight - 8) y = evt.clientY - hgt - pad;
+  tooltip.style.left = x + "px"; tooltip.style.top = y + "px";
+}
+
+const TERM_DEFS = {
+  "w-cp": ["Conditional Pass", "--status-warning",
+    "Serious violations were found. The facility keeps operating, but under " +
+    "orders to fix them, and an inspector comes back to check. Think of it " +
+    "as being on notice."],
+  "w-closure": ["Closure", "--status-critical",
+    "An immediate health hazard was found. The facility's permit is " +
+    "suspended and it must shut its doors until the problem is fixed and " +
+    "verified."],
+};
+
+function initTermDefs() {
+  for (const el of document.querySelectorAll(".w-cp, .w-closure")) {
+    const key = el.classList.contains("w-cp") ? "w-cp" : "w-closure";
+    const [term, colorVar, def] = TERM_DEFS[key];
+    el.classList.add("has-def");
+    el.tabIndex = 0;
+    el.setAttribute("role", "term");
+    const show = (evt) => showDef(evt, term, colorVar, def);
+    el.addEventListener("pointermove", show);
+    el.addEventListener("mousemove", show);
+    el.addEventListener("focus", () => {
+      const r = el.getBoundingClientRect();
+      show({ clientX: r.x + r.width / 2, clientY: r.bottom + 6 });
+    });
+    el.addEventListener("pointerleave", hideTip);
+    el.addEventListener("blur", hideTip);
+  }
+}
 
 function svgEl(tag, attrs) {
   const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
@@ -477,11 +533,20 @@ function renderFunnel(eps) {
   const el = $("#chart-funnel");
   el.replaceChildren();
   const groups = [["C", "After a Closure"], ["P", "After a Conditional Pass"]];
-  const ramp = [CSS("--ord-1"), CSS("--ord-2"), CSS("--ord-3"), CSS("--ord-4")];
+  /* outcome colors, matching the site's status semantics: the failure bar
+     wears its own status color, re-rated is a neutral process step, and
+     the good outcomes go green (full green = the durable one) */
+  const stageColors = (code) => [
+    code === "C" ? CSS("--status-critical") : CSS("--status-warning"),
+    CSS("--series-1"),
+    `color-mix(in srgb, ${CSS("--status-good")} 62%, ${CSS("--page")})`,
+    CSS("--status-good"),
+  ];
   const tableRows = [];
 
   for (const [code, title] of groups) {
     const g = eps.filter((e) => e.r === code);
+    const ramp = stageColors(code);
     const resolved = g.filter((e) => e.rr !== null);
     const passed = g.filter((e) => e.rr === "Pass");
     const observed = passed.filter((e) => e.du !== null);
@@ -990,15 +1055,39 @@ function showFacility(f) {
   }
   const ul = document.createElement("ul"); ul.className = "visits";
   const hist = (DATA.history[f.permit] || []).slice().reverse();
-  for (const [date, type, rating, viol] of hist) {
+  for (const [date, type, rating, viol, defIds] of hist) {
     const li = document.createElement("li");
     const dt = document.createElement("span"); dt.textContent = date; dt.style.minWidth = "90px";
     const ty = document.createElement("span"); ty.className = "muted";
     ty.textContent = type || "Type pending"; ty.style.minWidth = "140px";
-    const vi = document.createElement("span"); vi.className = "muted";
-    vi.textContent = viol !== null ? `${viol} violation${viol === 1 ? "" : "s"}` : "";
-    li.append(dt, ty, chipFor(rating), vi);
-    ul.append(li);
+    const label = viol !== null ? `${viol} violation${viol === 1 ? "" : "s"}` : "";
+    if (label && defIds && defIds.length && DATA.violDefs) {
+      /* clickable: expand what the inspector actually wrote up */
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.className = "viol-toggle";
+      btn.textContent = label + " ▸";
+      btn.setAttribute("aria-expanded", "false");
+      const detail = document.createElement("ul");
+      detail.className = "viol-list"; detail.hidden = true;
+      for (const id of defIds) {
+        const it = document.createElement("li");
+        it.textContent = DATA.violDefs[id] || "";
+        detail.append(it);
+      }
+      btn.addEventListener("click", () => {
+        const open = detail.hidden;
+        detail.hidden = !open;
+        btn.setAttribute("aria-expanded", String(open));
+        btn.textContent = label + (open ? " ▾" : " ▸");
+      });
+      li.append(dt, ty, chipFor(rating), btn);
+      ul.append(li, detail);
+    } else {
+      const vi = document.createElement("span"); vi.className = "muted";
+      vi.textContent = label;
+      li.append(dt, ty, chipFor(rating), vi);
+      ul.append(li);
+    }
   }
   d.append(ul);
   d.hidden = false;

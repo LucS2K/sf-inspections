@@ -82,7 +82,47 @@ def main():
         GROUP BY 1
     """))
 
-    # compact per-facility history: [date, type, rating, violations]
+    # violation descriptions: 298 distinct strings across ~47k segments, so
+    # ship a dictionary once and reference it by id from history rows
+    seg_rows = rows(con, """
+        WITH unified AS (
+            SELECT permit_number, inspection_date, inspection_type,
+                   violation_seq, description
+            FROM derived.violation_segments s
+            WHERE count_agrees OR NOT EXISTS (
+                SELECT 1 FROM derived.violation_segments_llm l
+                WHERE l.permit_number = s.permit_number
+                  AND l.inspection_date = s.inspection_date
+                  AND coalesce(l.inspection_type,'') = coalesce(s.inspection_type,'')
+                  AND l.event_seq = s.event_seq)
+            UNION ALL
+            SELECT permit_number, inspection_date, inspection_type,
+                   violation_seq, description
+            FROM derived.violation_segments_llm
+        )
+        SELECT permit_number, inspection_date, inspection_type,
+               violation_seq, description
+        FROM unified
+        WHERE description IS NOT NULL AND len(trim(description)) > 0
+        ORDER BY permit_number, inspection_date, violation_seq
+    """)
+    def_ids: dict[str, int] = {}
+    defs: list[str] = []
+    viol_by_visit: dict[tuple, list[int]] = {}
+    for r in seg_rows:
+        d = " ".join(r["description"].split())
+        if d not in def_ids:
+            def_ids[d] = len(defs)
+            # display copy: first 220 chars carries the remediation sentence
+            defs.append(d[:220] + ("…" if len(d) > 220 else ""))
+        key = (r["permit_number"], str(r["inspection_date"]),
+               r["inspection_type"] or "")
+        viol_by_visit.setdefault(key, []).append(def_ids[d])
+    dump("viol_defs", defs)
+
+    # compact per-facility history: [date, type, rating, violations, def_ids]
+    # (same-day same-type repeat visits share a key; the first row gets the
+    # list so violations are never shown twice)
     hist = {}
     for r in rows(con, """
         SELECT permit_number, inspection_date, inspection_type,
@@ -90,9 +130,12 @@ def main():
         FROM fct_inspection_timeline
         ORDER BY permit_number, inspection_date
     """):
+        key = (r["permit_number"], str(r["inspection_date"]),
+               r["inspection_type"] or "")
+        ids = viol_by_visit.pop(key, [])
         hist.setdefault(r["permit_number"], []).append([
             str(r["inspection_date"]), r["inspection_type"],
-            r["facility_rating_status"], r["violation_count"]])
+            r["facility_rating_status"], r["violation_count"], ids])
     dump("history", hist)
 
     # one row per enforcement episode, compact keys:
