@@ -287,32 +287,66 @@ const monthLabel = (k) => {
 /* ---- chart: inspections per month ---- */
 function renderMonthly(S) {
   const keys = monthKeys(S.cut);
+  /* stacked by outcome so the placard colors pay off in the very first
+     chart: green Pass base, amber and red on top, grey for unrated */
   const by = {};
-  for (const v of S.visits) { const k = v[0].slice(0, 7); by[k] = (by[k] || 0) + 1; }
-  const counts = keys.map((k) => by[k] || 0);
+  for (const v of S.visits) {
+    const k = v[0].slice(0, 7);
+    const a = by[k] || (by[k] = { pass: 0, cp: 0, cl: 0, un: 0 });
+    if (v[2] === "Pass") a.pass++;
+    else if (v[2] === "Conditional Pass") a.cp++;
+    else if (v[2] === "Closure") a.cl++;
+    else a.un++;
+  }
+  const rows = keys.map((k) => by[k] || { pass: 0, cp: 0, cl: 0, un: 0 });
+  const counts = rows.map((r) => r.pass + r.cp + r.cl + r.un);
   const W = chartWidth("#chart-monthly", 900), H = 240, m = { l: 8, r: 8, t: 16, b: 26 };
   const max = Math.max(...counts, 1);
-  const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Bar chart, inspections per month" });
+  const svg = svgEl("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Stacked bar chart, inspections per month by outcome" });
   const iw = (W - m.l - m.r) / keys.length, bw = Math.min(iw * 0.62, 34);
+  const cG = CSS("--status-good"), cW = CSS("--status-warning"),
+        cC = CSS("--status-critical"), cU = CSS("--baseline");
   svg.append(svgEl("line", { x1: m.l, x2: W - m.r, y1: H - m.b + 0.5, y2: H - m.b + 0.5, class: "axisline" }));
   keys.forEach((k, i) => {
-    const h = counts[i] / max * (H - m.t - m.b);
-    const x = m.l + i * iw + (iw - bw) / 2, y = H - m.b - h;
-    const rect = svgEl("rect", { x, y, width: bw, height: Math.max(h, 1), rx: Math.min(4, bw / 3), fill: CSS("--series-1"), class: "grow" });
-    rect.style.setProperty("--i", i);
-    svg.append(rect);
+    const r = rows[i];
+    const x = m.l + i * iw + (iw - bw) / 2;
+    const scale = (n) => n / max * (H - m.t - m.b);
+    /* pass sits on the baseline; amber, red, then grey stack upward */
+    let y = H - m.b;
+    for (const [n, color] of [[r.pass, cG], [r.cp, cW], [r.cl, cC], [r.un, cU]]) {
+      if (!n) continue;
+      const h = Math.max(scale(n), 1);
+      y -= h;
+      const rect = svgEl("rect", { x, y, width: bw, height: h, rx: Math.min(2, bw / 4), fill: color, class: "grow" });
+      rect.style.setProperty("--i", i);
+      svg.append(rect);
+    }
     const step = Math.ceil(keys.length / Math.floor(W / 76));
     if (i % step === 0) {
       const t = svgEl("text", { x: m.l + i * iw + iw / 2, y: H - 8, "text-anchor": "middle" });
       t.textContent = monthLabel(k); svg.append(t);
     }
-    hitArea(svg, m.l + i * iw, m.t, iw, H - m.t - m.b, () => tipShow(monthLabel(k) + " " + k.slice(0, 4), [[CSS("--series-1"), "Inspections", fmt(counts[i])]]));
+    hitArea(svg, m.l + i * iw, m.t, iw, H - m.t - m.b, () => tipShow(monthLabel(k) + " " + k.slice(0, 4), [
+      [cG, "Pass", fmt(r.pass)],
+      [cW, "Conditional Pass", fmt(r.cp)],
+      [cC, "Closure", fmt(r.cl)],
+      ...(r.un ? [[cU, "No rating", fmt(r.un)]] : []),
+      [null, "Total", fmt(counts[i])]]));
   });
   const peak = counts.indexOf(max);
   const pl = svgEl("text", { x: m.l + peak * iw + iw / 2, y: Math.max(H - m.b - max / max * (H - m.t - m.b) - 6, 12), "text-anchor": "middle", class: "fadein dlabel" });
   pl.textContent = fmt(max); svg.append(pl);
   $("#chart-monthly").replaceChildren(svg);
-  tableTwin("#card-monthly", ["Month", "Inspections"], keys.map((k, i) => [k, fmt(counts[i])]));
+  const lg = $("#legend-monthly");
+  if (lg) {
+    lg.replaceChildren();
+    for (const [c, n] of [[cG, "Pass"], [cW, "Conditional Pass"], [cC, "Closure"], [cU, "No rating"]]) {
+      const key = el("span", "key"); const sw = el("span", "swatch"); sw.style.background = c;
+      key.append(sw, document.createTextNode(n)); lg.append(key);
+    }
+  }
+  tableTwin("#card-monthly", ["Month", "Pass", "Conditional Pass", "Closure", "No rating", "Total"],
+    keys.map((k, i) => [k, fmt(rows[i].pass), fmt(rows[i].cp), fmt(rows[i].cl), fmt(rows[i].un), fmt(counts[i])]));
   const perMonth = keys.length ? Math.round(counts.reduce((a2, b2) => a2 + b2, 0) / keys.length) : 0;
   let drop = "";
   if (keys.length >= 18) {
@@ -320,7 +354,10 @@ function renderMonthly(S) {
     const rAvg = Math.round(avg(counts.slice(-12))), pAvg = Math.round(avg(counts.slice(0, -12)));
     if (rAvg < pAvg * 0.75) drop = ` Monthly volume in the most recent year runs well below what came before (about ${fmt(rAvg)} vs ${fmt(pAvg)} per month); whether that is a real slowdown or records still arriving will become clear as weekly refreshes accumulate.`;
   }
-  takeaway("#tk-monthly", `The health department made ${fmt(counts.reduce((a2, b2) => a2 + b2, 0))} inspection visits in this period, about ${fmt(perMonth)} per month.` + drop);
+  const totPass = rows.reduce((s2, r) => s2 + r.pass, 0);
+  const totRated = rows.reduce((s2, r) => s2 + r.pass + r.cp + r.cl, 0);
+  const greenShare = totRated ? Math.round(totPass * 100 / totRated) : 0;
+  takeaway("#tk-monthly", `The health department made ${fmt(counts.reduce((a2, b2) => a2 + b2, 0))} inspection visits in this period, about ${fmt(perMonth)} per month, and ${greenShare}% of the rated ones came back green. The thin amber and red band on top is where enforcement begins.` + drop);
 }
 
 /* ---- chart: failure rate per month (rate line; months under 50 rated visits stay blank) ---- */
