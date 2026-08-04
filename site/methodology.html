@@ -19,181 +19,92 @@
 <meta name="twitter:image" content="https://sf-inspections.vercel.app/og.png">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="stylesheet" href="style.css">
-<style>
-  .prose { max-width: 72ch; }
-  .prose h2 { font-size: 22px; margin: 36px 0 10px; }
-  .prose h3 { font-size: 16px; margin: 22px 0 6px; }
-  
-  .prose ul { padding-left: 22px; }
-  .prose .aside { font-family: var(--sans); color: var(--text-secondary); font-size: 14px; border-left: 3px solid var(--grid); padding-left: 14px; margin: 14px 0; }
-  table.stack { border-collapse: collapse; margin: 14px 0; font-family: var(--sans); font-size: 14px; width: 100%; }
-  table.stack th, table.stack td { text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-  table.stack th { color: var(--text-secondary); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
-  table.stack td:first-child { white-space: nowrap; font-weight: 600; }
-  a { color: var(--series-1); }
-</style>
+<script>(function(){const s=localStorage.getItem("sfi-theme");const d=s?s==="dark":matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.dataset.theme=d?(s?"dark":"auto-dark"):"light";})();</script>
 </head>
 <body>
-<div class="page prose">
-  <header class="masthead">
-    <div>
-      <p class="kicker">Behind the analysis</p>
-      <h1>How this was built</h1>
-      <p class="dek">The project behind the dashboard: where the data comes from, what it took
-        to make it trustworthy, and the decisions that shaped every number on the page.</p>
-      <p class="meta"><a href="/">Dashboard</a> &middot; <a href="/report">Findings report</a></p>
-    </div>
-    <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme">◐</button>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="/">SF Inspections</a>
+    <nav class="pagenav" aria-label="Pages">
+      <a href="/">Dashboard</a>
+      <a href="/report">Findings</a>
+      <a href="/methodology" aria-current="page">Methodology</a>
+    </nav>
+    <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme" style="margin-left:auto">&#9680;</button>
+  </div>
+</header>
+
+<main class="subpage prose">
+  <header class="page-head">
+    <p class="kicker">Behind the analysis</p>
+    <h1>How this was built</h1>
+    <p class="dek">The project behind the dashboard: where the data comes from, what it took to make it trustworthy, and the decisions that shaped every number on the page.</p>
   </header>
 
   <h2>Start with a question, not a dataset</h2>
-  <p>San Francisco publishes every restaurant health inspection. Most projects on
-  this data stop at a map of scores. The more useful business question is about
-  the <em>system</em>: when the city flags or closes a food business, does the
-  business actually fix the problem, and does the fix last? That framing turns a
-  public dataset into an evaluation of whether enforcement works, with findings
-  someone could act on.</p>
-  <p>The short version of what it found: San Francisco responds to failures
-  within days, and most fixes stick. But one in five does not last a year,
-  and 150 failures have no recorded follow-up.</p>
+  <p>San Francisco publishes every restaurant health inspection. Most projects on this data stop at a map of scores. The more useful business question is about the <em>system</em>: when the city flags or closes a food business, does the business actually fix the problem, and does the fix last? That framing turns a public dataset into an evaluation of whether enforcement works, with findings someone could act on.</p>
+  <p>The short version of what it found: San Francisco responds to failures within days, and most fixes stick. But one in five does not last a year, and 150 failures have no recorded follow-up.</p>
 
   <h2>Getting the data, and keeping it fresh</h2>
-  <p>The core data comes from San Francisco's open data portal through its API:
-  every health inspection from 2024 to today, refreshed weekly by an automated
-  pipeline. Two supporting sources answer questions the inspection data alone
-  cannot: the city's business registry (is a business still alive?) and the Yelp
-  API (do customer ratings know anything about kitchen hygiene?). Neither shares
-  an ID with the health department, so linking them required name-and-address
-  matching, which the analysis labels as inferred rather than measured wherever
-  it appears.</p>
+  <p>The core data comes from San Francisco&rsquo;s open data portal through its API: every health inspection from 2024 to today, refreshed weekly by an automated pipeline. Two supporting sources answer questions the inspection data alone cannot: the city&rsquo;s business registry (is a business still alive?) and the Yelp API (do customer ratings know anything about kitchen hygiene?). Neither shares an ID with the health department, so linking them required name-and-address matching, which the analysis labels as inferred rather than measured wherever it appears.</p>
 
   <h2>Making the data trustworthy</h2>
-  <p>This is where most of the analytical effort went. Raw open data is never
-  analysis-ready, and every finding on the dashboard sits on top of problems
-  that had to be found, measured, and handled:</p>
+  <p>This is where most of the analytical effort went. Raw open data is never analysis-ready, and every finding on the dashboard sits on top of problems that had to be found, measured, and handled:</p>
   <ul>
-    <li><strong>The same inspection appears multiple times.</strong> The city
-    republishes corrected records. The pipeline keeps every version and always
-    analyzes the latest one, so corrections improve the data instead of
-    double-counting it.</li>
-    <li><strong>Recent records are incomplete on purpose.</strong> The
-    inspection-type label is filled in by the city with roughly a year's lag;
-    all of the newest year has no labels yet. Analyses were designed around
-    the rating field, which does not lag.</li>
-    <li><strong>Not every "facility" is a facility.</strong> One farmers-market
-    permit produced 19 same-day inspection rows, one per stall. Treating those
-    as one facility's timeline would be nonsense, so umbrella permits are
-    identified and excluded from facility-level analysis.</li>
-    <li><strong>~110 permit types, from restaurants to tattoo parlors.</strong>
-    Health inspections cover massage parlors, laundromats, and tobacco shops
-    too. Every permit type was reviewed and classified, with an automated test
-    that fails if an unknown type ever appears.</li>
-    <li><strong>One row did not belong.</strong> A single inspection dated 2031,
-    after its own publish date. Found by checking, excluded with a comment.</li>
+    <li><strong>The same inspection appears multiple times.</strong> The city republishes corrected records. The pipeline keeps every version and always analyzes the latest one, so corrections improve the data instead of double-counting it.</li>
+    <li><strong>Recent records are incomplete on purpose.</strong> The inspection-type label is filled in by the city with roughly a year&rsquo;s lag; all of the newest year has no labels yet. Analyses were designed around the rating field, which does not lag.</li>
+    <li><strong>Not every &ldquo;facility&rdquo; is a facility.</strong> One farmers-market permit produced 19 same-day inspection rows, one per stall. Treating those as one facility&rsquo;s timeline would be nonsense, so umbrella permits are identified and excluded from facility-level analysis.</li>
+    <li><strong>~110 permit types, from restaurants to tattoo parlors.</strong> Health inspections cover massage parlors, laundromats, and tobacco shops too. Every permit type was reviewed and classified, with an automated test that fails if an unknown type ever appears.</li>
+    <li><strong>One row did not belong.</strong> A single inspection dated 2031, after its own publish date. Found by checking, excluded with a comment.</li>
   </ul>
-  <p>The discipline behind all of this: <strong>every excluded row is accounted
-  for by name.</strong> The staged data reconciles exactly against the raw data,
-  and 26 automated tests re-verify the assumptions on every weekly refresh.</p>
+  <p>The discipline behind all of this: <strong>every excluded row is accounted for by name.</strong> The staged data reconciles exactly against the raw data, and 26 automated tests re-verify the assumptions on every weekly refresh.</p>
 
   <h2 id="honest">Making the numbers honest</h2>
-  <p>The easy version of this analysis would be wrong in quiet ways. The methods
-  were chosen to avoid that:</p>
+  <p>The easy version of this analysis would be wrong in quiet ways. The methods were chosen to avoid that:</p>
   <ul>
-    <li id="censoring"><strong>Silence is not success.</strong> A failed facility with no
-    later inspection has not "stayed fixed", it just has not been observed.
-    Durability is only measured where a follow-up actually exists.</li>
-    <li id="same-clock"><strong>Compare on the same clock.</strong> Closed facilities get
-    re-checked within weeks; conditional passes within months. Concretely,
-    post-closure facilities are re-checked at a median of 41 days versus 207
-    for conditional passes, so comparing their "still passing" rates naively
-    looks fair and is not: the two groups are observed on different clocks.
-    The analysis uses a fixed one-year window for both.</li>
-    <li id="small-samples"><strong>Small samples do not get quoted.</strong> Any group under a
-    minimum sample size shows its count instead of a rate, on the dashboard
-    and in the report.</li>
-    <li><strong>Cross-check before concluding.</strong> 150 failures were never
-    re-inspected. Business-registry and Yelp data triangulate them: most are
-    businesses that are demonstrably still open, which turns "missing data"
-    into the project's sharpest finding, an enforcement follow-up gap.</li>
-    <li><strong>Name the confounds.</strong> Neighborhood failure rates track
-    business mix (restaurant-heavy districts fail more). Yelp comparisons carry
-    a coverage bias (enforcement lands on restaurants; the comparison group
-    includes markets Yelp does not list). Both caveats travel with the numbers
-    wherever they appear.</li>
+    <li id="censoring"><strong>Silence is not success.</strong> A failed facility with no later inspection has not &ldquo;stayed fixed&rdquo;, it just has not been observed. Durability is only measured where a follow-up actually exists.</li>
+    <li id="same-clock"><strong>Compare on the same clock.</strong> Closed facilities get re-checked within weeks; conditional passes within months. Concretely, post-closure facilities are re-checked at a median of 41 days versus 207 for conditional passes, so comparing their &ldquo;still passing&rdquo; rates naively looks fair and is not: the two groups are observed on different clocks. The analysis uses a fixed one-year window for both.</li>
+    <li id="small-samples"><strong>Small samples do not get quoted.</strong> Any group under a minimum sample size shows its count instead of a rate, on the dashboard and in the report.</li>
+    <li><strong>Cross-check before concluding.</strong> 150 failures were never re-inspected. Business-registry and Yelp data triangulate them: most are businesses that are demonstrably still open, which turns &ldquo;missing data&rdquo; into the project&rsquo;s sharpest finding, an enforcement follow-up gap.</li>
+    <li><strong>Name the confounds.</strong> Neighborhood failure rates track business mix (restaurant-heavy districts fail more). Yelp comparisons carry a coverage bias (enforcement lands on restaurants; the comparison group includes markets Yelp does not list). Both caveats travel with the numbers wherever they appear.</li>
   </ul>
 
   <h2>The technology</h2>
   <table class="stack">
     <tr><th>Layer</th><th>Tools</th><th>Why</th></tr>
-    <tr><td>Data pipeline</td><td>Python, Socrata API, Yelp Fusion API</td>
-        <td>Automated weekly updates; every version of every record is kept; loads are designed so re-running them can never double-count</td></tr>
-    <tr><td>Warehouse</td><td>DuckDB + MotherDuck</td>
-        <td>Fast analytical SQL locally; the same database in the cloud so nothing depends on one laptop</td></tr>
-    <tr><td>Modeling &amp; tests</td><td>dbt</td>
-        <td>Staged, documented data models; 26 automated tests re-check the structure, values, and completeness on every refresh</td></tr>
-    <tr><td>Analysis</td><td>SQL window functions</td>
-        <td>Facility histories, enforcement episodes, and one-year follow-up comparisons, all reproducible in the repo</td></tr>
-    <tr><td>Automation</td><td>GitHub Actions</td>
-        <td>Weekly cron runs ingest, tests, export, and deploy end to end; CI validates every change</td></tr>
-    <tr><td>Text parsing</td><td>Regex + Claude API</td>
-        <td>A deterministic parser handles 97% of the violation text; an LLM re-parses the remainder, every row validated against recorded counts</td></tr>
-    <tr><td>This site</td><td>Vanilla JavaScript + SVG, Vercel</td>
-        <td>No frameworks; ~2&nbsp;MB of static JSON, so it is fast, free to host, and cannot break</td></tr>
+    <tr><td>Data pipeline</td><td>Python, Socrata API, Yelp Fusion API</td><td>Automated weekly updates; every version of every record is kept; loads are designed so re-running them can never double-count</td></tr>
+    <tr><td>Warehouse</td><td>DuckDB + MotherDuck</td><td>Fast analytical SQL locally; the same database in the cloud so nothing depends on one laptop</td></tr>
+    <tr><td>Modeling &amp; tests</td><td>dbt</td><td>Staged, documented data models; 26 automated tests re-check the structure, values, and completeness on every refresh</td></tr>
+    <tr><td>Analysis</td><td>SQL window functions</td><td>Facility histories, enforcement episodes, and one-year follow-up comparisons, all reproducible in the repo</td></tr>
+    <tr><td>Automation</td><td>GitHub Actions</td><td>Weekly cron runs ingest, tests, export, and deploy end to end; CI validates every change</td></tr>
+    <tr><td>Text parsing</td><td>Regex + Claude API</td><td>A deterministic parser handles 97% of the violation text; an LLM re-parses the remainder, every row validated against recorded counts</td></tr>
+    <tr><td>This site</td><td>Vanilla JavaScript + SVG, Vercel</td><td>No frameworks; ~2&nbsp;MB of static JSON, so it is fast, free to host, and cannot break</td></tr>
   </table>
 
   <h3 id="parsing">Parsing and classifying violations</h3>
-  <p>The violation field concatenates statutory codes and legal boilerplate
-  into one text blob per inspection. A deterministic parser, validated
-  against the inspector's recorded violation counts, handles 97% of rows
-  exactly; an AI model re-parsed the hard remainder, with every row checked
-  against the recorded count before loading. A reviewed keyword ruleset then
-  maps every violation to a category and risk tier. As a robustness check,
-  an AI model independently re-classified every violation description: the
-  two methods agree on 65% of labels, yet the published finding does not
-  move. Relapse stays in a narrow flat band across categories under either
-  classification, which is the check that matters. As everywhere else,
-  category groups under 30 episodes are not quoted.</p>
+  <p>The violation field concatenates statutory codes and legal boilerplate into one text blob per inspection. A deterministic parser, validated against the inspector&rsquo;s recorded violation counts, handles 97% of rows exactly; an AI model re-parsed the hard remainder, with every row checked against the recorded count before loading. A reviewed keyword ruleset then maps every violation to a category and risk tier. As a robustness check, an AI model independently re-classified every violation description: the two methods agree on 65% of labels, yet the published finding does not move. Relapse stays in a narrow flat band across categories under either classification, which is the check that matters. As everywhere else, category groups under 30 episodes are not quoted.</p>
 
   <h2>Building the site</h2>
-  <p>The dashboard is deliberately simple technology doing careful work. Charts
-  are hand-built SVG following a validated accessibility method: the color
-  palette is machine-checked for color-blind safety in both light and dark
-  themes, every chart has a data-table twin for screen readers and skeptics,
-  tooltips add detail but never hide it, and every rate on the page carries its
-  sample size. All filtering happens in the browser against pre-computed data,
-  which is why the page needs no server and updates itself when the weekly
-  pipeline redeploys it. Each chart also states its takeaway in plain text, so
-  the reading is never left to chart interpretation alone.</p>
+  <p>The dashboard is deliberately simple technology doing careful work. Charts are hand-built SVG following a validated accessibility method: the color palette is machine-checked for color-blind safety in both light and dark themes, every chart has a data-table twin for screen readers and skeptics, tooltips add detail but never hide it, and every rate on the page carries its sample size. All filtering happens in the browser against pre-computed data, which is why the page needs no server and updates itself when the weekly pipeline redeploys it. Each chart also states its takeaway in plain text, so the reading is never left to chart interpretation alone.</p>
 
   <h2>Who this is for</h2>
-  <p><strong>For diners and residents</strong>, the dashboard is a practical
-  tool: look up any restaurant before you eat there and see its real inspection
-  history, not its star rating. <strong>For food-safety awareness</strong>, it
-  makes a public record legible that normally sits in a database nobody reads.
-  And <strong>for the city and anyone who holds it accountable</strong>, it
-  measures the enforcement system itself. Public data should be able to
-  answer whether public systems work; this project is that idea, executed on
-  one system.</p>
-  <h2>About me</h2>
-  <p>Hi, I'm <strong>Luc</strong>, a business analyst. This started with San
-  Francisco's open data portal: the inspection data was public, well
-  maintained, and mostly used to make maps of scores. The more interesting
-  question was whether the enforcement behind those scores actually works,
-  and that is what I built.</p>
-  <p>I did this end to end: framing the question, sourcing and interrogating
-  the data, making the modeling and methodology decisions described on this
-  page, and publishing the result. Implementation was AI-assisted (Claude
-  Code); the judgment calls documented above are mine.</p>
+  <p><strong>For diners and residents</strong>, the dashboard is a practical tool: look up any restaurant before you eat there and see its real inspection history, not its star rating. <strong>For food-safety awareness</strong>, it makes a public record legible that normally sits in a database nobody reads. And <strong>for the city and anyone who holds it accountable</strong>, it measures the enforcement system itself. Public data should be able to answer whether public systems work; this project is that idea, executed on one system.</p>
 
-  <p class="meta" id="stamp">Built by Luc Nguyen &middot; <a href="https://www.linkedin.com/in/luchnguyen/">LinkedIn</a> &middot; <a href="https://github.com/LucS2K">GitHub</a> &middot; <a href="mailto:ljr.luc.nguyen@gmail.com">ljr.luc.nguyen@gmail.com</a></p>
-</div>
+  <h2>About me</h2>
+  <p>Hi, I&rsquo;m <strong>Luc</strong>, a business analyst. This started with San Francisco&rsquo;s open data portal: the inspection data was public, well maintained, and mostly used to make maps of scores. The more interesting question was whether the enforcement behind those scores actually works, and that is what I built.</p>
+  <p>I did this end to end: framing the question, sourcing and interrogating the data, making the modeling and methodology decisions described on this page, and publishing the result. Implementation was AI-assisted (Claude Code); the judgment calls documented above are mine.</p>
+
+  <footer class="pagefoot muted">
+    <p>Built by Luc Nguyen &middot; <a href="https://www.linkedin.com/in/luchnguyen/">LinkedIn</a> &middot; <a href="https://github.com/LucS2K">GitHub</a> &middot; <a href="mailto:ljr.luc.nguyen@gmail.com">ljr.luc.nguyen@gmail.com</a></p>
+  </footer>
+</main>
 <script>
-  document.getElementById("theme-toggle").addEventListener("click", () => {
-    const root = document.documentElement;
-    const dark = matchMedia("(prefers-color-scheme: dark)").matches;
-    const cur = root.dataset.theme || (dark ? "dark" : "light");
-    root.dataset.theme = cur === "dark" ? "light" : "dark";
-  });
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const cur = document.documentElement.dataset.theme.includes("dark");
+  localStorage.setItem("sfi-theme", cur ? "light" : "dark");
+  const s = localStorage.getItem("sfi-theme");
+  document.documentElement.dataset.theme = s === "dark" ? "dark" : "light";
+});
 </script>
 </body>
 </html>
