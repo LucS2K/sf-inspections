@@ -62,7 +62,8 @@ def main():
                any_value(t.analysis_neighborhood) AS hood,
                count(*) AS inspections,
                max(t.inspection_date) AS last_seen,
-               (array_agg(t.facility_rating_status ORDER BY t.inspection_date DESC)
+               (array_agg(t.facility_rating_status
+                          ORDER BY t.inspection_date DESC, t.event_seq DESC)
                 FILTER (WHERE t.facility_rating_status IS NOT NULL))[1] AS last_rating,
                count(*) FILTER (WHERE t.facility_rating_status
                                 IN ('Conditional Pass', 'Closure')) AS failures,
@@ -124,11 +125,13 @@ def main():
     # (same-day same-type repeat visits share a key; the first row gets the
     # list so violations are never shown twice)
     hist = {}
+    # ordered by event_seq within a day so same-day visits (closure, then
+    # the re-check) keep their real sequence and "latest" is unambiguous
     for r in rows(con, """
         SELECT permit_number, inspection_date, inspection_type,
                facility_rating_status, violation_count
         FROM fct_inspection_timeline
-        ORDER BY permit_number, inspection_date
+        ORDER BY permit_number, inspection_date, event_seq
     """):
         key = (r["permit_number"], str(r["inspection_date"]),
                r["inspection_type"] or "")

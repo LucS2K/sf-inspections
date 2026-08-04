@@ -21,253 +21,224 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<a class="skip" href="#kpi-row">Skip to content</a>
+<a class="skip" href="#s-record">Skip to content</a>
 
 <header class="topbar">
   <div class="topbar-in">
-    <a class="brand" href="#top"><svg class="brand-mark" viewBox="0 0 32 32" width="17" height="17" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="7" fill="var(--status-good)"/><path d="M9 16.5 L14 21.5 L23 11.5" fill="none" stroke="var(--page)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>SF Health Inspections</a>
-    <input type="search" id="f-search" placeholder="Search facilities by name or address" aria-label="Search facilities" autocomplete="off">
+    <a class="brand" href="#s-hero">SF Inspections</a>
+    <nav class="pagenav topbar-pagenav" aria-label="Pages">
+      <a href="/report">Findings</a>
+      <a href="/methodology">Methodology</a>
+    </nav>
+    <div class="seg" id="f-period" role="group" aria-label="Period">
+      <button type="button" data-value="all" aria-pressed="true">All</button>
+      <button type="button" data-value="12m" aria-pressed="false">12 mo</button>
+      <button type="button" data-value="90d" aria-pressed="false">90 d</button>
+    </div>
+    <select id="f-hood" aria-label="Neighborhood"><option value="all" selected>All neighborhoods</option></select>
+    <input type="search" id="f-search" placeholder="Search a restaurant" aria-label="Search facilities" autocomplete="off">
     <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme">&#9680;</button>
   </div>
 </header>
 
-<main class="page" id="top">
-  <header class="masthead">
-    <p class="kicker">A civic-data analysis &middot; San Francisco<span id="window-note"></span></p>
-    <h1>Do health inspections work in the city?</h1>
-    <p class="dek">When a food business fails a health inspection or is shut down, does it get fixed, does the fix last, or does the place just close? <span class="dek-stats" id="dek-stats"></span></p>
-    <p class="meta"><a href="/report">Read the findings report</a> &middot; <a href="/methodology">Methodology</a> &middot; <a href="#glossary">Glossary</a></p>
-  </header>
+<nav class="dots" id="dots" aria-label="Sections"></nav>
 
-  <section class="overview" aria-label="At a glance">
-    <p class="ck">At a glance</p>
-    <p class="ov-lede">Using the health inspection data San Francisco publishes
-    on <a href="https://data.sfgov.org">DataSF</a>, we crunched 20,000+
-    inspections down to that one question. Three findings carry the
-    answer.</p>
-    <div class="ov-band">
-      <a class="ov-tile ov-good" href="#card-funnel">
-        <span class="ov-num">1 day</span>
-        <span class="ov-lab">median wait for the re-check after a shutdown</span></a>
-      <a class="ov-tile ov-good" href="#card-funnel">
-        <span class="ov-num">3 of 4</span>
-        <span class="ov-lab">shut-down kitchens pass that re-check</span></a>
-      <a class="ov-tile ov-bad" href="/report">
-        <span class="ov-num">1 in 5</span>
-        <span class="ov-lab">fixes fail again within a year</span></a>
+<main>
+  <section class="scene hero" id="s-hero" data-nav="Start">
+    <p class="kicker">San Francisco open data <span id="window-note"></span></p>
+    <h1>A restaurant fails inspection.<br>Then what?</h1>
+    <p class="dek">When a food business fails a health inspection or is shut down, does it get fixed, does the fix last, or does the place just close?</p>
+    <p class="hero-links"><a href="/report">Read the findings report</a> &middot; <a href="/methodology">How this was built</a></p>
+    <div class="kpi-row" id="kpi-row" aria-label="Key figures"></div>
+    <div class="hero-glance">
+      <p class="hg-lede">Using the health inspection data San Francisco publishes
+        on <a href="https://data.sfgov.org">DataSF</a>, we crunched 20,000+
+        inspections down to that one question. Three findings carry the answer.</p>
+      <p class="hg-verdict"><strong>Bottom line:</strong> SF&rsquo;s health department
+        does an excellent job responding, and businesses mostly fix the problem: after
+        a shutdown the median re-check comes the <em>next day</em>, and about 8 in 10
+        failing businesses pass that re-check. <strong>Making fixes stick is the weak
+        link:</strong> roughly 1 in 5 fixes fails again within a year, and about
+        120 failures were never re-checked at all.</p>
     </div>
-    <p class="ov-verdict"><strong>The short verdict:</strong> the city responds
-    fast and the first fix mostly works; <strong>making fixes stick is the weak
-    link</strong>. <a href="/report">Read the full findings</a>, or explore
-    below.</p>
+    <p class="scroll-cue" aria-hidden="true">Scroll</p>
   </section>
 
-  <header class="data-divider" id="data-divider">
-    <p class="ck">The full data</p>
-    <p class="note">The same story with every number shown. Filters re-slice
-    every chart; click any restaurant for its history.</p>
-  </header>
-
-  <div class="filterbar" role="group" aria-label="Filters">
-    <div class="seg" id="f-period" role="group" aria-label="Period">
-      <button type="button" data-value="all" aria-pressed="true">All data</button>
-      <button type="button" data-value="12m" aria-pressed="false">Last 12 months</button>
-      <button type="button" data-value="90d" aria-pressed="false">Last 90 days</button>
+  <section class="scene" id="s-record" data-nav="The record">
+    <div class="scene-head">
+      <p class="eyebrow">01 &middot; The record</p>
+      <h2>The city never stops checking</h2>
+      <p class="lede">Inspection cadence is steady, month after month. Enforcement begins when one of these visits goes wrong: most failures are <span class="w-cp">Conditional Passes</span>; <span class="w-closure">Closure</span> is the rarer, sharper instrument.</p>
+      <p class="filter-hint">Every chart on this page re-slices with the time period and neighborhood filters in the top bar.</p>
     </div>
-    <label class="hoodpick">Neighborhood
-      <select id="f-hood"><option value="all" selected>All neighborhoods</option></select>
-    </label>
-    <span class="filter-hint">Filters re-slice every figure below</span>
-  </div>
-
-  <figure class="hood-photo" id="hood-photo" hidden>
-    <img id="hood-photo-img" alt="">
-    <figcaption id="hood-photo-cap" class="muted"></figcaption>
-  </figure>
-
-  <section class="kpi-row" id="kpi-row" aria-label="Key figures"></section>
-
-  <section class="chapter">
-    <p class="ck">Part 1 &middot; The record</p>
-    <figure class="card" id="card-monthly">
-      <figcaption>
-        <h2>Inspections per month</h2>
-        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
-      </figcaption>
-      <p class="note">Inspection visits per month; enforcement begins when one of these visits goes wrong.</p>
+    <div class="placard-row" aria-label="The three placards posted in restaurant windows">
+      <figure class="placard-item">
+        <div class="placard pass" aria-hidden="true">
+          <div class="p-word">Pass</div>
+          <div class="p-fields"><span></span><span></span><span></span></div>
+        </div>
+        <figcaption><strong class="w-pass">Pass</strong>: the routine outcome. Posted at the door until the next visit.</figcaption>
+      </figure>
+      <figure class="placard-item">
+        <div class="placard cp" aria-hidden="true">
+          <div class="p-word p-word-long">Conditional Pass</div>
+          <div class="p-fields"><span></span><span></span><span></span></div>
+        </div>
+        <figcaption><strong class="w-cp">Conditional Pass</strong>: high-risk violations found. Stays up until a reinspection clears them.</figcaption>
+      </figure>
+      <figure class="placard-item">
+        <div class="placard closure" aria-hidden="true">
+          <div class="p-word">Closed</div>
+          <div class="p-fields"><span></span><span></span><span></span></div>
+        </div>
+        <figcaption><strong class="w-closure">Closed</strong>: an imminent hazard. Doors stay shut until it&rsquo;s fixed.</figcaption>
+      </figure>
+    </div>
+    <figure class="viz" id="card-monthly">
+      <figcaption class="viz-cap"><span>Rated inspections per month</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
+      <div class="legend" id="legend-monthly"></div>
       <div class="chart" id="chart-monthly"></div>
-      <p class="takeaway" id="tk-monthly"></p>
+      <p class="tk" id="tk-monthly"></p>
       <div class="table-view" hidden></div>
     </figure>
-    <figure class="card" id="card-rate">
-      <figcaption>
-        <h2>Failure rate per month</h2>
-        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
+    <figure class="viz" id="card-failures">
+      <figcaption class="viz-cap"><span>Failures per month</span>
+        <span class="cap-tools">
+          <span class="seg" id="failview" role="group" aria-label="Chart mode">
+            <button type="button" data-value="count" aria-pressed="true">Count</button>
+            <button type="button" data-value="rate" aria-pressed="false">Rate</button>
+          </span>
+          <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
+        </span>
       </figcaption>
-      <p class="note">Share of graded visits ending in <span class="w-cp">Conditional Pass</span> or <span class="w-closure">Closure</span>. A rate, so it stays comparable even when inspection volume swings. Months under 50 graded visits are left blank.</p>
-      <div class="chart" id="chart-rate"></div>
-      <p class="takeaway" id="tk-rate"></p>
-      <div class="table-view" hidden></div>
-    </figure>
-    <figure class="card" id="card-failures">
-      <figcaption>
-        <h2>Failures per month</h2>
-        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
-      </figcaption>
-      <p class="note">Most failures are <span class="w-cp">Conditional Passes</span>: the facility keeps operating under orders. <span class="w-closure">Closure</span> is the rarer, sharper instrument.</p>
       <div class="legend" id="legend-failures"></div>
       <div class="chart" id="chart-failures"></div>
-      <p class="takeaway" id="tk-failures"></p>
+      <p class="tk" id="tk-failures"></p>
       <div class="table-view" hidden></div>
     </figure>
+    <aside class="factband viz" aria-label="What failures cite">
+      <p class="factband-head">What do those failures actually cite? They are pile-ons, not single issues. Share of the 1,126 failures citing each problem:</p>
+      <div class="factrow">
+        <div class="fact"><span class="fact-num">71%</span><span class="fact-lab">cleaning and sanitizing</span></div>
+        <div class="fact"><span class="fact-num">69%</span><span class="fact-lab">vermin</span></div>
+        <div class="fact"><span class="fact-num">59%</span><span class="fact-lab">temperature control</span></div>
+        <div class="fact"><span class="fact-num">33%</span><span class="fact-lab">food storage</span></div>
+      </div>
+      <p class="factband-foot">The typical failure spans 4.3 distinct problem categories, and 81% of closures cite
+      a vermin infestation. Yet relapse barely varies by category: repeat failure tracks the
+      <em>facility</em>, not the violation. Full-record figures, unaffected by the filters above.
+      <a href="/report">More in the findings report</a>.</p>
+    </aside>
   </section>
 
-  <section class="chapter">
-    <p class="ck">Part 2 &middot; What happens after a failure</p>
+  <section class="scene" id="s-funnel" data-nav="After a failure">
+    <div class="scene-head">
+      <p class="eyebrow">02 &middot; After a failure</p>
+      <h2 id="funnel-headline">The system responds fast</h2>
+      <p class="lede">Each failure is followed to its next inspection, then the one after. A fix only counts as proven where a later inspection exists; no news means unknown, not fixed.</p>
+    </div>
     <p class="pullstat" id="pull-funnel" hidden></p>
-    <figure class="card wide" id="card-funnel">
-      <figcaption>
-        <h2>The enforcement funnel</h2>
-        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
-      </figcaption>
-      <p class="note">Every square is one failure, followed to its next graded
-      inspection and the one after. Green means fixed (full green means it was
-      still fixed at the next check); <span class="w-cp">amber</span> slipped
-      back; <span class="w-closure">red</span> failed the re-check. Hatched
-      squares were never re-rated: unknown, not fixed.</p>
+    <figure class="viz" id="card-funnel">
+      <figcaption class="viz-cap"><span>The enforcement funnel</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
+      <div class="note howto">
+        <p class="howto-t">How to read it</p>
+        <p>Every square is one real failure, colored by how its story ended. The left grid
+        is every closure, the right every conditional pass, and the colors stack from best
+        (top) to worst (bottom):</p>
+        <div class="hl">
+          <div class="hl-row"><span class="swatch sw-good"></span><span><strong>Fixed, and it stuck.</strong> Passed the re-check, and was still passing at the next inspection after that.</span></div>
+          <div class="hl-row"><span class="swatch sw-fade"></span><span><strong>Fixed, awaiting confirmation.</strong> Passed the re-check; no later inspection yet to prove the fix held.</span></div>
+          <div class="hl-row"><span class="swatch sw-warn"></span><span><strong>Fixed, then slipped back.</strong> Passed the re-check, but failed again at the inspection after it.</span></div>
+          <div class="hl-row"><span class="swatch sw-crit"></span><span><strong>Never fixed.</strong> Failed the re-check itself.</span></div>
+          <div class="hl-row"><span class="swatch swatch-hatch"></span><span><strong>Never re-checked.</strong> No follow-up inspection in the record, so the outcome is unknown.</span></div>
+        </div>
+      </div>
       <div class="chart funnel-pair" id="chart-funnel"></div>
-      <p class="takeaway" id="tk-funnel"></p>
+      <p class="tk" id="tk-funnel"></p>
       <div class="table-view" hidden></div>
     </figure>
   </section>
 
-  <section class="chapter">
-    <p class="ck">Part 3 &middot; Where failures cluster</p>
-    <figure class="card wide" id="card-map">
-      <figcaption>
-        <h2>SF, mapped and ranked</h2>
-      </figcaption>
-      <p class="note">Blue neighborhoods sit in the calmer half,
-      <span class="w-cp">amber</span> marks elevated failure rates, and
-      <span class="w-closure">red</span> the city's highest.
-      <strong>#1 is not a prize</strong>: the higher the rank, the larger the
-      share of inspections that found a problem. Hatched areas have too few
-      inspections to rate fairly. Hover for numbers; click for the full
-      picture.</p>
-      <div class="map-wrap">
+  <section class="scene" id="s-hoods" data-nav="Where it clusters">
+    <div class="scene-head">
+      <p class="eyebrow">03 &middot; Where it clusters</p>
+      <h2>Failure isn&rsquo;t evenly spread</h2>
+      <p class="lede">Share of rated inspections ending in <span class="w-cp">Conditional Pass</span> or <span class="w-closure">Closure</span>. Hover the map for numbers; click a neighborhood for its full picture. Neighborhoods with under 100 rated inspections are hatched and quoted only in the table; rates on small samples mislead.</p>
+    </div>
+    <figure class="viz" id="card-map">
+      <figcaption class="viz-cap"><span>SF, mapped and ranked</span></figcaption>
+      <div class="map-grid">
+        <div id="map-svg"></div>
         <div>
           <p class="map-list-cap">Every rated neighborhood, ranked by failure rate</p>
           <ol class="map-list" id="map-list" aria-label="Neighborhoods ranked by failure rate"></ol>
         </div>
-        <div class="map-svg" id="map-svg"></div>
       </div>
-      <p class="takeaway" id="tk-map"></p>
+      <p class="tk" id="tk-map"></p>
     </figure>
-    <figure class="card wide" id="card-hoods">
-      <figcaption>
-        <h2>Failure rate by neighborhood</h2>
-        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
-      </figcaption>
-      <p class="note">Share of graded inspections ending in <span class="w-cp">Conditional Pass</span> or <span class="w-closure">Closure</span>. Neighborhoods under 100 graded inspections appear in the table only; small samples mislead.</p>
+    <figure class="viz" id="card-hoods">
+      <figcaption class="viz-cap"><span>Failure rate by neighborhood</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
       <div class="chart" id="chart-hoods"></div>
-      <p class="takeaway" id="tk-hoods"></p>
+      <p class="tk" id="tk-hoods"></p>
       <div class="table-view" hidden></div>
     </figure>
   </section>
 
-  <section class="chapter feature">
-    <p class="ck">Part 4 &middot; The null result</p>
-    <figure class="card wide" id="card-yelp">
-      <figcaption>
-        <h2>Yelp rating vs enforcement history</h2>
-        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
-      </figcaption>
-      <p class="note">Today's Yelp ratings against each facility's inspection history. The near-identical bars are the finding: review scores do not reveal kitchen hygiene. (Coverage differs: 86% of enforcement-history facilities are on Yelp vs 67% of the comparison group.)</p>
-      <div class="chart" id="chart-yelp"></div>
-      <p class="takeaway" id="tk-yelp"></p>
-      <div class="table-view" hidden></div>
-    </figure>
-  </section>
-
-  <section class="chapter">
-    <p class="ck">Part 5 &middot; Look it up</p>
-    <figure class="card wide" id="card-lookup">
-      <figcaption><h2>Facility lookup</h2></figcaption>
-      <p class="note">Type in the search bar at the top of the page; matching facilities and their inspection history appear here, with Yelp stars (★) where collected.</p>
-      <div id="search-results" class="search-results" role="listbox"></div>
+  <section class="scene" id="s-lookup" data-nav="Look it up">
+    <div class="scene-head">
+      <p class="eyebrow">04 &middot; Receipts</p>
+      <h2>Look up any spot</h2>
+      <p class="lede">Search any facility by name or address, or browse the list below. The neighborhood filter up top narrows both.</p>
+    </div>
+    <div class="viz" id="card-lookup">
+      <input type="search" id="f-search-scene" class="lookup-search" placeholder="Search a facility by name or address" aria-label="Search facilities" autocomplete="off">
       <div id="facility-detail" class="facility-detail" hidden></div>
-      <h3 class="list-head" id="list-head"></h3>
-      <p class="note">Every facility inspected in the selected period and neighborhood, most recent first. Click any for its history.</p>
-      <div id="facility-list" class="search-results"></div>
-      <button id="list-more" class="ghost-btn" hidden>Show more</button>
-    </figure>
+      <p class="browse-head muted" id="browse-head"></p>
+      <div id="search-results" class="search-results" role="listbox"></div>
+    </div>
   </section>
 
-  <section class="chapter" id="glossary">
-    <details class="collap">
-    <summary><span class="ck-inline">Glossary &middot; What the words mean</span></summary>
-    <dl class="gloss">
-      <dt>Pass</dt>
-      <dd>The facility can operate normally. This does <em>not</em> mean zero
-      violations: a facility can pass with several minor ones (some pass with
-      8 or more). The rating depends on how <em>serious</em> the violations
-      are and whether they were corrected, not on a count. There is no fixed
-      number of "allowed" violations.</dd>
-      <dt>Conditional Pass</dt>
-      <dd>The inspector found serious violations. The facility may keep
-      operating, but under orders to fix the problems, and an inspector
-      comes back to check. Think of it as "on notice".</dd>
-      <dt>Closure</dt>
-      <dd>The inspector found an immediate health hazard (for example a
-      vermin infestation or no hot water). The facility's permit is suspended
-      and it must shut its doors until the problem is fixed and verified.</dd>
-      <dt>Violations count</dt>
-      <dd>How many individual problems the inspector recorded on that visit,
-      from minor (a wall that needs repainting) to major (food at unsafe
-      temperatures). Severity matters more than the number.</dd>
-      <dt>Failure</dt>
-      <dd>Our word for an inspection that ended in Conditional Pass or
-      Closure: the visits where enforcement kicked in.</dd>
-      <dt>Re-rated</dt>
-      <dd>After a failure, the next inspection that assigned a new grade.
-      This is how we know whether the facility responded.</dd>
-      <dt>Passed re-rating</dt>
-      <dd>That follow-up inspection ended in a Pass: the facility fixed the
-      problem, at least for now.</dd>
-      <dt>Held at next check</dt>
-      <dd>At the <em>next</em> graded inspection after the fix, often months
-      later, the facility was still passing. Our measure of whether the fix
-      lasted.</dd>
-      <dt>n=</dt>
-      <dd>The number of cases behind a statistic. A rate computed from 12
-      facilities means much less than one computed from 1,200, so every rate
-      on this site shows its n. Groups too small to trust show their count
-      instead of a rate.</dd>
-      <dt>Inspection types</dt>
-      <dd><strong>Routine</strong>: a regular unannounced visit.
-      <strong>Reinspection</strong>: a follow-up after a problem.
-      <strong>Complaint</strong>: triggered by a public complaint.
-      <strong>Foodborne Illness</strong>: investigating a report of someone
-      getting sick. <strong>New Ownership</strong>: checking a facility that
-      changed hands. <strong>Type pending</strong>: the city publishes this
-      label up to a year late, so recent visits show it as pending.</dd>
-    </dl>
+  <section class="scene foot-scene" id="caveats" data-nav="Fine print">
+    <div class="scene-head">
+      <p class="eyebrow">Before you quote these numbers</p>
+      <h2>The fine print</h2>
+    </div>
+    <details class="collap caveats-collap" open>
+      <summary>Caveats</summary>
+      <ul class="caveat-list">
+        <li>Each inspection counts once: when the city republishes a corrected record, only the latest version is analyzed. Farmers-market master permits (one permit covering many stalls) are excluded from per-facility histories.</li>
+        <li>Inspection <em>types</em> are backfilled by DPH with roughly a year&rsquo;s lag, so recent &ldquo;Reinspection&rdquo; labels are incomplete. The funnel uses ratings, which do not lag.</li>
+        <li>A failure with no later inspection is an unknown outcome, not a resolved one: registry cross-checks show at least 13 of 150 such facilities closed for good.</li>
+        <li>Facilities that have been through enforcement fail their next check at roughly 3&times; the base rate; the data cannot say whether that is enforcement failing or enforcement simply concentrating on trouble-prone facilities.</li>
+      </ul>
     </details>
+    <details class="collap glossary" id="glossary">
+      <summary>Glossary</summary>
+      <dl>
+        <dt><span class="w-pass">Pass</span></dt>
+        <dd>The facility can operate normally. This does <em>not</em> mean zero violations: a facility can pass with several minor ones. The rating depends on how <em>serious</em> the violations are and whether they were corrected, not on a count.</dd>
+        <dt><span class="w-cp">Conditional Pass</span></dt>
+        <dd>The inspector found serious violations. The facility may keep operating, but under orders to fix the problems, and an inspector comes back to check. Think of it as &ldquo;on notice&rdquo;.</dd>
+        <dt><span class="w-closure">Closure</span></dt>
+        <dd>The inspector found an immediate health hazard (for example a vermin infestation or no hot water). The facility&rsquo;s permit is suspended and it must shut its doors until the problem is fixed and verified.</dd>
+        <dt>Violations count</dt>
+        <dd>How many individual problems the inspector recorded on that visit, from minor to major. Severity matters more than the number.</dd>
+        <dt>Failure</dt>
+        <dd>Our word for an inspection that ended in Conditional Pass or Closure: the visits where enforcement kicked in.</dd>
+        <dt>Re-rated</dt>
+        <dd>After a failure, the next inspection that assigned a new grade. This is how we know whether the facility responded.</dd>
+        <dt>Held at next check</dt>
+        <dd>At the <em>next</em> rated inspection after the fix, often months later, the facility was still passing. Our measure of whether the fix lasted.</dd>
+        <dt>n=</dt>
+        <dd>The number of cases behind a statistic. Every rate on this site shows its n; groups too small to trust show their count instead of a rate.</dd>
+      </dl>
+    </details>
+    <p class="muted yelp-foot">The Yelp footnote: review scores barely move with enforcement history. Never-flagged
+    facilities average 3.99 stars (n=568); ever-closed facilities average 3.85 (n=306), a 0.14-star
+    gap on a 5-star scale. Review scores do not reveal kitchen hygiene; this record is the only
+    signal there is. Correlation only, with coverage caveats in the <a href="/report">report</a>.</p>
+    <p class="muted stampline"><a href="/report">Read the findings report</a> &middot; <a href="/methodology">How this was built</a> &middot; <span id="stamp"></span></p>
   </section>
-
-  <footer class="foot" id="caveats">
-    <details class="collap">
-    <summary><span class="ck-inline">Caveats</span></summary>
-    <ul>
-      <li>Each inspection is counted once, using the city's most recent version of the record. Farmers-market permits, where one permit covers many stalls, are left out of facility histories.</li>
-      <li>The city fills in inspection <em>type</em> labels up to a year late, so recent visits show &ldquo;Type pending&rdquo;. The analysis relies on the grades, which are published on time.</li>
-      <li>A failure with no later graded visit has an unknown outcome, not a resolved one. Cross-checking city business records shows at least 13 of those 150 facilities closed for good.</li>
-      <li>Facilities that failed before are about three times more likely than average to fail their next check. The data cannot say whether enforcement failed to reform them, or whether enforcement simply finds the riskiest businesses.</li>
-    </ul>
-    </details>
-    <p class="muted">Built by Luc Nguyen &middot; <a href="https://www.linkedin.com/in/luchnguyen/">LinkedIn</a> &middot; <a href="https://github.com/LucS2K">GitHub</a> &middot; <a href="mailto:ljr.luc.nguyen@gmail.com">ljr.luc.nguyen@gmail.com</a> &middot; <a href="/methodology">about this project</a></p>
-    <p class="muted" id="stamp"></p>
-  </footer>
 </main>
 
 <div id="tooltip" class="tooltip" hidden></div>
