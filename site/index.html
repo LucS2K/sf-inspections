@@ -132,7 +132,7 @@
     <div class="scene-head">
       <p class="eyebrow">02 &middot; After a failure</p>
       <h2 id="funnel-headline">The system responds fast</h2>
-      <p class="lede">Each failure followed to its next rated visit, then the one after. &ldquo;Held&rdquo; is measured only where a later visit exists; silence is censoring, not success.</p>
+      <p class="lede">Each failure is followed to its next inspection, then the one after. A fix only counts as proven where a later inspection exists; no news means unknown, not fixed.</p>
     </div>
     <p class="pullstat" id="pull-funnel" hidden></p>
     <figure class="viz" id="card-funnel">
@@ -160,7 +160,7 @@
     <div class="scene-head">
       <p class="eyebrow">03 &middot; Where it clusters</p>
       <h2>Failure isn&rsquo;t evenly spread</h2>
-      <p class="lede">Share of rated inspections ending in <span class="w-cp">Conditional Pass</span> or <span class="w-closure">Closure</span>. Hover the map for numbers; click a neighborhood for its full picture. Hatched areas and neighborhoods with under 100 rated inspections stay in the table; rates on small samples mislead.</p>
+      <p class="lede">Share of rated inspections ending in <span class="w-cp">Conditional Pass</span> or <span class="w-closure">Closure</span>. Hover the map for numbers; click a neighborhood for its full picture. Neighborhoods with under 100 rated inspections are hatched and quoted only in the table; rates on small samples mislead.</p>
     </div>
     <figure class="viz" id="card-map">
       <figcaption class="viz-cap"><span>SF, mapped and ranked</span></figcaption>
@@ -203,10 +203,10 @@
     <details class="collap caveats-collap" open>
       <summary>Caveats</summary>
       <ul class="caveat-list">
-        <li>One row per inspection event after latest-record dedup; farmers-market umbrella permits are excluded from facility timelines.</li>
+        <li>Each inspection counts once: when the city republishes a corrected record, only the latest version is analyzed. Farmers-market master permits (one permit covering many stalls) are excluded from per-facility histories.</li>
         <li>Inspection <em>types</em> are backfilled by DPH with roughly a year&rsquo;s lag, so recent &ldquo;Reinspection&rdquo; labels are incomplete. The funnel uses ratings, which do not lag.</li>
-        <li>A failure with no later rated visit is censored, not resolved: registry cross-checks show at least 13 of 150 such facilities closed for good.</li>
-        <li>Post-enforcement facilities fail their next check at roughly 3&times; the base rate; the data cannot say whether that is enforcement failing or selection of trouble-prone facilities.</li>
+        <li>A failure with no later inspection is an unknown outcome, not a resolved one: registry cross-checks show at least 13 of 150 such facilities closed for good.</li>
+        <li>Facilities that have been through enforcement fail their next check at roughly 3&times; the base rate; the data cannot say whether that is enforcement failing or enforcement simply concentrating on trouble-prone facilities.</li>
       </ul>
     </details>
     <details class="collap glossary" id="glossary">

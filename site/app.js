@@ -217,13 +217,13 @@ function renderKPIs(S) {
   const resolved = S.eps.filter((e) => e.rr !== null);
   const fails = S.eps.length;
   const tiles = [
-    ["Inspections", fmt(S.visits.length), "visits in the selected slice"],
+    ["Inspections", fmt(S.visits.length), "inspection visits in this view"],
     ["Facilities", fmt(S.perFac.size), "with at least one visit"],
     ["Failures", fmt(fails), "Conditional Pass or Closure"],
-    ["Re-rated", fails ? Math.round(resolved.length * 100 / fails) + "%" : "n/a",
-      fails ? `share of ${fmt(fails)} failures with a later rated visit` : "failures with a later rated visit"],
+    ["Re-checked", fails ? Math.round(resolved.length * 100 / fails) + "%" : "n/a",
+      fails ? `share of ${fmt(fails)} failures with a follow-up inspection` : "failures with a follow-up inspection"],
     ["Median response", resolved.length ? Math.round(median(resolved.map((e) => e.dr))) + " d" : "n/a",
-      resolved.length ? `failure to next rated visit · n=${fmt(resolved.length)}` : "failure to next rated visit"],
+      resolved.length ? `from failure to the follow-up · n=${fmt(resolved.length)}` : "from failure to the follow-up"],
   ];
   const row = $("#kpi-row"); row.replaceChildren();
   for (const [label, value, hint] of tiles) {
@@ -465,7 +465,7 @@ function renderFailures(S) {
     const nCp = a.reduce((s2, v2) => s2 + v2, 0), nCl = b.reduce((s2, v2) => s2 + v2, 0);
     const rated = S.visits.filter((v) => v[2] !== null).length;
     const pct = rated ? ((nCp + nCl) * 100 / rated).toFixed(1) : "0";
-    takeaway("#tk-failures", `${pct}% of rated visits found a problem serious enough to act on: ${fmt(nCp)} facilities were put on notice (Conditional Pass) and ${fmt(nCl)} were shut down on the spot (Closure). Flip to Rate for the volume-proof view.`);
+    takeaway("#tk-failures", `${pct}% of rated visits found a problem serious enough to act on: ${fmt(nCp)} facilities were put on notice (Conditional Pass) and ${fmt(nCl)} were shut down on the spot (Closure). Flip to Rate to see the share of visits that fail instead of the raw count.`);
   }
 
   /* one table twin serves both views */
@@ -490,7 +490,7 @@ function renderFunnel(S) {
       const big = el("span", "big", Math.round(resolvedAll.length * 100 / eps.length) + "%");
       const wrapT = el("span", "pull-text");
       wrapT.append(
-        el("span", "rest", `of ${fmt(eps.length)} failures were re-rated; median ${med} days from failure to the next graded visit.`),
+        el("span", "rest", `of ${fmt(eps.length)} failures were re-inspected; median ${med} days from failure to that follow-up.`),
         el("span", "pull-plain", `Meaning: after almost every failure, an inspector came back to re-check, typically in about ${med} day${med === 1 ? "" : "s"}.`));
       ps.append(big, wrapT); ps.hidden = false;
     } else ps.hidden = true;
@@ -512,8 +512,8 @@ function renderFunnel(S) {
       ["Fixed, awaiting confirmation", passed.length - observed.length,
        `color-mix(in srgb, ${CSS("--status-good")} 55%, ${CSS("--page")})`],
       ["Fixed, then slipped back", observed.length - held.length, CSS("--status-warning")],
-      ["Never fixed: failed the re-check", resolved.length - passed.length, CSS("--status-critical")],
-      ["Never re-checked: unknown", g.length - resolved.length, "url(#nodata-" + code + ")"],
+      ["Never fixed", resolved.length - passed.length, CSS("--status-critical")],
+      ["Never re-checked", g.length - resolved.length, "url(#nodata-" + code + ")"],
     ];
     const panel = el("div");
     const h = el("h3", "waffle-title", `${title} (${fmt(g.length)} failures)`);
@@ -772,7 +772,7 @@ function renderMap(S) {
   });
   const unshaded = Object.keys(HOOD_GEO.hoods).length - qualifying.length;
   takeaway("#tk-map", qualifying.length
-    ? `${qualifying[0].h} sits deepest in the red this period, with ${qualifying[0].rate.toFixed(1)}% of ${fmt(qualifying[0].rated)} rated visits finding a problem. Red marks the city's highest quarter of failure rates, not an absolute danger zone: even there, most inspections pass. ${unshaded} neighborhoods are hatched because they have too few rated inspections to rate fairly, so read the colors as enforcement activity, not a hygiene league table.`
+    ? `${qualifying[0].h} sits deepest in the red this period, with ${qualifying[0].rate.toFixed(1)}% of ${fmt(qualifying[0].rated)} rated visits finding a problem. Red marks the city's highest quarter of failure rates, not an absolute danger zone: even there, most inspections pass. ${unshaded} neighborhoods are hatched because they have too few rated inspections to quote a fair rate, so read the colors as enforcement activity, not a hygiene league table.`
     : "No neighborhood clears 100 rated inspections in this selection; widen the period for a fair map.");
 }
 

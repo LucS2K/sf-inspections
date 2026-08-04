@@ -51,7 +51,7 @@
   </div>
 
   <h2>The first fix: fast and mostly works</h2>
-  <p>After a closure, the median facility is re-rated the <em>next day</em> (n=452); after a Conditional Pass, within 8 days (n=674), and 87% of all failures have an observed re-rating. The outcomes mostly justify the speed: 75.1% of closed facilities pass at re-rating (293 of 390 observed), 89.2% of conditional passes clear (523 of 586), and mean violations drop from 7.3 to 4.6 after closures and 7.4 to 3.6 after conditional passes. The harsher the sanction, the harder it is to clear on the first attempt. Whatever else is true of this system, it does not sit on failures.</p>
+  <p>After a closure, the median facility is re-rated (given a fresh rating at a follow-up inspection) the <em>next day</em> (n=452); after a Conditional Pass, within 8 days (n=674), and 87% of all failures have an observed re-rating. The outcomes mostly justify the speed: 75.1% of closed facilities pass at re-rating (293 of 390 observed), 89.2% of conditional passes clear (523 of 586), and mean violations drop from 7.3 to 4.6 after closures and 7.4 to 3.6 after conditional passes. The harsher the sanction, the harder it is to clear on the first attempt. Whatever else is true of this system, it does not sit on failures.</p>
 
   <h2>But one in five fixes fails, and it&rsquo;s the same facilities</h2>
   <p>Among episodes that resolved to a Pass and had a full observable year after resolution, <strong>20.2%</strong> of closure episodes (34 of 168) and <strong>20.6%</strong> of conditional-pass episodes (52 of 252) failed again within 365 days. For context, after an ordinary Pass, facilities fail their next observation 4.5% of the time (n=11,474); post-enforcement facilities fail theirs at roughly three times that rate.</p>
@@ -116,7 +116,7 @@
   <p>Some gaps in this analysis are publishing choices: inspection-type labels arrive up to a year late, violations ship as concatenated text rather than structured records, and umbrella permits are not flagged. Metric to watch: the lag between an inspection appearing and its type label arriving.</p>
 
   <h2>What this data cannot establish</h2>
-  <p>The biggest limit is censoring: a failure with no later inspection has an unknown outcome, not a good one, so silence is never counted as success. The other limits (no causal counterfactual, lagging type labels, inferred cross-source matching) are catalogued in the <a href="/methodology#honest">methodology</a>.</p>
+  <p>The biggest limit: a failure with no later inspection has an unknown outcome, not a good one, so silence is never counted as success. The other limits (the data shows what happened, not what would have happened without enforcement; type labels arrive late; cross-source matches are inferred from names and addresses) are catalogued in the <a href="/methodology#honest">methodology</a>.</p>
   <p class="aside">Method in one sentence: a weekly automated pipeline off the city&rsquo;s open-data API, guarded by 26 automated tests, produces everything on this page. The full story is in <a href="/methodology">How this was built</a>.</p>
 
   <footer class="pagefoot muted">

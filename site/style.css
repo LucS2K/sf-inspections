@@ -123,7 +123,7 @@ svg .fadein { opacity: 0; transition: opacity 0.6s ease 0.55s; }
 }
 
 /* ---- window placards ---- */
-.placard-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; max-width: 720px; margin: 0 0 44px; }
+.placard-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; max-width: 880px; margin: 0 0 44px; }
 .placard-item { margin: 0; }
 .placard-item figcaption { font-size: 13px; line-height: 1.5; color: var(--text-secondary); margin-top: 12px; text-wrap: pretty; }
 .placard {
@@ -376,7 +376,7 @@ details.collap[open] summary { margin-bottom: 4px; }
 .caveat-list li { font-size: 15px; line-height: 1.6; color: var(--text-secondary); padding: 11px 0; border-top: 1px solid var(--grid); text-wrap: pretty; }
 .caveat-list li:first-child { border-top: 0; }
 .caveat-list li:last-child { border-bottom: 0; }
-.foot-scene details.collap { max-width: 680px; margin: 0 0 14px; }
+.foot-scene details.collap { max-width: 860px; margin: 0 0 14px; }
 .foot-scene details.collap summary { font-size: 15px; color: var(--text-primary); }
 .glossary dl { margin: 10px 0 4px; }
 .glossary dt { font-weight: 650; margin-top: 14px; }
