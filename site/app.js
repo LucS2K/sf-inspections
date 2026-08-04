@@ -16,7 +16,7 @@ const svgEl = (t, at = {}) => { const e = document.createElementNS("http://www.w
 const el = (t, cls, txt) => { const e = document.createElement(t); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
 const MIN_HOOD_N = 100, MIN_YELP_N = 30;
 
-const state = { period: "all", hood: "all" };
+const state = { period: "all", hood: "all", q: "" };
 let DATA = null;
 
 /* hero background follows the neighborhood filter; the citywide shot is the
@@ -109,6 +109,7 @@ async function boot() {
     });
   $("#f-hood").addEventListener("change", (e) => { state.hood = e.target.value; render(); });
   $("#f-search").addEventListener("input", onSearch);
+  $("#f-search-scene").addEventListener("input", onSearch);
   for (const btn of $$(".table-toggle"))
     btn.addEventListener("click", () => {
       const tv = btn.closest(".viz").querySelector(".table-view");
@@ -197,6 +198,7 @@ function monthKeys(cut) {
 function render() {
   const S = computeSlice();
   updateHeroPhoto();
+  updateLookup();
   renderKPIs(S);
   renderMonthly(S);
   renderRate(S);
@@ -776,23 +778,52 @@ function renderYelp(S) {
   }
 }
 
-/* ---------- facility search ---------- */
+/* ---------- facility search + neighborhood browse list ---------- */
 function onSearch(e) {
-  const q = e.target.value.trim().toLowerCase();
-  const res = $("#search-results"), det = $("#facility-detail");
-  det.hidden = true; res.replaceChildren();
-  if (q.length < 2) return;
-  const scene = $("#s-lookup");
-  const rct = scene.getBoundingClientRect();
-  if (rct.top > innerHeight * 0.6 || rct.bottom < 160)
-    window.scrollTo({ top: rct.top + scrollY, behavior: "smooth" });
-  const hits = DATA.facilities.filter((f) =>
-    f.dba.toLowerCase().includes(q) || f.address.toLowerCase().includes(q)).slice(0, 30);
-  if (!hits.length) { res.append(el("div", "search-empty", "No facilities match.")); return; }
-  for (const f of hits) {
+  state.q = e.target.value;
+  /* keep the top-bar and in-scene search boxes in step */
+  for (const sel of ["#f-search", "#f-search-scene"]) {
+    const n = $(sel);
+    if (n && n !== e.target) n.value = e.target.value;
+  }
+  $("#facility-detail").hidden = true;
+  if (e.target.id === "f-search" && state.q.trim().length >= 2) {
+    const rct = $("#s-lookup").getBoundingClientRect();
+    if (rct.top > innerHeight * 0.6 || rct.bottom < 160)
+      window.scrollTo({ top: rct.top + scrollY, behavior: "smooth" });
+  }
+  updateLookup();
+}
+function updateLookup() {
+  const res = $("#search-results"), head = $("#browse-head");
+  res.replaceChildren();
+  const q = (state.q || "").trim().toLowerCase();
+  const pool = state.hood === "all"
+    ? DATA.facilities
+    : DATA.facilities.filter((f) => f.hood === state.hood);
+  const where = state.hood === "all" ? "all neighborhoods" : state.hood;
+  let list;
+  if (q.length >= 2) {
+    list = pool.filter((f) =>
+      f.dba.toLowerCase().includes(q) || f.address.toLowerCase().includes(q)).slice(0, 30);
+    head.textContent = list.length
+      ? `${fmt(list.length)}${list.length === 30 ? "+" : ""} match${list.length === 1 ? "" : "es"} in ${where}`
+      : "";
+    if (!list.length) {
+      res.append(el("div", "search-empty",
+        `No facilities match in ${where}.` +
+        (state.hood === "all" ? "" : " Set the neighborhood filter back to all for a citywide search.")));
+      return;
+    }
+  } else {
+    /* no query: browse the current neighborhood, most-inspected first */
+    list = [...pool].sort((a, b) => b.inspections - a.inspections).slice(0, 30);
+    head.textContent = `Browsing ${where}: the ${fmt(list.length)} most inspected of ${fmt(pool.length)} facilities. Search or pick one for its full history.`;
+  }
+  for (const f of list) {
     const b = el("button");
     b.type = "button";
-    b.append(el("span", "", f.dba), el("span", "addr", `${f.address} · ${f.hood}`));
+    b.append(el("span", "", f.dba), el("span", "addr", `${f.address} · ${f.hood || "Unknown"}`));
     b.addEventListener("click", () => showFacility(f));
     res.append(b);
   }

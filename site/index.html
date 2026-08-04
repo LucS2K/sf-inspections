@@ -174,11 +174,13 @@
     <div class="scene-head">
       <p class="eyebrow">05 &middot; Receipts</p>
       <h2>Look up any spot</h2>
-      <p class="lede">Use the search field in the top bar; matches and their full inspection history appear here.</p>
+      <p class="lede">Search any facility by name or address, or browse the list below. The neighborhood filter up top narrows both.</p>
     </div>
     <div class="viz" id="card-lookup">
-      <div id="search-results" class="search-results" role="listbox"></div>
+      <input type="search" id="f-search-scene" class="lookup-search" placeholder="Search a facility by name or address" aria-label="Search facilities" autocomplete="off">
       <div id="facility-detail" class="facility-detail" hidden></div>
+      <p class="browse-head muted" id="browse-head"></p>
+      <div id="search-results" class="search-results" role="listbox"></div>
     </div>
   </section>
 
