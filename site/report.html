@@ -21,9 +21,9 @@
 <link rel="stylesheet" href="style.css">
 <style>
   .prose { max-width: 72ch; }
-  .prose h2 { font-size: 19px; margin: 32px 0 8px; }
+  .prose h2 { font-size: 22px; margin: 34px 0 10px; }
   .prose h3 { font-size: 15px; margin: 20px 0 6px; }
-  .prose p, .prose li { color: var(--text-primary); font-size: 15.5px; line-height: 1.65; }
+  .prose p, .prose li { color: var(--text-primary); }
   .prose .aside { color: var(--text-secondary); font-size: 14px; border-left: 3px solid var(--grid); padding-left: 14px; margin: 14px 0; }
   .bignum { font-size: 34px; font-weight: 650; }
   .figrow { display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0; }
@@ -43,7 +43,7 @@
       <p class="sub">San Francisco food-facility health inspections, January 2024 to July 2026.
         <a href="/">Interactive dashboard</a> &middot; <a href="/methodology">Methodology</a></p>
     </div>
-    <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme">â—</button>
+    <button id="theme-toggle" class="ghost-btn" aria-label="Toggle color theme">&#9680;</button>
   </header>
 
   <p>When San Francisco's health department flags a food facility with a
@@ -304,18 +304,8 @@
     address.</li>
   </ul>
 
-  <h2>Method, briefly</h2>
-  <p>The data flows automatically each week from the city's open-data API
-  into a pipeline that keeps every version of every record and always
-  analyzes the most recent one (the city republishes corrected records).
-  Roughly 110 permit types were reviewed to isolate food facilities;
-  farmers-market permits, where one permit can carry 19 same-day stall
-  inspections, are handled separately; and every excluded record is
-  accounted for by name, with the cleaned data reconciling exactly against
-  the raw feed. Facility histories and enforcement episodes are built in
-  SQL on top of that, guarded by 26 automated tests that re-check the
-  assumptions on every refresh. The whole pipeline runs in the cloud on a
-  weekly schedule, and this page regenerates with it.</p>
+  <p class="aside">How the data was collected, cleaned, and verified lives on
+  its own page: <a href="/methodology">How this was built</a>.</p>
 
   <p class="muted">Built by Luc Nguyen &middot; <a href="https://www.linkedin.com/in/luchnguyen/">LinkedIn</a> &middot; <a href="https://github.com/LucS2K">GitHub</a> &middot; <a href="mailto:ljr.luc.nguyen@gmail.com">ljr.luc.nguyen@gmail.com</a> &middot; <a href="/methodology">about this project</a></p>
   <p class="muted" id="stamp">Sources: SF DPH Health Inspections
