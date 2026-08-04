@@ -8,14 +8,14 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SF Health Inspections">
 <meta property="og:title" content="Do San Francisco's health inspections work?">
-<meta property="og:description" content="When a food business fails a health inspection, does it fix the problem, and does the fix last? 87% of failures re-rated, median 7 days; 1 in 5 fixes fails within a year.">
+<meta property="og:description" content="When a food business fails a health inspection, does it get fixed, does the fix last, or does the place just close? 87% of failures re-checked, median 7 days; 1 in 5 fixes fails within a year.">
 <meta property="og:url" content="https://sf-inspections.vercel.app/">
 <meta property="og:image" content="https://sf-inspections.vercel.app/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Do San Francisco's health inspections work?">
-<meta name="twitter:description" content="When a food business fails a health inspection, does it fix the problem, and does the fix last?">
+<meta name="twitter:description" content="When a food business fails a health inspection, does it get fixed, does the fix last, or does the place just close?">
 <meta name="twitter:image" content="https://sf-inspections.vercel.app/og.png">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="stylesheet" href="style.css">
@@ -120,7 +120,7 @@
         <h2>The enforcement funnel</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Each failure is followed to its next graded inspection, then the one after. A fix only counts as &ldquo;held&rdquo; where a later inspection actually happened: no follow-up on record means unknown, not fixed.</p>
+      <p class="note">Each failure is followed to its next graded inspection, then the one after. No follow-up on record means unknown, not fixed.</p>
       <div class="chart funnel-pair" id="chart-funnel"></div>
       <p class="takeaway" id="tk-funnel"></p>
       <div class="table-view" hidden></div>
@@ -133,16 +133,13 @@
       <figcaption>
         <h2>SF, mapped and ranked</h2>
       </figcaption>
-      <p class="note">Failure rate by neighborhood, in familiar colors: blue
-      neighborhoods sit in the calmer half, <span class="w-cp">amber</span>
-      marks elevated rates, and <span class="w-closure">red</span> the city's
-      highest, using the same colors this dashboard reserves for Conditional
-      Pass and Closure. A word on the ranking: <strong>#1 is not a
-      prize</strong>. The higher a neighborhood sits, the larger the share of
-      its health inspections that found a problem. Hatched neighborhoods have
-      fewer than 100 graded inspections in the selected period, too few to
-      rate fairly. Hover any neighborhood for its numbers; click one for its
-      full picture.</p>
+      <p class="note">Blue neighborhoods sit in the calmer half,
+      <span class="w-cp">amber</span> marks elevated failure rates, and
+      <span class="w-closure">red</span> the city's highest.
+      <strong>#1 is not a prize</strong>: the higher the rank, the larger the
+      share of inspections that found a problem. Hatched areas have too few
+      inspections to rate fairly. Hover for numbers; click for the full
+      picture.</p>
       <div class="map-wrap">
         <div>
           <p class="map-list-cap">Every rated neighborhood, ranked by failure rate</p>
@@ -157,7 +154,7 @@
         <h2>Failure rate by neighborhood</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Share of graded inspections that ended in <span class="w-cp">Conditional Pass</span> or <span class="w-closure">Closure</span>. Neighborhoods with fewer than 100 graded inspections in the selected period appear in the table only, because rates from small samples are unreliable.</p>
+      <p class="note">Share of graded inspections ending in <span class="w-cp">Conditional Pass</span> or <span class="w-closure">Closure</span>. Neighborhoods under 100 graded inspections appear in the table only; small samples mislead.</p>
       <div class="chart" id="chart-hoods"></div>
       <p class="takeaway" id="tk-hoods"></p>
       <div class="table-view" hidden></div>
@@ -171,7 +168,7 @@
         <h2>Yelp rating vs enforcement history</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Today's Yelp ratings compared with each facility's inspection history since 2024. The near-identical bars are the finding: review scores do not reveal kitchen hygiene. One reading note: 86% of facilities with enforcement history are on Yelp versus 67% of the never-failed group, because enforcement mostly lands on restaurants while the comparison group includes markets and cafeterias Yelp does not list.</p>
+      <p class="note">Today's Yelp ratings against each facility's inspection history. The near-identical bars are the finding: review scores do not reveal kitchen hygiene. (Coverage differs: 86% of enforcement-history facilities are on Yelp vs 67% of the comparison group.)</p>
       <div class="chart" id="chart-yelp"></div>
       <p class="takeaway" id="tk-yelp"></p>
       <div class="table-view" hidden></div>
@@ -182,11 +179,11 @@
     <p class="ck">Part 5 &middot; Look it up</p>
     <figure class="card wide" id="card-lookup">
       <figcaption><h2>Facility lookup</h2></figcaption>
-      <p class="note">Type in the search bar at the top of the page; matching facilities and their full inspection history appear here. Yelp star ratings (â˜…) are shown where collected: every facility with enforcement history, plus a comparison sample.</p>
+      <p class="note">Type in the search bar at the top of the page; matching facilities and their inspection history appear here, with Yelp stars (★) where collected.</p>
       <div id="search-results" class="search-results" role="listbox"></div>
       <div id="facility-detail" class="facility-detail" hidden></div>
       <h3 class="list-head" id="list-head"></h3>
-      <p class="note">Every facility inspected in the period and neighborhood selected above, most recent first. Click one for its full history.</p>
+      <p class="note">Every facility inspected in the selected period and neighborhood, most recent first. Click any for its history.</p>
       <div id="facility-list" class="search-results"></div>
       <button id="list-more" class="ghost-btn" hidden>Show more</button>
     </figure>
