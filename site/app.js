@@ -821,7 +821,8 @@ function updateLookup() {
   for (const f of list) {
     const b = el("button");
     b.type = "button";
-    b.append(el("span", "", f.dba), el("span", "addr", `${f.address} · ${f.hood || "Unknown"}`));
+    /* last-visit date keeps same-name permits (old vs current owner) tellable apart */
+    b.append(el("span", "", f.dba), el("span", "addr", `${f.address} · ${f.hood || "Unknown"} · last visit ${f.last_seen}`));
     b.addEventListener("click", () => showFacility(f));
     res.append(b);
   }
@@ -829,7 +830,9 @@ function updateLookup() {
 function showFacility(f) {
   const det = $("#facility-detail");
   det.replaceChildren();
-  const hist = [...(DATA.history[f.permit] || [])].sort((a, b) => b[0] < a[0] ? -1 : 1);
+  /* stored ascending by date and same-day sequence; reverse gives strict
+     newest-first, so the top row and mini placard are the true latest event */
+  const hist = [...(DATA.history[f.permit] || [])].reverse();
   const latest = hist.find(r => ["Pass", "Conditional Pass", "Closure"].includes(r[2]));
   if (latest) {
     const cls = latest[2] === "Pass" ? "pass" : latest[2] === "Conditional Pass" ? "cp" : "closure";
