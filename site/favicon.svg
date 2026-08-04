@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- inspection placard: the site's Pass green with a check -->
+  <rect x="2" y="2" width="28" height="28" rx="7" fill="#00795a"/>
+  <path d="M9 16.5 L14 21.5 L23 11.5" fill="none" stroke="#fffefb"
+        stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

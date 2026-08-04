@@ -466,3 +466,7 @@ details.collap[open] summary::before { transform: rotate(90deg); }
 }
 details.collap summary:hover .ck-inline { color: var(--text-primary); }
 details.collap > dl, details.collap > ul { margin-top: 16px; }
+
+/* brand mark: the pass-placard check */
+.brand { display: inline-flex; align-items: center; gap: 8px; }
+.brand-mark { flex: 0 0 auto; }
