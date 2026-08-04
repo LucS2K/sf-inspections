@@ -159,6 +159,14 @@
       <p class="tk" id="tk-funnel"></p>
       <div class="table-view" hidden></div>
     </figure>
+    <details class="collap viz" id="followup">
+      <summary id="fq-summary">The follow-up queue</summary>
+      <p class="note">Every failure below is more than 90 days old with no re-check
+      in the record. An unknown outcome is not a good one: registry cross-checks
+      show at least 13 of these closed for good, but most are, by every available
+      record, still open. Click a row for the facility&rsquo;s full history.</p>
+      <ol class="fq-list" id="fq-list"></ol>
+    </details>
   </section>
 
   <section class="scene" id="s-hoods" data-nav="Where it clusters">
@@ -246,5 +254,6 @@
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="hoods_geo.js"></script>
 <script src="app.js"></script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

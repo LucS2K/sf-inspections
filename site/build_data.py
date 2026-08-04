@@ -142,10 +142,13 @@ def main():
     dump("history", hist)
 
     # one row per enforcement episode, compact keys:
-    # d failure date, r C|P, h neighborhood, dr days to resolution,
-    # rr resolution rating, du durability rating
+    # p permit, d failure date, r C|P, h neighborhood, dr days to
+    # resolution, rr resolution rating, du durability rating
+    # (permit lets the dashboard link episodes to facility records,
+    # e.g. the follow-up queue)
     dump("episodes", rows(con, """
-        SELECT failure_date AS d,
+        SELECT permit_number AS p,
+               failure_date AS d,
                CASE failure_rating WHEN 'Closure' THEN 'C' ELSE 'P' END AS r,
                coalesce(analysis_neighborhood, 'Unknown') AS h,
                days_to_resolution AS dr,

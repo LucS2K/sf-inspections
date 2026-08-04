@@ -127,6 +127,24 @@ async function boot() {
   setupScenes();
   render();
   addEventListener("resize", () => { clearTimeout(boot._rz); boot._rz = setTimeout(render, 180); });
+
+  /* shareable facility links: #permit=XXXX opens that record directly */
+  openFromHash();
+  addEventListener("hashchange", openFromHash);
+}
+
+function openFromHash() {
+  const m = location.hash.match(/^#permit=([\w-]+)$/);
+  if (!m || !DATA) return;
+  const f = DATA.byPermit[m[1]];
+  if (!f) return;
+  showFacility(f);
+  const jump = () => { const s = $("#s-lookup"); if (s) s.scrollIntoView({ block: "start", behavior: "instant" }); };
+  jump();
+  /* the browser's own fragment handling at load-end can yank the page back
+     to the top (no element matches #permit=...), so jump again after load */
+  if (document.readyState === "complete") setTimeout(jump, 250);
+  else addEventListener("load", () => setTimeout(jump, 250), { once: true });
 }
 
 /* ---------- scroll orchestration ---------- */
@@ -209,8 +227,42 @@ function render() {
   renderMonthly(S);
   renderFailures(S);
   renderFunnel(S);
+  renderFollowup();
   renderHoods(S);
   renderMap(S);
+}
+
+/* ---- the follow-up queue: full-record failures 90+ days old with no
+   re-check; respects the neighborhood filter but not the period, since a
+   stale failure stays stale no matter which window you view ---- */
+function renderFollowup() {
+  const listEl = $("#fq-list"), sumEl = $("#fq-summary");
+  if (!listEl || !sumEl) return;
+  const end = new Date(DATA.summary.window_end + "T00:00:00Z");
+  const cutoff90 = new Date(end); cutoff90.setUTCDate(cutoff90.getUTCDate() - 90);
+  const cut = cutoff90.toISOString().slice(0, 10);
+  const q = DATA.episodes.filter((e) => e.rr === null && e.d <= cut &&
+    (state.hood === "all" || e.h === state.hood));
+  q.sort((a, b) => a.d < b.d ? -1 : 1);
+  const where = state.hood === "all" ? "" : ` in ${state.hood}`;
+  sumEl.textContent = `The follow-up queue: ${fmt(q.length)} failure${q.length === 1 ? "" : "s"}${where} older than 90 days with no re-check`;
+  listEl.replaceChildren();
+  for (const e of q) {
+    const f = DATA.byPermit[e.p];
+    const days = Math.round((end - new Date(e.d + "T00:00:00Z")) / 86400000);
+    const b = el("button");
+    b.type = "button";
+    const chip = el("span", "chip " + (e.r === "C" ? "closure" : "cp"),
+                    e.r === "C" ? "Closure" : "Conditional Pass");
+    b.append(
+      el("span", "fq-name", f ? f.dba : e.p),
+      chip,
+      el("span", "fq-meta", `${f ? f.address + " · " : ""}failed ${e.d} · ${fmt(days)} days ago`));
+    b.addEventListener("click", () => {
+      if (f) { showFacility(f); $("#s-lookup").scrollIntoView({ block: "start" }); }
+    });
+    const li = el("li"); li.append(b); listEl.append(li);
+  }
 }
 
 function renderKPIs(S) {
@@ -785,6 +837,8 @@ function onSearch(e) {
     if (n && n !== e.target) n.value = e.target.value;
   }
   $("#facility-detail").hidden = true;
+  if (location.hash.startsWith("#permit="))
+    history.replaceState(null, "", location.pathname + location.search);
   if (e.target.id === "f-search" && state.q.trim().length >= 2) {
     const rct = $("#s-lookup").getBoundingClientRect();
     if (rct.top > innerHeight * 0.6 || rct.bottom < 160)
@@ -828,6 +882,9 @@ function updateLookup() {
   }
 }
 function showFacility(f) {
+  /* keep the address bar copy-able: the open record is always linkable */
+  if (location.hash !== "#permit=" + f.permit)
+    history.replaceState(null, "", "#permit=" + f.permit);
   const det = $("#facility-detail");
   det.replaceChildren();
   /* stored ascending by date and same-day sequence; reverse gives strict

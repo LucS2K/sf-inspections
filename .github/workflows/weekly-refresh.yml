@@ -7,6 +7,10 @@ on:
     - cron: "0 16 * * 1"
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -46,3 +50,14 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         working-directory: site
         run: npx vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+
+      - name: Open an issue if the refresh failed
+        # a silent Monday failure would leave the site quietly stale;
+        # an issue lands in email so it gets seen
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --repo "${{ github.repository }}" \
+            --title "Weekly refresh failed $(date -u +%F)" \
+            --body "The weekly refresh did not complete. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
