@@ -169,6 +169,7 @@ function render() {
   renderKPIs(vs, eps);
   renderMonthly(vs);
   renderFailures(vs);
+  renderRate(vs);
   renderFunnel(eps);
   renderMap();
   renderHoods();
@@ -495,8 +496,123 @@ function renderMonthly(vs) {
     [{ name: "Inspections", color: CSS("--series-1"), byMonth }],
     $("#card-monthly .table-view"));
   const perMonth = months.length ? Math.round(vs.length / months.length) : 0;
+  /* honest about the visible volume drop: compare the most recent 12
+     months with what came before instead of calling everything "steady" */
+  let drop = "";
+  if (months.length >= 18) {
+    const recent = months.slice(-12), prior = months.slice(0, -12);
+    const avg = (ms) => ms.reduce((a, mo) => a + (byMonth[mo] || 0), 0) / ms.length;
+    const rAvg = Math.round(avg(recent)), pAvg = Math.round(avg(prior));
+    if (rAvg < pAvg * 0.75) {
+      drop = ` Monthly volume in the most recent year runs well below what `
+        + `came before (about ${fmt(rAvg)} vs ${fmt(pAvg)} per month); whether `
+        + `that is a real slowdown or records still arriving will become clear `
+        + `as weekly refreshes accumulate.`;
+    }
+  }
   takeaway("#tk-monthly", `The health department made ${fmt(vs.length)} `
-    + `inspection visits in this period, about ${fmt(perMonth)} per month.`);
+    + `inspection visits in this period, about ${fmt(perMonth)} per month.` + drop);
+}
+
+function renderRate(vs) {
+  const months = monthKeys(vs);
+  const agg = {};
+  for (const v of vs) {
+    if (v[3] === null) continue;
+    const mo = v[1].slice(0, 7);
+    agg[mo] = agg[mo] || { graded: 0, failed: 0 };
+    agg[mo].graded++;
+    if (v[3] !== "Pass") agg[mo].failed++;
+  }
+  const pts = months.map((mo) => {
+    const a = agg[mo] || { graded: 0, failed: 0 };
+    return { mo, graded: a.graded, failed: a.failed,
+             rate: a.graded >= 50 ? a.failed * 100 / a.graded : null };
+  });
+
+  const el = $("#chart-rate");
+  el.replaceChildren();
+  const W = Math.max(el.clientWidth || 640, 320), H = 190;
+  const m = { l: 44, r: 14, t: 10, b: 26 };
+  const maxRate = Math.max(...pts.map((p) => p.rate || 0), 4);
+  const yMax = Math.ceil(maxRate / 2) * 2;
+  const x = (i) => m.l + (W - m.l - m.r) * (months.length > 1 ? i / (months.length - 1) : 0.5);
+  const y = (r) => m.t + (H - m.t - m.b) * (1 - r / yMax);
+  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img" });
+  for (let t = 0; t <= yMax; t += yMax / 4) {
+    svg.append(svgEl("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t),
+                               stroke: CSS(t === 0 ? "--baseline" : "--grid"), "stroke-width": 1 }));
+    const lbl = svgEl("text", { x: m.l - 6, y: y(t) + 4, "text-anchor": "end" });
+    lbl.textContent = t + "%"; svg.append(lbl);
+  }
+  /* line drawn in gap-separated runs so suppressed months stay honest blanks */
+  let run = [];
+  const flush = () => {
+    if (run.length > 1)
+      svg.append(svgEl("polyline", {
+        points: run.map(([i, r]) => `${x(i)},${y(r)}`).join(" "),
+        fill: "none", stroke: CSS("--series-1"), "stroke-width": 2 }));
+    run = [];
+  };
+  pts.forEach((p, i) => { p.rate === null ? flush() : run.push([i, p.rate]); });
+  flush();
+  pts.forEach((p, i) => {
+    if (p.rate === null) return;
+    svg.append(svgEl("circle", { cx: x(i), cy: y(p.rate), r: 3,
+                                 fill: CSS("--series-1"), stroke: CSS("--page"), "stroke-width": 1 }));
+    const hit = svgEl("rect", { x: x(i) - 8, y: m.t, width: 16, height: H - m.t - m.b,
+                                fill: "transparent", tabindex: 0 });
+    const show = (evt) => showTip(evt, monthLabel(p.mo), [
+      [CSS("--series-1"), p.rate.toFixed(1) + "%", "failure rate"],
+      [CSS("--baseline"), fmt(p.failed), "failures"],
+      [CSS("--grid"), fmt(p.graded), "graded visits"],
+    ]);
+    hit.addEventListener("pointermove", show);
+    hit.addEventListener("mousemove", show);
+    hit.addEventListener("pointerleave", hideTip);
+    hit.addEventListener("blur", hideTip);
+    svg.append(hit);
+    if (i % Math.ceil(months.length / 10) === 0) {
+      const lbl = svgEl("text", { x: x(i), y: H - 8, "text-anchor": "middle" });
+      lbl.textContent = monthLabel(p.mo); svg.append(lbl);
+    }
+  });
+  el.append(svg);
+
+  const tbl = document.createElement("table");
+  const thead = document.createElement("tr");
+  for (const h of ["Month", "Graded visits", "Failures", "Failure rate"]) {
+    const th = document.createElement("th"); th.textContent = h; thead.append(th);
+  }
+  tbl.append(thead);
+  for (const p of pts) {
+    const tr = document.createElement("tr");
+    for (const c of [p.mo, fmt(p.graded), fmt(p.failed),
+                     p.rate === null ? `n/a (n=${p.graded})` : p.rate.toFixed(1) + "%"]) {
+      const td = document.createElement("td"); td.textContent = c; tr.append(td);
+    }
+    tbl.append(tr);
+  }
+  $("#card-rate .table-view").replaceChildren(tbl);
+
+  const shown = pts.filter((p) => p.rate !== null);
+  if (shown.length >= 2) {
+    const recent = shown.slice(-12), prior = shown.slice(0, -12);
+    const avgOf = (arr) => arr.reduce((a, p) => a + p.failed, 0) * 100
+                         / Math.max(arr.reduce((a, p) => a + p.graded, 0), 1);
+    let cmp = "";
+    if (prior.length >= 6) {
+      const rA = avgOf(recent), pA = avgOf(prior);
+      cmp = ` The most recent year runs at ${rA.toFixed(1)}% versus `
+        + `${pA.toFixed(1)}% before, so enforcement intensity `
+        + `${Math.abs(rA - pA) < 1.5 ? "held roughly steady" : rA > pA ? "rose" : "eased"} `
+        + `even as inspection volume changed.`;
+    }
+    takeaway("#tk-rate", `Month to month, the share of graded visits that `
+      + `fail stays in a narrow band.` + cmp);
+  } else {
+    takeaway("#tk-rate", "Too few graded visits per month in this selection to chart a fair rate.");
+  }
 }
 
 function renderFailures(vs) {
@@ -533,20 +649,10 @@ function renderFunnel(eps) {
   const el = $("#chart-funnel");
   el.replaceChildren();
   const groups = [["C", "After a Closure"], ["P", "After a Conditional Pass"]];
-  /* outcome colors, matching the site's status semantics: the failure bar
-     wears its own status color, re-rated is a neutral process step, and
-     the good outcomes go green (full green = the durable one) */
-  const stageColors = (code) => [
-    code === "C" ? CSS("--status-critical") : CSS("--status-warning"),
-    CSS("--series-1"),
-    `color-mix(in srgb, ${CSS("--status-good")} 62%, ${CSS("--page")})`,
-    CSS("--status-good"),
-  ];
   const tableRows = [];
 
   for (const [code, title] of groups) {
     const g = eps.filter((e) => e.r === code);
-    const ramp = stageColors(code);
     const resolved = g.filter((e) => e.rr !== null);
     const passed = g.filter((e) => e.rr === "Pass");
     const observed = passed.filter((e) => e.du !== null);
@@ -559,32 +665,68 @@ function renderFunnel(eps) {
     ];
     tableRows.push([title, ...stages.map((s) => s[1])]);
 
+    /* waffle: one square per failure episode, colored by its outcome */
+    const cats = [
+      ["Held at next check", held.length, CSS("--status-good")],
+      ["Passed, awaiting the next check", passed.length - observed.length,
+       `color-mix(in srgb, ${CSS("--status-good")} 55%, ${CSS("--page")})`],
+      ["Relapsed at next check", observed.length - held.length, CSS("--status-warning")],
+      ["Failed the re-rating", resolved.length - passed.length, CSS("--status-critical")],
+      ["Never re-rated (unknown)", g.length - resolved.length, "url(#nodata-" + code + ")"],
+    ];
     const wrap = document.createElement("div");
-    const h = document.createElement("h3"); h.textContent = title;
-    h.style.cssText = "font-size:13px;margin:0 0 6px;color:var(--text-secondary);font-weight:600";
+    const h = document.createElement("h3");
+    h.textContent = `${title} (${fmt(g.length)} failures)`;
+    h.style.cssText = "font-size:13px;margin:0 0 8px;color:var(--text-secondary);font-weight:600";
     wrap.append(h);
-    const W = Math.max((el.clientWidth || 640) / 2 - 20, 280), rowH = 34, H = stages.length * rowH + 6;
-    const max = Math.max(g.length, 1);
-    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img" });
-    stages.forEach(([name, val], i) => {
-      /* reserve label room so a full-width bar never clips its value */
-      const bw = Math.max((val / max) * (W - 58), val > 0 ? 3 : 0);
-      const yy = i * rowH + 16;
-      const lbl = svgEl("text", { x: 0, y: yy - 4, class: "stage-label" });
-      lbl.textContent = name; svg.append(lbl);
-      const bar = svgEl("rect", { x: 0, y: yy, width: bw, height: 12, rx: 4, fill: ramp[i] });
-      svg.append(bar);
-      const vl = svgEl("text", { x: bw + 6, y: yy + 10, class: "dlabel" });
-      vl.textContent = fmt(val); svg.append(vl);
-      const hit = svgEl("rect", { x: 0, y: yy - 12, width: W, height: rowH, fill: "transparent", tabindex: 0 });
-      const show = (evt) => showTip(evt, title, [[ramp[i], fmt(val), name]]);
-      hit.addEventListener("pointermove", show);
-    hit.addEventListener("mousemove", show);
-      hit.addEventListener("pointerleave", hideTip);
-      hit.addEventListener("blur", hideTip);
-      svg.append(hit);
-    });
+    const cols = 25, cell = 11, gap = 2;
+    const rowsN = Math.ceil(g.length / cols);
+    const W = cols * (cell + gap), H = Math.max(rowsN * (cell + gap), cell);
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%",
+                               style: "max-width:" + W * 1.6 + "px", role: "img" });
+    const defs = svgEl("defs", {});
+    const pat = svgEl("pattern", { id: "nodata-" + code, width: 5, height: 5,
+                                   patternUnits: "userSpaceOnUse",
+                                   patternTransform: "rotate(45)" });
+    pat.append(svgEl("rect", { width: 5, height: 5, fill: CSS("--map-nodata-bg") }));
+    pat.append(svgEl("line", { x1: 0, y1: 0, x2: 0, y2: 5,
+                               stroke: CSS("--map-nodata-line"), "stroke-width": 1 }));
+    defs.append(pat);
+    svg.append(defs);
+    let idx = 0;
+    for (const [name, count, color] of cats) {
+      for (let k = 0; k < count; k++, idx++) {
+        const r = svgEl("rect", {
+          x: (idx % cols) * (cell + gap), y: Math.floor(idx / cols) * (cell + gap),
+          width: cell, height: cell, rx: 2, fill: color });
+        r.dataset.cat = name; r.dataset.count = count; r.dataset.color = color;
+        svg.append(r);
+      }
+    }
+    /* one delegated tooltip handler instead of a thousand listeners */
+    const show = (evt) => {
+      const t = evt.target;
+      if (!t.dataset || !t.dataset.cat) { hideTip(); return; }
+      showTip(evt, title, [[t.dataset.color.startsWith("url") ? CSS("--map-nodata-line") : t.dataset.color,
+                            fmt(Number(t.dataset.count)), t.dataset.cat]]);
+    };
+    svg.addEventListener("pointermove", show);
+    svg.addEventListener("mousemove", show);
+    svg.addEventListener("pointerleave", hideTip);
     wrap.append(svg);
+    const lg = document.createElement("div");
+    lg.className = "waffle-legend";
+    for (const [name, count, color] of cats) {
+      if (!count) continue;
+      const k = document.createElement("span"); k.className = "key";
+      const sw = document.createElement("span"); sw.className = "swatch";
+      if (color.startsWith("url")) sw.classList.add("swatch-hatch");
+      else sw.style.background = color;
+      const t = document.createElement("span");
+      t.textContent = `${name}: ${fmt(count)}`;
+      k.append(sw, t); lg.append(k);
+    }
+    wrap.append(lg);
     el.append(wrap);
   }
 

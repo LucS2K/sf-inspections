@@ -94,9 +94,19 @@
         <h2>Inspections per month</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">The city inspects at a steady pace; enforcement begins when one of these visits goes wrong.</p>
+      <p class="note">Inspection visits per month; enforcement begins when one of these visits goes wrong.</p>
       <div class="chart" id="chart-monthly"></div>
       <p class="takeaway" id="tk-monthly"></p>
+      <div class="table-view" hidden></div>
+    </figure>
+    <figure class="card" id="card-rate">
+      <figcaption>
+        <h2>Failure rate per month</h2>
+        <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
+      </figcaption>
+      <p class="note">Share of graded visits ending in <span class="w-cp">Conditional Pass</span> or <span class="w-closure">Closure</span>. A rate, so it stays comparable even when inspection volume swings. Months under 50 graded visits are left blank.</p>
+      <div class="chart" id="chart-rate"></div>
+      <p class="takeaway" id="tk-rate"></p>
       <div class="table-view" hidden></div>
     </figure>
     <figure class="card" id="card-failures">
@@ -120,7 +130,11 @@
         <h2>The enforcement funnel</h2>
         <button class="ghost-btn table-toggle" aria-pressed="false">Table</button>
       </figcaption>
-      <p class="note">Each failure is followed to its next graded inspection, then the one after. No follow-up on record means unknown, not fixed.</p>
+      <p class="note">Every square is one failure, followed to its next graded
+      inspection and the one after. Green means fixed (full green means it was
+      still fixed at the next check); <span class="w-cp">amber</span> slipped
+      back; <span class="w-closure">red</span> failed the re-check. Hatched
+      squares were never re-rated: unknown, not fixed.</p>
       <div class="chart funnel-pair" id="chart-funnel"></div>
       <p class="takeaway" id="tk-funnel"></p>
       <div class="table-view" hidden></div>

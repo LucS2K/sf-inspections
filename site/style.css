@@ -511,3 +511,14 @@ details.collap > dl, details.collap > ul { margin-top: 16px; }
   padding: 18px 22px; margin: 6px 0 34px;
 }
 #list-head { border-top: 2px solid var(--baseline); padding-top: 20px; margin-top: 36px; }
+
+/* waffle funnel legend */
+.waffle-legend {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px;
+  font-family: var(--sans); font-size: 12.5px; color: var(--text-secondary);
+}
+.waffle-legend .key { display: inline-flex; align-items: center; gap: 6px; }
+.swatch-hatch {
+  background: repeating-linear-gradient(45deg, var(--map-nodata-bg),
+    var(--map-nodata-bg) 2px, var(--map-nodata-line) 2px, var(--map-nodata-line) 3px);
+}
