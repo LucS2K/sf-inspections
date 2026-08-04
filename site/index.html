@@ -136,11 +136,14 @@
     <p class="pullstat" id="pull-funnel" hidden></p>
     <figure class="viz" id="card-funnel">
       <figcaption class="viz-cap"><span>The enforcement funnel</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
-      <p class="note">Every square is one failure, followed to its next graded
-      inspection and the one after. Green means fixed (full green means it was
-      still fixed at the next check); <span class="w-cp">amber</span> slipped
-      back; <span class="w-closure">red</span> failed the re-check. Hatched
-      squares were never re-rated: unknown, not fixed.</p>
+      <div class="note howto">
+        <p class="howto-t">How to read it</p>
+        <ol>
+          <li>Every square is one real failure. The left grid is every closure, the right grid every conditional pass.</li>
+          <li>A square's color is what happened at the next inspection. Solid green: fixed, and still fixed at the check after that. Faded green: fixed, with the follow-up check not due yet. <span class="w-cp">Amber</span>: fixed, then slipped back. <span class="w-closure">Red</span>: failed the re-check. Hatched: never re-checked, so the outcome is unknown.</li>
+          <li>The colors stack in bands from best (top) to worst (bottom), so the more green a grid is up top, the better enforcement worked. Hover any square for its group's count.</li>
+        </ol>
+      </div>
       <div class="chart funnel-pair" id="chart-funnel"></div>
       <p class="tk" id="tk-funnel"></p>
       <div class="table-view" hidden></div>

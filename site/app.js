@@ -522,8 +522,18 @@ function renderFunnel(S) {
     const h = el("h3", "waffle-title", `${title} (${fmt(g.length)} failures)`);
     panel.append(h);
     const cols = 25, cell = 11, gap = 2;
-    const rowsN = Math.ceil(g.length / cols);
-    const W = cols * (cell + gap), H = Math.max(rowsN * (cell + gap), cell);
+    /* each outcome starts on a fresh row, so the colors read as clean
+       bands from best (top) to worst (bottom) instead of mid-row switches */
+    let idx = 0;
+    const cells = [];
+    for (const [name, count, color] of cats) {
+      if (!count) continue;
+      if (idx % cols !== 0) idx += cols - (idx % cols);
+      for (let k = 0; k < count; k++, idx++)
+        cells.push({ x: (idx % cols) * (cell + gap), y: Math.floor(idx / cols) * (cell + gap), name, count, color });
+    }
+    const rowsN = Math.max(Math.ceil(idx / cols), 1);
+    const W = cols * (cell + gap), H = rowsN * (cell + gap);
     const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%",
                                style: "max-width:" + W * 1.6 + "px", role: "img",
                                "aria-label": `Waffle chart, outcomes ${title.toLowerCase()}` });
@@ -536,15 +546,10 @@ function renderFunnel(S) {
                                stroke: CSS("--map-nodata-line"), "stroke-width": 1 }));
     defs.append(pat);
     svg.append(defs);
-    let idx = 0;
-    for (const [name, count, color] of cats) {
-      for (let k = 0; k < count; k++, idx++) {
-        const r = svgEl("rect", {
-          x: (idx % cols) * (cell + gap), y: Math.floor(idx / cols) * (cell + gap),
-          width: cell, height: cell, rx: 2, fill: color });
-        r.dataset.cat = name; r.dataset.count = count; r.dataset.color = color;
-        svg.append(r);
-      }
+    for (const c of cells) {
+      const r = svgEl("rect", { x: c.x, y: c.y, width: cell, height: cell, rx: 2, fill: c.color });
+      r.dataset.cat = c.name; r.dataset.count = c.count; r.dataset.color = c.color;
+      svg.append(r);
     }
     /* one delegated tooltip handler instead of a thousand listeners */
     const show = (evt) => {
