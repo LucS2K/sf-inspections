@@ -1,3 +1,9 @@
+/* Be Vietnam Pro, self-hosted (latin subset): the text and UI face.
+   Serif stays for headlines and big numerals. */
+@font-face { font-family: 'Be Vietnam Pro'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/be-vietnam-pro-400.woff2') format('woff2'); }
+@font-face { font-family: 'Be Vietnam Pro'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/be-vietnam-pro-500.woff2') format('woff2'); }
+@font-face { font-family: 'Be Vietnam Pro'; font-style: normal; font-weight: 600; font-display: swap; src: url('fonts/be-vietnam-pro-600.woff2') format('woff2'); }
+@font-face { font-family: 'Be Vietnam Pro'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/be-vietnam-pro-700.woff2') format('woff2'); }
 /* Editorial redesign. Token NAMES are preserved â€” app.js reads them via CSS().
    Status hues follow Okabe-Ito (colorblind-safe, both themes); green/amber/red
    mean Pass / Conditional Pass / Closure only, never decoration. */
@@ -18,7 +24,7 @@
   --ord-1:#94b3d5; --ord-2:#6c92b8; --ord-3:#33608f; --ord-4:#1c3a5c;
   --map-1:#b6cde6; --map-2:#4a78ad; --map-3:#e6a30f; --map-4:#b13a12; --map-nodata-bg:#ece8dd; --map-nodata-line:#b3ac9a;
   --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
-  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
@@ -52,7 +58,7 @@
 * { box-sizing: border-box; }
 body {
   margin: 0; background: var(--page); color: var(--text-primary);
-  font: 18px/1.6 var(--serif);
+  font: 16.5px/1.65 var(--sans);
   text-rendering: optimizeLegibility;
 }
 a { color: var(--series-1); text-decoration-thickness: 1px; text-underline-offset: 2px; }
@@ -420,7 +426,7 @@ html { scroll-behavior: smooth; }
 /* at-a-glance overview */
 .overview { margin: 8px 0 34px; }
 .ov-lede {
-  font-family: var(--serif); font-size: 19px; line-height: 1.55;
+  font-family: var(--sans); font-size: 17.5px; line-height: 1.55;
   color: var(--text-primary); max-width: 58ch; margin: 0 0 18px; text-wrap: pretty;
 }
 .ov-band {
@@ -439,7 +445,7 @@ html { scroll-behavior: smooth; }
 }
 .ov-lab { font-family: var(--sans); font-size: 13.5px; color: var(--text-secondary); line-height: 1.45; }
 .ov-verdict {
-  font-family: var(--serif); font-size: 19px; line-height: 1.55;
+  font-family: var(--sans); font-size: 17.5px; line-height: 1.55;
   color: var(--text-primary); margin: 18px 0 0; max-width: 58ch; text-wrap: pretty;
 }
 @media (max-width: 700px) {
