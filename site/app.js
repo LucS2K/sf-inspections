@@ -307,6 +307,10 @@ function tipMove(ev) {
   tip.style.left = x + "px"; tip.style.top = y + "px";
 }
 function tipHide() { tip.hidden = true; }
+/* touch has no mouseleave, so a tapped tooltip would stick forever;
+   scrolling or tapping anywhere clears it (a fresh tap re-shows its own) */
+addEventListener("scroll", tipHide, { passive: true });
+document.addEventListener("pointerdown", tipHide, true);
 function hitArea(svg, x, y, w, h, onenter) {
   const r = svgEl("rect", { x, y, width: Math.max(w, 8), height: h, class: "bar-hit" });
   r.addEventListener("mouseenter", onenter);
