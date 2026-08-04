@@ -138,11 +138,16 @@
       <figcaption class="viz-cap"><span>The enforcement funnel</span><button class="ghost-btn table-toggle" aria-pressed="false">Table</button></figcaption>
       <div class="note howto">
         <p class="howto-t">How to read it</p>
-        <ol>
-          <li>Every square is one real failure. The left grid is every closure, the right grid every conditional pass.</li>
-          <li>A square's color is what happened at the next inspection. Solid green: fixed, and still fixed at the check after that. Faded green: fixed, with the follow-up check not due yet. <span class="w-cp">Amber</span>: fixed, then slipped back. <span class="w-closure">Red</span>: failed the re-check. Hatched: never re-checked, so the outcome is unknown.</li>
-          <li>The colors stack in bands from best (top) to worst (bottom), so the more green a grid is up top, the better enforcement worked. Hover any square for its group's count.</li>
-        </ol>
+        <p>Every square is one real failure, colored by how its story ended. The left grid
+        is every closure, the right every conditional pass, and the colors stack from best
+        (top) to worst (bottom):</p>
+        <div class="hl">
+          <div class="hl-row"><span class="swatch sw-good"></span><span><strong>Fixed, and it stuck.</strong> Passed the re-check, and was still passing at the next inspection after that.</span></div>
+          <div class="hl-row"><span class="swatch sw-fade"></span><span><strong>Fixed, awaiting confirmation.</strong> Passed the re-check; no later inspection yet to prove the fix held.</span></div>
+          <div class="hl-row"><span class="swatch sw-warn"></span><span><strong>Fixed, then slipped back.</strong> Passed the re-check, but failed again at the inspection after it.</span></div>
+          <div class="hl-row"><span class="swatch sw-crit"></span><span><strong>Never fixed.</strong> Failed the re-check itself.</span></div>
+          <div class="hl-row"><span class="swatch swatch-hatch"></span><span><strong>Never re-checked.</strong> No follow-up inspection in the record, so the outcome is unknown.</span></div>
+        </div>
       </div>
       <div class="chart funnel-pair" id="chart-funnel"></div>
       <p class="tk" id="tk-funnel"></p>

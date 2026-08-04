@@ -511,12 +511,12 @@ function renderFunnel(S) {
     tableRows.push([title, g.length, resolved.length, passed.length, held.length]);
 
     const cats = [
-      ["Held at next check", held.length, CSS("--status-good")],
-      ["Passed, awaiting the next check", passed.length - observed.length,
+      ["Fixed, and it stuck", held.length, CSS("--status-good")],
+      ["Fixed, awaiting confirmation", passed.length - observed.length,
        `color-mix(in srgb, ${CSS("--status-good")} 55%, ${CSS("--page")})`],
-      ["Relapsed at next check", observed.length - held.length, CSS("--status-warning")],
-      ["Failed the re-rating", resolved.length - passed.length, CSS("--status-critical")],
-      ["Never re-rated (unknown)", g.length - resolved.length, "url(#nodata-" + code + ")"],
+      ["Fixed, then slipped back", observed.length - held.length, CSS("--status-warning")],
+      ["Never fixed: failed the re-check", resolved.length - passed.length, CSS("--status-critical")],
+      ["Never re-checked: unknown", g.length - resolved.length, "url(#nodata-" + code + ")"],
     ];
     const panel = el("div");
     const h = el("h3", "waffle-title", `${title} (${fmt(g.length)} failures)`);

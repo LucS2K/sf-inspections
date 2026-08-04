@@ -203,8 +203,15 @@ h1 { font-size: clamp(40px, 7.5vw, 76px); font-weight: 700; letter-spacing: -0.0
 /* how-to-read walkthrough for the waffle */
 .howto { max-width: 72ch; }
 .howto-t { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
-.howto ol { margin: 0 0 4px; padding-left: 20px; }
-.howto li { margin: 0 0 6px; }
+.howto p { margin: 0 0 10px; }
+.hl { display: flex; flex-direction: column; gap: 6px; margin: 0 0 4px; }
+.hl-row { display: flex; align-items: baseline; gap: 8px; }
+.hl-row .swatch { width: 11px; height: 11px; border-radius: 3.5px; display: inline-block; flex: none; transform: translateY(1px); }
+.hl-row strong { color: var(--text-primary); }
+.sw-good { background: var(--status-good); }
+.sw-fade { background: color-mix(in srgb, var(--status-good) 55%, var(--page)); }
+.sw-warn { background: var(--status-warning); }
+.sw-crit { background: var(--status-critical); }
 
 /* waffle funnel */
 .waffle-title { font-size: 13px; margin: 0 0 8px; color: var(--text-secondary); font-weight: 600; }
