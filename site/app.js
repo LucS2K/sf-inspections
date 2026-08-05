@@ -678,9 +678,11 @@ function renderHoods(S) {
   tableTwin("#card-hoods", ["Neighborhood", "Rated inspections", "Failures", "Failure rate"],
     all.map((r) => [r.h, fmt(r.rated), fmt(r.fail),
       r.rated >= MIN_HOOD_N ? r.rate.toFixed(1) + "%" : `too few to quote (n=${fmt(r.rated)})`]));
-  if (quoted.length) {
+  if (quoted.length >= 5) {
     const top = quoted[0];
     takeaway("#tk-hoods", `${top.h} tops this view, with ${top.rate.toFixed(1)}% of its ${fmt(top.rated)} rated visits finding a problem. Read gently: neighborhoods differ in what kinds of food businesses they have, and restaurants fail more often than markets, so this partly reflects business mix, not just kitchen hygiene.`);
+  } else if (quoted.length) {
+    takeaway("#tk-hoods", `Only ${quoted.length === 1 ? "one neighborhood clears" : fmt(quoted.length) + " neighborhoods clear"} 100 rated visits in this window, so there is no fair ranking to draw. Every neighborhood still appears in the table with its count; switch the period to All for the full comparison.`);
   } else {
     takeaway("#tk-hoods", "Not enough rated inspections in this selection to compare neighborhoods fairly.");
   }
@@ -827,9 +829,14 @@ function renderMap(S) {
     list.append(li);
   });
   const unshaded = Object.keys(HOOD_GEO.hoods).length - qualifying.length;
-  takeaway("#tk-map", qualifying.length
-    ? `${qualifying[0].h} sits deepest in the red this period, with ${qualifying[0].rate.toFixed(1)}% of ${fmt(qualifying[0].rated)} rated visits finding a problem. Red marks the city's highest quarter of failure rates, not an absolute danger zone: even there, most inspections pass. ${unshaded} neighborhoods are hatched because they have too few rated inspections to quote a fair rate, so read the colors as enforcement activity, not a hygiene league table.`
-    : "No neighborhood clears 100 rated inspections in this selection; widen the period for a fair map.");
+  /* a thin window (90 days, or the still-filling recent year) leaves only a
+     few high-volume neighborhoods over the 100-rated-visit bar; the red-vs-
+     blue framing only makes sense when the map is mostly filled in */
+  takeaway("#tk-map", !qualifying.length
+    ? "No neighborhood clears 100 rated inspections in this selection; widen the period to All for the full map."
+    : qualifying.length < 5
+    ? `Only ${qualifying.length === 1 ? "one neighborhood clears" : fmt(qualifying.length) + " neighborhoods clear"} the 100-rated-visit bar in this window: the rest are hatched, not missing. Short windows are thin by design, and the newest months are still filling in as the city publishes records. Switch the period to All for the full, fairly-shaded map.`
+    : `${qualifying[0].h} sits deepest in the red this period, with ${qualifying[0].rate.toFixed(1)}% of ${fmt(qualifying[0].rated)} rated visits finding a problem. Red marks the city's highest quarter of failure rates, not an absolute danger zone: even there, most inspections pass. ${unshaded} neighborhoods are hatched because they have too few rated inspections to quote a fair rate, so read the colors as enforcement activity, not a hygiene league table.`);
 }
 
 /* ---------- facility search + neighborhood browse list ---------- */
