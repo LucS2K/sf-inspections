@@ -792,7 +792,9 @@ function renderMap(S) {
     const head = rankOf[name] ? `#${rankOf[name]} \u00b7 ${name}` : name;
     const tipRows = qual
       ? [[CSS("--series-1"), "Failure rate", rate.toFixed(1) + "%"], [null, "Rated inspections", fmt(rated)]]
-      : [[null, "Rated inspections", fmt(rated)], [null, "Fair rating needs 100+", "too few"]];
+      : [[null, "Rated inspections", fmt(rated)],
+         [CSS("--status-warning"), "Failures", fmt(a ? a.fail : 0)],
+         [null, "A fair rate needs 100+ visits", "counts only"]];
     const show = (ev2) => { tipShow(head, tipRows); tipMove(ev2); };
     p.addEventListener("mouseenter", show);
     p.addEventListener("mousemove", tipMove);
@@ -828,6 +830,24 @@ function renderMap(S) {
     li.addEventListener("keydown", (e) => { if (e.key === "Enter") openMapPop(r.h, i + 1, e); });
     list.append(li);
   });
+  /* below the bar, the list keeps going with counts instead of rates, so a
+     thin window never looks like "everyone else passed fine" */
+  const below = [...agg.entries()]
+    .filter(([h, a]) => HOOD_GEO.hoods[h] && a.rated > 0 && a.rated < MIN_HOOD_N)
+    .map(([h, a]) => ({ h, ...a }))
+    .sort((x, y) => y.fail - x.fail || y.rated - x.rated);
+  if (below.length) {
+    list.append(el("li", "map-list-div", "Below the 100-visit bar: counts, not rates"));
+    for (const r of below) {
+      const li = el("li", "small-n" + (state.hood === r.h ? " active" : ""));
+      li.tabIndex = 0;
+      li.append(el("span", "map-rank", ""), el("span", "map-name", r.h),
+                el("span", "map-val", `${fmt(r.fail)} fail · ${fmt(r.rated)} visits`));
+      li.addEventListener("click", (ev2) => openMapPop(r.h, null, ev2));
+      li.addEventListener("keydown", (e) => { if (e.key === "Enter") openMapPop(r.h, null, e); });
+      list.append(li);
+    }
+  }
   const unshaded = Object.keys(HOOD_GEO.hoods).length - qualifying.length;
   /* a thin window (90 days, or the still-filling recent year) leaves only a
      few high-volume neighborhoods over the 100-rated-visit bar; the red-vs-

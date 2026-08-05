@@ -334,6 +334,13 @@ h1 { font-size: clamp(40px, 7.5vw, 76px); font-weight: 700; letter-spacing: -0.0
 .map-list li { display: flex; align-items: baseline; gap: 10px; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
 .map-list li:hover, .map-list li:focus-visible { background: var(--grid); }
 .map-list li.active .map-name { font-weight: 700; }
+.map-list li.map-list-div {
+  cursor: default; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid);
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted);
+}
+.map-list li.map-list-div:hover { background: none; }
+.map-list li.small-n .map-name { color: var(--text-secondary); }
+.map-list li.small-n .map-val { color: var(--muted); font-size: 12.5px; }
 .map-rank { color: var(--muted); font-size: 11.5px; min-width: 18px; font-variant-numeric: tabular-nums; }
 .map-name { flex: 1; }
 .map-val { font-variant-numeric: tabular-nums; font-weight: 600; }
